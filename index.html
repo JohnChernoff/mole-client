@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+
+    <body onload="initGame()">
+        <div id="sidebar_left" class="sidebar">
+            <div id="div-buttons">
+                <button hidden type="button" id="sock-butt" onclick="startSocket()" > Connect </button>
+                <button id="new-butt" onclick="createGame()">New</button>
+                <button id="start-butt" onclick="gameCmd('startgame')">Start</button>
+                <button id="obs-butt" onclick="gameCmd('obsgame')">Obs</button>
+                <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
+                <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
+                <button id="vote-butt" onclick="castVote()">Accuse</button>
+                <button hidden id="test-butt" onclick="test()">Test</button>
+                <br><br>
+                <input type="radio" name="chk_color" id="chk_black" value="0" >
+                <label for="chk_black">Black</label>
+                <input type="radio" name="chk_color" id="chk_white" value="1" checked>
+                <label for="chk_white">White</label>
+            </div>
+            <div id="div-chat">
+                <div>
+                    <textarea rows="32" readonly id="txt-messages"></textarea>
+                </div>
+                <br>
+                <label id="lab-lobby-msg">
+                    Lobby:<input type="text" id="lobby-msg"/>
+                </label>
+                <br>
+                <label id="lab-game-msg">
+                    Game:&nbsp<input type="text" id="game-msg"/>
+                </label>
+            </div>
+            <div id="div-clock">
+                <span id="counter">30</span>
+            </div>
+        </div>
+        <div id="div-main">
+            <div id="main-board" class="board-view"> </div>
+            <div id="div-mole" class="board-view">
+                <h1>YOU'RE THE MOLE </h1>
+            </div>
+            <button id="flip-butt" onclick="flipBoard()">Flip</button>
+        </div>
+        <div id="sidebar_right" class="sidebar">
+            <div id="div-games">
+                <table id="table-games"> </table>
+            </div>
+            <div id="div-moves">
+                <input id="range-history" type="range" min="0" onchange="rangeSelect()">
+                <div id="div-movetab">
+                    <table id="table-moves"></table>
+                </div>
+            </div>
+        </div>
+        <script>var exports = {};</script>
+        <script type="text/javascript" src="js/oauth2-auth-code-pkce-master/pkce.js"></script>
+        <script type="text/javascript" src="js/lichess.js"></script>
+        <script type="text/javascript" src="js/colors.js"></script>
+        <script type="text/javascript" src="js/websock.js"></script>
+        <script type="text/javascript" src="js/webclient.js"></script>
+        <script type="text/javascript" src="js/zugboard.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+    </body>
+
+</html>

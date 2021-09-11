@@ -1,0 +1,137 @@
+body {
+    width: 99%;
+    height: 99%;
+    background-color: burlywood;
+    font-family: monospace;
+}
+
+#div-main {
+    position: relative;
+    width: 90vh;
+    height: 90vh;
+    margin: 5vh auto auto auto;
+    background-color: black; //rgba(38, 63, 63, 0.5);
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    width: 20vw;
+    height: 100vh;
+    background-color: darkslategrey;
+    color: white;
+}
+#sidebar_left { left: 0; }
+#sidebar_right { right: 0; }
+
+.board-view {
+    position: absolute;
+    width: 85%; height: 85%;
+    top: 50%; left: 50%;
+    -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+}
+
+.overlay-view {
+    position: absolute;
+    width: 100%; height: 100%;
+    top: 0; left: 0;
+}
+
+#main-board {
+    display: grid;
+    grid-template-columns: repeat(8,1fr);
+    grid-template-rows: repeat(8,auto);
+    background-color: black;
+}
+
+#main-board > div > canvas {
+    cursor: move;
+}
+
+#div-games {
+    overflow: scroll;
+    display: flex;
+    align-items: flex-start;
+    height: 25%;
+}
+
+#div-games > table {
+    color: black;
+    display: table;
+}
+
+#div-games > table > row {
+}
+
+#div-games > table > tr > td {
+    border-style: solid;
+}
+
+#div-moves {
+    overflow-y: scroll;
+    height: 75%;
+    background-color: #227722;
+}
+
+#div-movetab > table {
+    position: relative;
+    top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    color: black;
+}
+
+#div-movetab > table > tr > td {
+    background-color: black;
+    color: white;
+    border-style: solid;
+}
+
+#div-buttons {
+    height: 10vh;
+
+}
+
+#div-chat {
+    height: 75vh;
+    background-color: #227722;
+}
+
+#txt-messages {
+    resize: none;
+    background-color: black;
+    color: chartreuse;
+    width: 75%;
+    height: 66vh;
+}
+
+#lab-msg {
+    height: 8vh;
+}
+
+#div-clock {
+    height: 12vh;
+}
+
+#counter {
+    background-color: aquamarine;
+    color: black;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 2vh;
+    left: 25%;
+    height: 10vh;
+    width: 10vh;
+    border: 2px solid;
+    border-radius: 50%;
+}
+
+#div-mole {
+    display: none;
+    text-blink: true;
+    text-align: center;
+    background-color: black;
+    color: chartreuse;
+}
