@@ -2,6 +2,7 @@
 
 class LichessLogger {
     constructor(host,clientId,scopes) {
+        this.host = host;
         this.clientUrl = (() => {
             const url = new URL(location.href);
             url.search = '';
@@ -42,7 +43,7 @@ class LichessLogger {
         this.accessContext = undefined;
         this.error = undefined;
         // Example request using vanilla fetch: Revoke access token.
-        await fetch(`${lichessHost}/api/token`, {
+        await fetch(this.host + `/api/token`, {
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${token}`,

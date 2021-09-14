@@ -135,3 +135,20 @@ body {
     background-color: black;
     color: chartreuse;
 }
+
+#div-splash {
+    display: block; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-image: url("../img/mole-logo.png");
+    background-size: cover;
+}
+
+.splash-butt {
+    display: none;
+}

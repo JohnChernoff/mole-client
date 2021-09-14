@@ -2,11 +2,17 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Title</title>
+        <title>MoleChess 0.1</title>
         <link rel="stylesheet" href="css/main.css">
     </head>
 
     <body onload="initGame()">
+        <div id="div-splash">
+            <button id="help-butt" onclick="window.location.assign('help.html')">How to Play</button>
+            <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
+            <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
+            <button id="enter-butt" class="splash-butt" onclick="enterGame()"></button>
+        </div>
         <div id="sidebar_left" class="sidebar">
             <div id="div-buttons">
                 <button hidden type="button" id="sock-butt" onclick="startSocket()" > Connect </button>

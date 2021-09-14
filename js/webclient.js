@@ -1,6 +1,5 @@
 let sock_butt = document.getElementById("sock-butt");
 let txt_messages = document.getElementById("txt-messages");
-let oauth_token;
 
 function startSocket() {
     //openSocket("wss://molechess.com/server",sockHandler);
@@ -66,6 +65,9 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     }
     else if (type === "phase") { console.log("New phase: " + data.msg); }
     else if (type === "movelist") updateMoveList(data);
+    else if (type === "info") {
+        writeResponse(JSON.stringify(data));
+    }
     else {
         console.log("Unknown Type: " + type);
     }

@@ -14,6 +14,10 @@ let moves_div = document.getElementById("div-movetab");
 let moves_range = document.getElementById("range-history");
 let lobby_input = document.getElementById("lobby-msg");
 let game_input = document.getElementById("game-msg");
+let login_butt = document.getElementById("login-butt");
+let logout_butt = document.getElementById("logout-butt");
+let enter_butt = document.getElementById("enter-butt");
+let splash_screen = document.getElementById("div-splash");
 let BLACK = "0", WHITE = "1";
 let main_board = [];
 let move_history = [];
@@ -22,7 +26,8 @@ let selected_player;
 let timer;
 let seconds = 0;
 let zug_board;
-let lichess = new LichessLogger("https://lichess.org","example.com");
+let lichess = new LichessLogger("https://lichess.org", "molechess.com"); //"example.com");
+let oauth_token = null;
 
 window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
     if (e.code === "Enter") {
@@ -32,18 +37,6 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
 } , false);
 
 function initGame() {
-    let token = lichess.getCookie("lichess_oauth");
-    lichess.init().then(() => {
-        if (lichess.accessContext) { //console.log(JSON.stringify(lichess.accessContext));
-            oauth_token = lichess.accessContext.token.value;
-            if (token === "") lichess.setCookie("lichess_oauth",oauth_token);
-        }
-        else {
-            if (token !== "") oauth_token = token;
-            else lichess.login(); //.then(console.log("logged in"));
-        }
-        if (oauth_token !== null) startSocket();
-    });
     zug_board = new ZugBoard(main_board_div,onMove,onPieceLoad,{
         square: { black: "#227722", white: "#AAAA88" },
         //square: { black: "#884444", white: "#22AAAA" },
@@ -54,8 +47,49 @@ function initGame() {
 
 function onPieceLoad() {
     console.log("Pieces loaded");
+    initLichess().then(() => showLogin());
+}
+
+function showLogin() {
+    logout_butt.style.display = "inline";
+    enter_butt.style.display = "none";
+    if (oauth_token === null) {
+        login_butt.style.display = "inline";
+    }
+    else {
+        login_butt.style.display = "none";
+        fetch("https://lichess.org/api/account",{
+            method: "get",
+            headers:{ 'Accept':'application/json', 'Authorization': `Bearer ` + oauth_token }
+        }).then(result => result.json()).then(json => {
+            enter_butt.textContent = "Login as " + json.username;
+            enter_butt.style.display = "inline";
+        });
+    }
+}
+
+async function initLichess() {
+    let token = lichess.getCookie("lichess_oauth");
+    await lichess.init().then(() => {
+        if (lichess.accessContext) { //console.log(JSON.stringify(lichess.accessContext));
+            oauth_token = lichess.accessContext.token.value;
+            if (token !== oauth_token) lichess.setCookie("lichess_oauth",oauth_token);
+        }
+        else if (token !== "") oauth_token = token;
+    });
+}
+
+function login() { lichess.login(); }
+function logout() {
+    lichess.logout().then(() => {
+        oauth_token = null; lichess.setCookie("lichess_oauth",""); showLogin();
+    });
+}
+function enterGame() {
+    splash_screen.style.display = "none";
     window.onresize = () => { zug_board.resize(main_board,main_board_div); zug_board.drawGridBoard(main_board); };
     zug_board.updateBoard();
+    if (oauth_token !== null) startSocket();
 }
 
 function onMove(move) {
@@ -223,7 +257,15 @@ function flipBoard() {
 }
 
 function sendChat(input, source) {
-    send("chat",{ msg: input.value, source: source });
+    let msg = input.value;
+    if (msg.startsWith("!") && msg.length > 1) {
+        let tokens = msg.substring(1).split(" ");
+        let cmd = tokens.shift();
+        send("cmd",{ cmd: cmd, args: tokens });
+    }
+    else {
+        send("chat",{ msg: input.value, source: source });
+    }
     input.value = "";
 }
 
