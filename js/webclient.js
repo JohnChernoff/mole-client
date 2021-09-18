@@ -65,6 +65,7 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     }
     else if (type === "phase") { console.log("New phase: " + data.msg); }
     else if (type === "movelist") updateMoveList(data);
+    else if (type === "top") updateHighScores(data);
     else if (type === "info") {
         writeResponse(JSON.stringify(data));
     }

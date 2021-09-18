@@ -69,7 +69,7 @@ body {
 
 #div-moves {
     overflow-y: scroll;
-    height: 75%;
+    height: 50%;
     background-color: #227722;
 }
 
@@ -82,6 +82,18 @@ body {
 }
 
 #div-movetab > table > tr > td {
+    background-color: black;
+    color: white;
+    border-style: solid;
+}
+
+#div-highscores {
+    overflow-y: scroll;
+    height: 25%;
+    background-color: darkslategray; //cornflowerblue;
+}
+
+#div-highscores > table > tr > td {
     background-color: black;
     color: white;
     border-style: solid;
@@ -145,8 +157,10 @@ body {
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-image: url("../img/mole-logo.png");
-    background-size: cover;
+    background: white url("../img/mole-logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .splash-butt {

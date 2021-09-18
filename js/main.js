@@ -4,6 +4,7 @@ Railbird80: like all the mole has to do is hang the queen.
 and the arrows should be visible after each move maybe
 move history scrollbar
  draw arrows as people vote and have them go away like 5 seconds after the move is made
+ after voting it would be cool if player whose move was selected was flashed across the board
  */
 
 let main_board_div = document.getElementById("main-board");
@@ -12,6 +13,7 @@ let radio_black = document.getElementById("chk_black");
 let games_div = document.getElementById("div-games");
 let moves_div = document.getElementById("div-movetab");
 let moves_range = document.getElementById("range-history");
+let score_tab = document.getElementById("table-highscores");
 let lobby_input = document.getElementById("lobby-msg");
 let game_input = document.getElementById("game-msg");
 let login_butt = document.getElementById("login-butt");
@@ -228,6 +230,19 @@ function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     //let play_score = document.createElement("td");
     //play_score.textContent = pdata.score; play_row.appendChild(play_score);
     return play_row;
+}
+
+function updateHighScores(data) {
+    clearElement(score_tab);
+    for (let i=0;i<data.length;i++) {
+        let row = document.createElement("tr");
+        let play_field = document.createElement("td");
+        play_field.textContent = data[i].name;
+        let rating_field = document.createElement("td");
+        rating_field.textContent = data[i].rating;
+        row.appendChild(play_field); row.appendChild(rating_field);
+        score_tab.appendChild(row);
+    }
 }
 
 function castVote() {
