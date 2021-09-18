@@ -10,9 +10,11 @@ move history scrollbar
 let main_board_div = document.getElementById("main-board");
 let counter = document.getElementById("counter");
 let radio_black = document.getElementById("chk_black");
-let games_div = document.getElementById("div-games");
+let games_select = document.getElementById("select-games");
+let play_tab = document.getElementById("table-players");
 let moves_div = document.getElementById("div-movetab");
 let moves_range = document.getElementById("range-history");
+let score_div = document.getElementById("div-highscores");
 let score_tab = document.getElementById("table-highscores");
 let lobby_input = document.getElementById("lobby-msg");
 let game_input = document.getElementById("game-msg");
@@ -23,7 +25,8 @@ let splash_screen = document.getElementById("div-splash");
 let BLACK = "0", WHITE = "1";
 let main_board = [];
 let move_history = [];
-let selected_game;
+let games;
+let selected_game = "";
 let selected_player;
 let timer;
 let seconds = 0;
@@ -37,6 +40,12 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
         else if (game_input === document.activeElement) sendChat(game_input, selected_game);
     }
 } , false);
+
+games_select.addEventListener("change", () =>  {
+    selected_game = games_select.value;
+    console.log("Selected: " + selected_game);
+    updatePlayTab(games);
+});
 
 function initGame() {
     zug_board = new ZugBoard(main_board_div,onMove,onPieceLoad,{
@@ -111,9 +120,9 @@ function updateGame(data) { //console.log("Update Data: " + JSON.stringify(data)
 function countdown(data) {
     if (timer !== null) clearInterval(timer);
     seconds = parseInt(data);
-    counter.textContent = "" + seconds;
+    counter.textContent = "Time: " + seconds;
     timer = setInterval(() => {
-        counter.textContent = "" + (--seconds);
+        counter.textContent = "Time: " + (--seconds);
         if (seconds <= 0) clearInterval(timer);
     },1000);
 }
@@ -169,37 +178,45 @@ function updateMoveList(data) { //console.log(JSON.stringify(data));
     moves_range.max = data.history.length-1; //TODO: obviously buggy
 }
 
-function updateGameTable(data) { //console.log("Data: " + JSON.stringify(data));
-    clearElement(games_div);
-    for (let i=0; i<data.length; i++) {
-        let game_tab = document.createElement("table");
-        let title_row = document.createElement("tr");
-        title_row.style.borderColor = "black";
-        title_row.style.flexGrow = "0";
-        let title_butt = document.createElement("button");
-        title_butt.textContent = data[i].title;
-        title_butt.addEventListener("click", () =>  {
-            send("joingame",{ title: data[i].title, color: radio_black.checked ? BLACK : WHITE });
-            selected_game = data[i].title;
-        });
-        let game_chk = document.createElement("input");
-        game_chk.type = "radio"; game_chk.name = "game_chk";
-        if (selected_game === data[i].title) game_chk.checked = true;
-        game_chk.addEventListener("click", () => {
-            selected_game = data[i].title; console.log("Selected: " + selected_game);
-        });
-        let title_butt_td = document.createElement("td"); title_butt_td.appendChild(title_butt);
-        let title_chk_td = document.createElement("td"); title_chk_td.appendChild(game_chk);
-        title_row.appendChild(title_butt_td);
-        title_row.appendChild(title_chk_td);
-        game_tab.appendChild(title_row);
-        for (let t=0;t<2;t++) {
-            for (let p = 0; p < data[i].teams[t].players.length; p++) {
-                game_tab.appendChild(playRow(data[i].teams[t].players[p],data[i].title));
+function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
+    games = data;
+    clearElement(games_select);
+    let selected_game_exists = false;
+    for (let i=0; i<games.length; i++) {
+        let title_opt = document.createElement("option");
+        title_opt.text = games[i].title; title_opt.value = games[i].title;
+        games_select.appendChild(title_opt);
+        if (games[i].title === selected_game) {
+            games_select.selectedIndex = i; selected_game_exists = true;
+        }
+    }
+    if (!selected_game_exists) {
+        if (games.length > 0) selected_game = games[0].title; else selected_game = "";
+    }
+    updatePlayTab(games);
+}
+
+function updatePlayTab(games) {
+    clearElement(play_tab);
+    play_tab.appendChild(getHead(["Player","Color","Rating","Accuse","Kick"]));
+    for (let i=0; i<games.length; i++) {
+        if (selected_game === games[i].title) {
+            for (let t=0;t<2;t++) {
+                for (let p = 0; p < games[i].teams[t].players.length; p++) {
+                    play_tab.appendChild(playRow(games[i].teams[t].players[p],games[i].title));
+                }
             }
         }
-        games_div.appendChild(game_tab);
     }
+}
+
+function getHead(txt) {
+    let head_row = document.createElement("tr");
+    for (let i=0;i<txt.length;i++) {
+        let head_txt = document.createElement("th"); head_txt.scope = "col"; head_txt.textContent = txt[i];
+        head_row.appendChild(head_txt);
+    }
+    return head_row;
 }
 
 function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
@@ -223,13 +240,29 @@ function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
         selected_player = { element: play_name, color: pdata.play_col, name: pdata.user.name, title: title };
     }
     play_row.appendChild(play_name);
-    let play_col = document.createElement("td");
-    play_col.style.background = pdata.game_col === 0 ? "black" : "white";
-    play_col.style.width = "8px";
-    play_row.appendChild(play_col);
-    //let play_score = document.createElement("td");
-    //play_score.textContent = pdata.score; play_row.appendChild(play_score);
+
+    let play_color = document.createElement("td");
+    play_color.style.background = pdata.game_col === 0 ? "black" : "white";
+    play_color.style.width = "8px";
+    play_row.appendChild(play_color);
+
+    let play_rating = document.createElement("td");
+    if (pdata.user.data) play_rating.textContent = pdata.user.data.rating; else play_rating.textContent = "?";
+    play_row.appendChild(play_rating);
+
+    play_row.appendChild(getActionButton(title,pdata.user.name,"voteoff"));
+    play_row.appendChild(getActionButton(title,pdata.user.name,"votekick"));
     return play_row;
+}
+
+function getActionButton(board,player,action_msg) {
+    let play_col = document.createElement("td");
+    let play_butt = document.createElement("button");
+    play_butt.textContent = "X"; play_butt.addEventListener("click",() => {
+        send(action_msg,{ player: player, board: board });
+    });
+    play_col.appendChild(play_butt);
+    return play_col;
 }
 
 function updateHighScores(data) {
@@ -245,18 +278,18 @@ function updateHighScores(data) {
     }
 }
 
-function castVote() {
-    if (selected_player !== null) {
-        send("voteoff",{
-            suspect: selected_player.name,
-            board: selected_game
-        });
-    }
+function showHighScores() {
+    score_div.style.display = "block";
+    send("top",10);
 }
 
 function createGame() {
     let title = prompt("Enter a new game title");
     if (title !== "null") send("newgame",title);
+}
+
+function joinGame() {
+    send("joingame",{ title: selected_game, color: radio_black.checked ? BLACK : WHITE });
 }
 
 function gameCmd(cmd) {

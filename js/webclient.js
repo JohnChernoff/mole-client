@@ -56,7 +56,7 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "chat") writeResponse(data.player + "(" + data.source + "): " + data.msg);
     else if (type === "err_msg") writeResponse(data.msg);
     else if (type === "log_OK") writeResponse(data.msg);
-    else if (type === "games_update") updateGameTable(data);
+    else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
     else if (type === "countdown") countdown(data.msg);
     else if (type === "mole") {

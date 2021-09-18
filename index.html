@@ -7,33 +7,37 @@
     </head>
 
     <body onload="initGame()">
-        <div id="div-splash">
+        <div id="div-splash" class="modal">
             <button id="help-butt" onclick="window.location.assign('help.html')">How to Play</button>
             <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
             <button id="enter-butt" class="splash-butt" onclick="enterGame()"></button>
         </div>
+        <div id="div-highscores" class="modal">
+            <button onclick="document.getElementById('div-highscores').style.display='none'">Return</button>
+            <table id="table-highscores"></table>
+        </div>
+        <div id="div-help" class="modal">
+            <button onclick="document.getElementById('div-help').style.display='none'">Return</button> <br>
+            <iframe id="inlineFrameExample"
+                    title="Inline Frame Example"
+                    width="99%"
+                    height="90%"
+                    src="help.html">
+            </iframe>
+        </div>
         <div id="sidebar_left" class="sidebar">
             <div id="div-buttons">
+                <button onclick="document.getElementById('div-help').style.display='block'">Help</button>
+                <button onclick="showHighScores()">Best</button>
                 <button hidden type="button" id="sock-butt" onclick="startSocket()" > Connect </button>
-                <button id="new-butt" onclick="createGame()">New</button>
-                <button id="start-butt" onclick="gameCmd('startgame')">Start</button>
-                <button id="obs-butt" onclick="gameCmd('obsgame')">Obs</button>
-                <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
-                <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
-                <button id="vote-butt" onclick="castVote()">Accuse</button>
                 <button hidden id="test-butt" onclick="test()">Test</button>
                 <br><br>
-                <input type="radio" name="chk_color" id="chk_black" value="0" >
-                <label for="chk_black">Black</label>
-                <input type="radio" name="chk_color" id="chk_white" value="1" checked>
-                <label for="chk_white">White</label>
             </div>
-            <div id="div-chat">
-                <div>
+            <div id="div-messages">
                     <textarea rows="32" readonly id="txt-messages"></textarea>
-                </div>
-                <br>
+            </div>
+            <div id="div-inputs">
                 <label id="lab-lobby-msg">
                     Lobby:<input type="text" id="lobby-msg"/>
                 </label>
@@ -43,7 +47,7 @@
                 </label>
             </div>
             <div id="div-clock">
-                <span id="counter">30</span>
+                <span id="counter">Time: 30</span>
             </div>
         </div>
         <div id="div-main">
@@ -55,16 +59,27 @@
         </div>
         <div id="sidebar_right" class="sidebar">
             <div id="div-games">
-                <table id="table-games"> </table>
+                <button id="new-butt" onclick="createGame()">New Game</button>
+                <input type="radio" name="chk_color" id="chk_black" value="0" >
+                <label for="chk_black">Black</label>
+                <input type="radio" name="chk_color" id="chk_white" value="1" checked>
+                <label for="chk_white">White</label>
+                <br><br>
+                <button id="join-butt" onclick="joinGame()">Join</button>
+                <button id="start-butt" onclick="gameCmd('startgame')">Start</button>
+                <button id="obs-butt" onclick="gameCmd('obsgame')">Obs</button>
+                <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
+                <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
+                <br><br>
+                <select id="select-games"></select>
+                <br><br>
+                <table id="table-players"></table>
             </div>
             <div id="div-moves">
                 <input id="range-history" type="range" min="0" onchange="rangeSelect()">
                 <div id="div-movetab">
                     <table id="table-moves"></table>
                 </div>
-            </div>
-            <div id="div-highscores">
-                <table id="table-highscores"></table>
             </div>
         </div>
         <script>var exports = {};</script>

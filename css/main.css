@@ -48,11 +48,9 @@ body {
     cursor: move;
 }
 
-#div-games {
+#div-games {  //display: flex; //align-items: flex-start;
     overflow: scroll;
-    display: flex;
-    align-items: flex-start;
-    height: 25%;
+    height: 50%;
 }
 
 #div-games > table {
@@ -87,38 +85,28 @@ body {
     border-style: solid;
 }
 
-#div-highscores {
-    overflow-y: scroll;
-    height: 25%;
-    background-color: darkslategray; //cornflowerblue;
-}
-
-#div-highscores > table > tr > td {
-    background-color: black;
-    color: white;
-    border-style: solid;
-}
-
 #div-buttons {
-    height: 10vh;
-
+    height: 5vh;
 }
 
-#div-chat {
+#div-messages {
     height: 75vh;
     background-color: #227722;
 }
 
 #txt-messages {
+    position: relative;
     resize: none;
     background-color: black;
     color: chartreuse;
-    width: 75%;
-    height: 66vh;
+    width: 85%;
+    height: 95%;
 }
 
-#lab-msg {
+#div-inputs {
     height: 8vh;
+    //background-color: black;
+    border: solid black 1px;
 }
 
 #div-clock {
@@ -126,14 +114,14 @@ body {
 }
 
 #counter {
-    background-color: aquamarine;
+    background-color: burlywood; //aquamarine;
     color: black;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    top: 2vh;
-    left: 25%;
+    top: 1vh;
+    left: 33%;
     height: 10vh;
     width: 10vh;
     border: 2px solid;
@@ -148,15 +136,30 @@ body {
     color: chartreuse;
 }
 
-#div-splash {
-    display: block; /* Hidden by default */
+.modal {
+    display: none; /* Hidden by default */
+    left: 25vw;
+    top: 25vh;
+    width: 50%;
+    height: 50%;
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: darkslategray;
+}
+
+#div-highscores > table > tr > td {
+    background-color: black;
+    color: white;
+    border-style: solid;
+}
+
+#div-splash {
+    display: block;
     left: 0;
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
     background: white url("../img/mole-logo.png");
     background-size: contain;
     background-repeat: no-repeat;
