@@ -44,11 +44,21 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
 games_select.addEventListener("change", () =>  {
     selected_game = games_select.value;
     console.log("Selected: " + selected_game);
-    updatePlayTab(games);
+    send("update", selected_game);
 });
 
+function countdown(data) {
+    if (timer !== null) clearInterval(timer);
+    seconds = parseInt(data);
+    counter.textContent = "Time: " + seconds;
+    timer = setInterval(() => {
+        counter.textContent = "Time: " + (--seconds);
+        if (seconds <= 0) clearInterval(timer);
+    },1000);
+}
+
 function initGame() {
-    zug_board = new ZugBoard(main_board_div,onMove,onPieceLoad,{
+    zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{
         square: { black: "#227722", white: "#AAAA88" },
         //square: { black: "#884444", white: "#22AAAA" },
         //square: { black: "#9B5C5C", white: "#5C9B5C" },
@@ -103,7 +113,7 @@ function enterGame() {
     if (oauth_token !== null) startSocket();
 }
 
-function onMove(move) {
+function sendMove(move) {
     if (selected_game !== undefined) {
         send("move", {
             move: ZugBoard.getAlgebraicMove(move),
@@ -113,22 +123,7 @@ function onMove(move) {
     }
 }
 
-function updateGame(data) { //console.log("Update Data: " + JSON.stringify(data));
-    if (data.fen !== undefined) zug_board.updateBoard(data.fen);
-}
-
-function countdown(data) {
-    if (timer !== null) clearInterval(timer);
-    seconds = parseInt(data);
-    counter.textContent = "Time: " + seconds;
-    timer = setInterval(() => {
-        counter.textContent = "Time: " + (--seconds);
-        if (seconds <= 0) clearInterval(timer);
-    },1000);
-}
-
 function displayMoves(moves) { //console.log("Displaying Move:" + JSON.stringify(moves));
-    zug_board.updateBoard(moves.fen);
     for (let i=0;i<moves.selected.length;i++) {
         zug_board.drawArrow(moves.selected[0].move,
             moves.selected[i].player === null ? "#555555" : moves.selected[i].player.play_col);
@@ -139,43 +134,47 @@ function displayMoves(moves) { //console.log("Displaying Move:" + JSON.stringify
     moves_range.value = moves.ply;
 }
 
-function clearElement(e) {
-    while (e.firstChild) e.removeChild(e.lastChild);
+function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game));
+    if (game.title === selected_game) {
+        if (game.currentFEN !== undefined) zug_board.updateBoard(game.currentFEN);
+        if (game.history !== undefined) updateMoveList(game.history);
+        updatePlayTab(game);
+    }
 }
 
-function updateMoveList(data) { //console.log(JSON.stringify(data));
+function updateMoveList(history) { //console.log(JSON.stringify(data));
     clearElement(moves_div);
-    move_history[data.title] = [data.history.length];
+    move_history = [history.length];
     let move_tab = document.createElement("table");
     let move_row = document.createElement("tr");
     let n = 0;
-    for (let i=0; i<data.history.length; i++) {
-        move_history[data.title][i] = {
+    for (let i=0; i<history.length; i++) {
+        move_history[i] = {
             ply: i,
-            turn: data.history[i].turn,
-            fen: data.history[i].fen,
-            selected: data.history[i].selected,
-            alts: data.history[i].alts
+            turn: history[i].turn,
+            fen: history[i].fen,
+            selected: history[i].selected,
+            alts: history[i].alts
         };
         let move_entry = document.createElement("td");
         let m = ""; if (i % 2 === 0) m = (++n) + ".";
-        if (data.history[i].selected.length > 0) {
+        if (history[i].selected.length > 0) {
             move_entry.textContent =
-                m + data.history[i].selected[0].move.from + "-" + data.history[i].selected[0].move.to;
+                m + history[i].selected[0].move.from + "-" + history[i].selected[0].move.to;
         }
         else move_entry.textContent = "?";
-        move_entry.onclick = () => { displayMoves(move_history[data.title][i]); };
+        move_entry.onclick = () => { displayMoves(move_history[i]); };
         move_row.appendChild(move_entry);
         if ((i+1) % 4 === 0) {
             move_tab.appendChild(move_row);
             move_row = document.createElement("tr");
         }
-        else if (i === data.history.length-1) {
+        else if (i === history.length-1) {
             move_tab.appendChild(move_row);
         }
     }
     moves_div.appendChild(move_tab);
-    moves_range.max = data.history.length-1; //TODO: obviously buggy
+    moves_range.max = history.length-1; //TODO: buggy?
 }
 
 function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
@@ -188,29 +187,30 @@ function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
         games_select.appendChild(title_opt);
         if (games[i].title === selected_game) {
             games_select.selectedIndex = i; selected_game_exists = true;
+            updatePlayTab(games[i]);
         }
     }
     if (!selected_game_exists) {
-        if (games.length > 0) selected_game = games[0].title; else selected_game = "";
+        if (games.length > 0) {
+            selected_game = games[0].title;
+            updatePlayTab(games[0]);
+        }
+        else selected_game = "";
     }
-    updatePlayTab(games);
 }
 
-function updatePlayTab(games) {
+function updatePlayTab(game) { //console.log(JSON.stringify(game));
     clearElement(play_tab);
-    play_tab.appendChild(getHead(["Player","Color","Rating","Accuse","Kick"]));
-    for (let i=0; i<games.length; i++) {
-        if (selected_game === games[i].title) {
-            for (let t=0;t<2;t++) {
-                for (let p = 0; p < games[i].teams[t].players.length; p++) {
-                    play_tab.appendChild(playRow(games[i].teams[t].players[p],games[i].title));
-                }
-            }
+    play_tab.appendChild(getHeaders(["Player","Color","Rating","Accuse","Kick"]));
+    for (let t=0;t<2;t++) {
+        for (let p = 0; p < game.teams[t].players.length; p++) {
+            play_tab.appendChild(playRow(game.teams[t].players[p],game.title));
         }
     }
+    //for (let i=0; i<games.length; i++) { if (selected_game === games[i].title) {   }  }
 }
 
-function getHead(txt) {
+function getHeaders(txt) {
     let head_row = document.createElement("tr");
     for (let i=0;i<txt.length;i++) {
         let head_txt = document.createElement("th"); head_txt.scope = "col"; head_txt.textContent = txt[i];
@@ -287,6 +287,10 @@ function showHighScores() {
     send("top",10);
 }
 
+function clearElement(e) {
+    while (e.firstChild) e.removeChild(e.lastChild);
+}
+
 function createGame() {
     let title = prompt("Enter a new game title");
     if (title !== "null") send("newgame",title);
@@ -300,7 +304,7 @@ function gameCmd(cmd) {
     if (selected_game !== undefined) send(cmd, selected_game);
 }
 
-function rangeSelect() {
+function rangeSelect() { //TODO: game change bug
     displayMoves(move_history[selected_game][moves_range.value]);
 }
 
