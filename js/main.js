@@ -250,17 +250,21 @@ function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     if (pdata.user.data) play_rating.textContent = pdata.user.data.rating; else play_rating.textContent = "?";
     play_row.appendChild(play_rating);
 
-    play_row.appendChild(getActionButton(title,pdata.user.name,"voteoff"));
-    play_row.appendChild(getActionButton(title,pdata.user.name,"votekick"));
+    play_row.appendChild(getActionButton(title,pdata.user.name,"voteoff",true));
+    play_row.appendChild(getActionButton(title,pdata.user.name,"kickoff",pdata.kickable));
+
     return play_row;
 }
 
-function getActionButton(board,player,action_msg) {
+function getActionButton(board,player,action_msg,active) {
     let play_col = document.createElement("td");
     let play_butt = document.createElement("button");
-    play_butt.textContent = "X"; play_butt.addEventListener("click",() => {
-        send(action_msg,{ player: player, board: board });
-    });
+    if (active) {
+        play_butt.textContent = "X"; play_butt.addEventListener("click",() => {
+            send(action_msg,{ player: player, board: board });
+        });
+    }
+    else play_butt.textContent = "-";
     play_col.appendChild(play_butt);
     return play_col;
 }
