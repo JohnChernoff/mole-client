@@ -5,6 +5,7 @@ and the arrows should be visible after each move maybe
 move history scrollbar
  draw arrows as people vote and have them go away like 5 seconds after the move is made
  after voting it would be cool if player whose move was selected was flashed across the board
+fix clock
  */
 
 let main_board_div = document.getElementById("main-board");
@@ -124,6 +125,7 @@ function sendMove(move) {
 }
 
 function displayMoves(moves) { //console.log("Displaying Move:" + JSON.stringify(moves));
+    zug_board.updateBoard(moves.fen);
     for (let i=0;i<moves.selected.length;i++) {
         zug_board.drawArrow(moves.selected[0].move,
             moves.selected[i].player === null ? "#555555" : moves.selected[i].player.play_col);
@@ -305,7 +307,7 @@ function gameCmd(cmd) {
 }
 
 function rangeSelect() { //TODO: game change bug
-    displayMoves(move_history[selected_game][moves_range.value]);
+    displayMoves(move_history[moves_range.value]);
 }
 
 function flipBoard() {
