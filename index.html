@@ -26,10 +26,13 @@
                     src="help.html">
             </iframe>
         </div>
+        <span id="counter-top" class="counter">Time: 30</span>
+        <span id="counter-bottom" class="counter">Time: 30</span>
         <div id="sidebar_left" class="sidebar">
             <div id="div-buttons">
                 <button onclick="document.getElementById('div-help').style.display='block'">Help</button>
                 <button onclick="showHighScores()">Best</button>
+                <button id="flip-butt" onclick="flipBoard()">Flip</button>
                 <button hidden type="button" id="sock-butt" onclick="startSocket()" > Connect </button>
                 <button hidden id="test-butt" onclick="test()">Test</button>
                 <br><br>
@@ -46,16 +49,12 @@
                     Game:&nbsp<input type="text" id="game-msg"/>
                 </label>
             </div>
-            <div id="div-clock">
-                <span id="counter">Time: 30</span>
-            </div>
         </div>
         <div id="div-main">
             <div id="main-board" class="board-view"> </div>
             <div id="div-mole" class="board-view">
                 <h1>YOU'RE THE MOLE </h1>
             </div>
-            <button id="flip-butt" onclick="flipBoard()">Flip</button>
         </div>
         <div id="sidebar_right" class="sidebar">
             <div id="div-games">
@@ -71,6 +70,7 @@
                 <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
                 <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
                 <br><br>
+                <label for="select-games">Game Title: </label>
                 <select id="select-games"></select>
                 <br><br>
                 <table id="table-players"></table>

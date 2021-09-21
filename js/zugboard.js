@@ -12,6 +12,7 @@ class ZugBoard {
     constructor(wrapper,move_handler,callback,colors) {
         this.board = [];
         this.piece_imgs = [];
+        this.light_tex = new Image(); this.dark_tex = new Image();
         this.board_background_color = [0,0,0];
         this.billinear = false;
         this.svg_pieces = false;
@@ -36,7 +37,7 @@ class ZugBoard {
             this.black_square_color = ZugBoard.rgb(155,92,92);
         }
         this.current_promotion = "Q"; //TODO: "q" and underpromotions
-        this.loadPieces(callback);
+        this.loadImages(callback);
         this.initGridBoard(wrapper,move_handler);
         this.overlay = document.createElement("canvas");
         this.overlay.style.position = "absolute";
@@ -51,15 +52,25 @@ class ZugBoard {
         wrapper.appendChild(this.overlay);
     }
 
-    alg2coord(move) {
-        let w2 = this.square_width/2, h2 = this.square_height/2;
-        let x1 = (move.from.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) * this.square_width;
-        let y1 = (this.max_ranks - move.from.toLowerCase().charAt(1)) * this.square_height;
-        let x2 = (move.to.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) * this.square_width;
-        let y2 = (this.max_ranks - move.to.toLowerCase().charAt(1)) * this.square_height;
+    alg2Coord(move) {
         return {
-            from: { x: x1 + w2, y: y1 + h2 },
-            to: { x: x2 + w2, y: y2 + h2 }
+            from: {
+                x: this.povFile(move.from.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)),
+                y: this.povRank(this.max_ranks - move.from.toLowerCase().charAt(1))
+            },
+            to: {
+                x: this.povFile(move.to.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)),
+                y: this.povRank(this.max_ranks - move.to.toLowerCase().charAt(1))
+            }
+        }
+    }
+
+    alg2Pix(move) {
+        let indexes = this.alg2Coord(move);
+        let w2 = this.square_width/2, h2 = this.square_height/2;
+        return {
+            from: { x: (indexes.from.x * this.square_width) + w2, y: (indexes.from.y * this.square_height) + h2 },
+            to: { x: (indexes.to.x * this.square_width) + w2, y: (indexes.to.y * this.square_height) + h2 }
         }
     }
 
@@ -71,7 +82,7 @@ class ZugBoard {
     }
 
     drawArrow(move,color) {
-        let coords = this.alg2coord(move); //console.log(JSON.stringify(coords));
+        let coords = this.alg2Pix(move); //console.log(JSON.stringify(coords));
         this.overlay_ctx.fillStyle = color + "80";
         let dist = ZugBoard.calcDistance(coords);
         this.overlay_ctx.save();
@@ -91,8 +102,10 @@ class ZugBoard {
         this.overlay_ctx.restore();
     }
 
-    loadPieces(callback) {
+    loadImages(callback) {
         console.log("Loading pieces...");
+        this.light_tex.src = "img/tex/light_tex.jpeg";
+        this.dark_tex.src = "img/tex/dark_tex.jpg";
         for (let i=0;i<6;i++) {
             this.piece_imgs[i] = { black: new Image(), white: new Image() };
             this.fetchPiece("b",i+1,this.piece_imgs[i].black,callback);
@@ -139,8 +152,8 @@ class ZugBoard {
     }
 
     initGridBoard(wrapper,moveHandler) {
-        this.square_width = Math.floor(wrapper.clientWidth/8)-1;
-        this.square_height = Math.floor(wrapper.clientHeight/8)-1;
+        this.square_width = (wrapper.clientWidth/8);
+        this.square_height = (wrapper.clientHeight/8);
         for (let file=0;file<this.max_files;file++) this.board[file] = [];
         for (let rank=0;rank<this.max_ranks;rank++) {
             for (let file=0;file<this.max_files;file++) {
@@ -217,8 +230,10 @@ class ZugBoard {
     drawNormalSquares() {
         for (let y = 0; y < this.max_ranks; y++) {
             for (let x = 0; x < this.max_files; x++) {
-                this.board[x][y].ctx.fillStyle = this.board[x][y].color;
-                this.board[x][y].ctx.fillRect(0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
+                //this.board[x][y].ctx.fillStyle = this.board[x][y].color;
+                //this.board[x][y].ctx.fillRect(0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
+                let bkg_img = this.board[x][y].color == this.black_square_color ? this.dark_tex : this.light_tex;
+                this.board[x][y].ctx.drawImage(bkg_img,0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
             }
         }
     }

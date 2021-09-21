@@ -58,7 +58,7 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "log_OK") writeResponse(data.msg);
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
-    else if (type === "countdown") countdown(data.msg);
+    else if (type === "countdown") countdown(data);
     else if (type === "mole") {
         let mole_div = document.getElementById("div-mole");
         mole_div.style.display = "block"; setTimeout(() => { mole_div.style.display = "none"; },5000);
