@@ -6,10 +6,29 @@ move history scrollbar
  draw arrows as people vote and have them go away like 5 seconds after the move is made
  after voting it would be cool if player whose move was selected was flashed across the board
 fix clock
+Railbird80: When you review the game it would be cool to see which moves the moles made.
+
+OwenKraweki: wait I mised the beginning
+OwenKraweki: idk if i'm the mole
+
+OwenKraweki: is says Bad Move: g2g1
+ornicar2: I dig the new board
+OwenKraweki: yeah when I tried to play Qc8 is also said bad move
+
+(Owen): also there should be a way to send messages to specific people in the game chat
+OwenKraweki: maybe using @
+
+support for the Maxthon Browser
+
+~OwenKraweki: (clock) bottom right
+~OwenKraweki: and top right when it's opponents move
  */
 
+//let body = document.getElementById("body"));
+let main_div = document.getElementById("div-main");
 let main_board_div = document.getElementById("main-board");
-let counter = document.getElementById("counter");
+let top_clock = document.getElementById("counter-top");
+let bottom_clock = document.getElementById("counter-bottom");
 let radio_black = document.getElementById("chk_black");
 let games_select = document.getElementById("select-games");
 let play_tab = document.getElementById("table-players");
@@ -23,7 +42,7 @@ let login_butt = document.getElementById("login-butt");
 let logout_butt = document.getElementById("logout-butt");
 let enter_butt = document.getElementById("enter-butt");
 let splash_screen = document.getElementById("div-splash");
-let BLACK = "0", WHITE = "1";
+let BLACK = 0, WHITE = 1;
 let main_board = [];
 let move_history = [];
 let games;
@@ -48,9 +67,15 @@ games_select.addEventListener("change", () =>  {
     send("update", selected_game);
 });
 
-function countdown(data) {
+function countdown(data) { //console.log(JSON.stringify(data));
+    if (data.title !== selected_game) return;
     if (timer !== null) clearInterval(timer);
-    seconds = parseInt(data);
+    bottom_clock.style.display = 'none'; top_clock.style.display = 'none';
+    let counter = data.turn === BLACK ?
+        zug_board.povBlack ? bottom_clock : top_clock :
+        zug_board.povBlack ? top_clock : bottom_clock;
+    counter.style.display = 'flex';
+    let seconds = data.seconds;
     counter.textContent = "Time: " + seconds;
     timer = setInterval(() => {
         counter.textContent = "Time: " + (--seconds);
@@ -59,10 +84,8 @@ function countdown(data) {
 }
 
 function initGame() {
-    zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{
-        square: { black: "#227722", white: "#AAAA88" },
-        //square: { black: "#884444", white: "#22AAAA" },
-        //square: { black: "#9B5C5C", white: "#5C9B5C" },
+    zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
+        square: { black: "#2F4F4F", white: "#AAAA88" }, //square: { black: "#227722", white: "#AAAA88" },
         piece: { black: "#000000", white: "#FFFFFF"}
     });
 }
@@ -73,8 +96,7 @@ function onPieceLoad() {
 }
 
 function showLogin() {
-    logout_butt.style.display = "inline";
-    enter_butt.style.display = "none";
+    logout_butt.style.display = "inline"; enter_butt.style.display = "none";
     if (oauth_token === null) {
         login_butt.style.display = "inline";
     }
@@ -107,11 +129,24 @@ function logout() {
         oauth_token = null; lichess.setCookie("lichess_oauth",""); showLogin();
     });
 }
+
 function enterGame() {
     splash_screen.style.display = "none";
-    window.onresize = () => { zug_board.resize(main_board,main_board_div); zug_board.drawGridBoard(main_board); };
-    zug_board.updateBoard();
+    window.onresize = () => { resize(); }; resize();
     if (oauth_token !== null) startSocket();
+}
+
+function resize() {
+    centralizeMainView();
+    zug_board.resize(main_board,main_board_div);
+}
+
+function centralizeMainView() {
+    let len = Math.floor(Math.min((window.innerWidth / 2),(window.innerHeight * .9)));
+    main_div.style.width =  len + "px";
+    main_div.style.height = len + "px";
+    main_div.style.left = (window.innerWidth * .25) + "px";
+    main_div.style.top = ((window.innerHeight - len) / 2) + "px";
 }
 
 function sendMove(move) {
@@ -124,7 +159,7 @@ function sendMove(move) {
     }
 }
 
-function displayMoves(moves) { //console.log("Displaying Move:" + JSON.stringify(moves));
+function displayMoveArrows(moves) { //console.log("Displaying Move:" + JSON.stringify(moves));
     zug_board.updateBoard(moves.fen);
     for (let i=0;i<moves.selected.length;i++) {
         zug_board.drawArrow(moves.selected[0].move,
@@ -165,7 +200,7 @@ function updateMoveList(history) { //console.log(JSON.stringify(data));
                 m + history[i].selected[0].move.from + "-" + history[i].selected[0].move.to;
         }
         else move_entry.textContent = "?";
-        move_entry.onclick = () => { displayMoves(move_history[i]); };
+        move_entry.onclick = () => { displayMoveArrows(move_history[i]); };
         move_row.appendChild(move_entry);
         if ((i+1) % 4 === 0) {
             move_tab.appendChild(move_row);
@@ -307,7 +342,7 @@ function gameCmd(cmd) {
 }
 
 function rangeSelect() { //TODO: game change bug
-    displayMoves(move_history[moves_range.value]);
+    displayMoveArrows(move_history[moves_range.value]);
 }
 
 function flipBoard() {
