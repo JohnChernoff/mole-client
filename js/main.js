@@ -22,6 +22,10 @@ support for the Maxthon Browser
 
 ~OwenKraweki: (clock) bottom right
 ~OwenKraweki: and top right when it's opponents move
+
+arrows after move
+clock shift on flip
+
  */
 
 let main_board_div = document.getElementById("main-board");
