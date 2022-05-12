@@ -28,6 +28,8 @@ clock shift on flip
 
  */
 
+//let body = document.getElementById("body"));
+let main_div = document.getElementById("div-main");
 let main_board_div = document.getElementById("main-board");
 let top_clock = document.getElementById("counter-top");
 let bottom_clock = document.getElementById("counter-bottom");
@@ -86,7 +88,7 @@ function countdown(data) { //console.log(JSON.stringify(data));
 }
 
 function initGame() {
-    zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{
+    zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
         square: { black: "#2F4F4F", white: "#AAAA88" }, //square: { black: "#227722", white: "#AAAA88" },
         piece: { black: "#000000", white: "#FFFFFF"}
     });
@@ -98,8 +100,7 @@ function onPieceLoad() {
 }
 
 function showLogin() {
-    logout_butt.style.display = "inline";
-    enter_butt.style.display = "none";
+    logout_butt.style.display = "inline"; enter_butt.style.display = "none";
     if (oauth_token === null) {
         login_butt.style.display = "inline";
     }
@@ -132,11 +133,24 @@ function logout() {
         oauth_token = null; lichess.setCookie("lichess_oauth",""); showLogin();
     });
 }
+
 function enterGame() {
     splash_screen.style.display = "none";
-    window.onresize = () => { zug_board.resize(main_board,main_board_div); zug_board.drawGridBoard(main_board); };
-    zug_board.updateBoard();
+    window.onresize = () => { resize(); }; resize();
     if (oauth_token !== null) startSocket();
+}
+
+function resize() {
+    centralizeMainView();
+    zug_board.resize(main_board,main_board_div);
+}
+
+function centralizeMainView() {
+    let len = Math.floor(Math.min((window.innerWidth / 2),(window.innerHeight * .9)));
+    main_div.style.width =  len + "px";
+    main_div.style.height = len + "px";
+    main_div.style.left = (window.innerWidth * .25) + "px";
+    main_div.style.top = ((window.innerHeight - len) / 2) + "px";
 }
 
 function sendMove(move) {

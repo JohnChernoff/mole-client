@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="css/main.css">
     </head>
 
-    <body onload="initGame()">
+    <body id="body" onload="initGame()">
         <div id="div-splash" class="modal">
             <button id="help-butt" onclick="window.location.assign('help.html')">How to Play</button>
             <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
@@ -19,8 +19,8 @@
         </div>
         <div id="div-help" class="modal">
             <button onclick="document.getElementById('div-help').style.display='none'">Return</button> <br>
-            <iframe id="inlineFrameExample"
-                    title="Inline Frame Example"
+            <iframe id="help-frame"
+                    title="MoleChess Help"
                     width="99%"
                     height="90%"
                     src="help.html">

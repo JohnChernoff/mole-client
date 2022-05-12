@@ -1,16 +1,14 @@
 body {
     width: 99%;
     height: 99%;
-    background: black url("../img/moleback.jpg");
+    background: black url("../img/backgrounds/moleback.png");
     background-size: cover;
     font-family: monospace;
 }
 
 #div-main {
-    position: relative;
-    width: 90vh;
-    height: 90vh;
-    margin: 5vh auto auto auto;
+    position: absolute;
+    border: thick solid #2f4f4f;
     background-color: black; //rgba(38, 63, 63, 0.5);
 }
 
@@ -26,11 +24,13 @@ body {
 #sidebar_right { right: 0; }
 
 .board-view {
-    position: absolute;
     width: 100%; height: 100%;
+    /*
+    position: absolute;
     align-items: stretch;
     top: 50%; left: 50%;
-    -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%);
+    */
 }
 
 .overlay-view {
@@ -66,7 +66,7 @@ body {
 #div-moves {
     overflow-y: scroll;
     height: 50%;
-    background-color: darkslategrey; //#AAAA88;
+    background-color: #2f4f4f; //#AAAA88;
 }
 
 #div-movetab > table {
@@ -89,7 +89,7 @@ body {
 
 #div-messages {
     height: 85vh;
-    background-color: darkslategray;
+    background-color: #2f4f4f;
 }
 
 #txt-messages {
@@ -121,7 +121,7 @@ body {
 }
 
 #counter-top { top: 1vh; }
-#counter-bottom { bottom: 1vh; }
+#counter-bottom { bottom: 0vh; }
 
 #div-mole {
     display: none;
@@ -140,7 +140,7 @@ body {
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
     overflow: auto; /* Enable scroll if needed */
-    background-color: darkslategray;
+    background-color: #2f4f4f;
 }
 
 #div-highscores > table > tr > td {
@@ -155,10 +155,8 @@ body {
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
-    background: white url("../img/mole-logo.png");
     background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    background: white url("../img/mole-logo.png") no-repeat center;
 }
 
 .splash-butt {

@@ -9,8 +9,9 @@ class ZugBoard {
     static PIECE_CHRS = "kqrbnp-PNBRQK";
     static PAWN = 1;
 
-    constructor(wrapper,move_handler,callback,colors) {
+    constructor(wrapper,move_handler,callback,style,colors) {
         this.board = [];
+        this.style = style;
         this.piece_imgs = [];
         this.light_tex = new Image(); this.dark_tex = new Image();
         this.board_background_color = [0,0,0];
@@ -104,8 +105,8 @@ class ZugBoard {
 
     loadImages(callback) {
         console.log("Loading pieces...");
-        this.light_tex.src = "img/tex/light_tex.jpeg";
-        this.dark_tex.src = "img/tex/dark_tex.jpg";
+        this.light_tex.src = "img/tex/" + this.style.board_tex + "/light_tex.png";
+        this.dark_tex.src = "img/tex/" + this.style.board_tex + "/dark_tex.png";
         for (let i=0;i<6;i++) {
             this.piece_imgs[i] = { black: new Image(), white: new Image() };
             this.fetchPiece("b",i+1,this.piece_imgs[i].black,callback);
@@ -116,7 +117,7 @@ class ZugBoard {
     fetchPiece(color,i,img,callback) {
         let id = color + i;
         if (this.svg_pieces) {
-            fetch("img/pieces/" + id +  ".svg", {cache: "reload"}).
+            fetch("img/pieces/" + this.style.pieces + "/" + id +  ".svg", {cache: "reload"}).
             then(response => response.text()).
             then(text => {
                 let svg = document.createElement("template");
@@ -129,7 +130,7 @@ class ZugBoard {
             });
         }
         else {
-            img.src = "img/pieces/leipzig/" + id + ".png";
+            img.src = "img/pieces/" + this.style.pieces + "/" + id + ".png";
             img.onload = () => {  if (++this.pieces_loaded >= 12) { callback(); } };
         }
     }
@@ -137,12 +138,14 @@ class ZugBoard {
     resize(board,wrapper) {
         let width = Math.floor(wrapper.clientWidth/8)-1;
         let height = Math.floor(wrapper.clientHeight/8)-1;
+        //console.log("Resizing: " + width + ", " + height);
         for (let file=0;file<this.max_files;file++) {
             for (let rank = 0; rank < this.max_ranks; rank++) {
                 this.board[file][rank].canvas.width = width;
                 this.board[file][rank].canvas.height = height;
             }
         }
+        this.updateBoard();
     }
 
     updateBoard(fen) {
@@ -232,7 +235,7 @@ class ZugBoard {
             for (let x = 0; x < this.max_files; x++) {
                 //this.board[x][y].ctx.fillStyle = this.board[x][y].color;
                 //this.board[x][y].ctx.fillRect(0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
-                let bkg_img = this.board[x][y].color == this.black_square_color ? this.dark_tex : this.light_tex;
+                let bkg_img = this.board[x][y].color === this.black_square_color ? this.dark_tex : this.light_tex;
                 this.board[x][y].ctx.drawImage(bkg_img,0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
             }
         }
