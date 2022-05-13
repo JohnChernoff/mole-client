@@ -8,7 +8,7 @@
 
     <body id="body" onload="initGame()">
         <div id="div-splash" class="modal">
-            <button id="help-butt" onclick="window.location.assign('help.html')">How to Play</button>
+            <button id="help-butt1" onclick="window.location.assign('help.html')">How to Play</button>
             <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
             <button id="enter-butt" class="splash-butt" onclick="enterGame()"></button>
@@ -28,60 +28,56 @@
         </div>
         <span id="counter-top" class="counter">Time: 30</span>
         <span id="counter-bottom" class="counter">Time: 30</span>
-        <div id="sidebar_left" class="sidebar">
-            <div id="div-buttons">
-                <button onclick="document.getElementById('div-help').style.display='block'">Help</button>
-                <button onclick="showHighScores()">Best</button>
-                <button id="flip-butt" onclick="flipBoard()">Flip</button>
-                <button hidden type="button" id="sock-butt" onclick="startSocket()" > Connect </button>
-                <button hidden id="test-butt" onclick="test()">Test</button>
-                <br><br>
-            </div>
-            <div id="div-messages">
-                    <textarea rows="32" readonly id="txt-messages"></textarea>
-            </div>
-            <div id="div-inputs">
-                <label id="lab-lobby-msg">
-                    Lobby:<input type="text" id="lobby-msg"/>
-                </label>
+        <div id="div-comm" class="modular_view">
+            <div id="div-chat">
+                <input type="radio" name="chk_chat" id="chk_lobby" value="lobby" >
+                <label for="chk_lobby">Lobby</label>
+                <input type="radio" name="chk_chat" id="chk_game" value="game" checked>
+                <label for="chk_game">Game</label>
                 <br>
-                <label id="lab-game-msg">
-                    Game:&nbsp<input type="text" id="game-msg"/>
-                </label>
+                <input type="text" id="chat-msg"/>
+                <br>
+            </div>
+            <br>
+            <div id="div-messages">
+                <textarea rows="32" readonly id="txt-messages"></textarea>
             </div>
         </div>
-        <div id="div-main">
+        <div id="div-main" class="modular_view">
             <div id="main-board" class="board-view"> </div>
             <div id="div-mole" class="board-view">
                 <h1>YOU'RE THE MOLE </h1>
             </div>
         </div>
-        <div id="sidebar_right" class="sidebar">
-            <div id="div-games">
-                <button id="new-butt" onclick="createGame()">New Game</button>
-                <input type="radio" name="chk_color" id="chk_black" value="0" >
-                <label for="chk_black">Black</label>
-                <input type="radio" name="chk_color" id="chk_white" value="1" checked>
-                <label for="chk_white">White</label>
-                <br><br>
-                <button id="join-butt" onclick="joinGame()">Join</button>
-                <button id="start-butt" onclick="gameCmd('startgame')">Start</button>
-                <button id="obs-butt" onclick="gameCmd('obsgame')">Obs</button>
-                <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
-                <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
-                <br><br>
-                <label for="select-games">Game Title: </label>
-                <select id="select-games"></select>
-                <br><br>
-                <table id="table-players"></table>
-            </div>
-            <div id="div-moves">
-                <input id="range-history" type="range" min="0" onchange="rangeSelect()">
-                <div id="div-movetab">
-                    <table id="table-moves"></table>
-                </div>
+        <div id="div-games" class="modular_view">
+            <button id="help-butt2" onclick="document.getElementById('div-help').style.display='block'">Help</button>
+            <button id="best-butt" onclick="showHighScores()">Best</button>
+            <button id="new-butt" onclick="createGame()">New Game</button>
+            <br><br>
+            <input type="radio" name="chk_color" id="chk_black" value="0" >
+            <label for="chk_black">Black</label>
+            <input type="radio" name="chk_color" id="chk_white" value="1" checked>
+            <label for="chk_white">White</label>
+            <br><br>
+            <button id="join-butt" onclick="joinGame()">Join</button>
+            <button id="start-butt" onclick="gameCmd('startgame')">Start</button>
+            <button id="obs-butt" onclick="gameCmd('obsgame')">Obs</button>
+            <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
+            <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
+            <button id="flip-butt" onclick="flipBoard()">Flip</button>
+            <br><br>
+            <label for="select-games">Game Title: </label>
+            <select id="select-games"></select>
+            <br><br>
+            <table id="table-players"></table>
+        </div>
+        <div id="div-moves" class="modular_view">
+            <input id="range-history" type="range" min="0" onchange="rangeSelect()">
+            <div id="div-movetab">
+                <table id="table-moves"></table>
             </div>
         </div>
+
         <script>var exports = {};</script>
         <script type="text/javascript" src="js/oauth2-auth-code-pkce-master/pkce.js"></script>
         <script type="text/javascript" src="js/lichess.js"></script>

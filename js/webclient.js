@@ -1,9 +1,9 @@
-let sock_butt = document.getElementById("sock-butt");
+//let sock_butt = document.getElementById("sock-butt");
 let txt_messages = document.getElementById("txt-messages");
 
 function startSocket() {
-    //openSocket("wss://molechess.com/server",sockHandler);
-    openSocket("ws://localhost:5555",sockHandler);
+    openSocket("wss://molechess.com/server",sockHandler);
+    //openSocket("ws://localhost:5555",sockHandler);
 }
 
 function sockHandler(event_type,event) {
@@ -13,8 +13,7 @@ function sockHandler(event_type,event) {
         case SOCK_EVENT.CONNECTION_OPEN:
             console.log(SOCK_EVENT.CONNECTION_OPEN);
             if (event.data !== undefined) { writeResponse(event.data); }
-            sock_butt.innerHTML = "Disconnect";
-            sock_butt.onclick = () => { closeSocket(); };
+            //sock_butt.innerHTML = "Disconnect"; sock_butt.onclick = () => { closeSocket(); };
             send("login",oauth_token); //send("login",prompt("Enter your name"));
             break;
         case SOCK_EVENT.CONNECTION_INCOMING_MSG:
@@ -46,7 +45,7 @@ function closeSocket() {
 function writeResponse(text) {
     console.log("Response: " + text);
     txt_messages.value += text + "\n"; //showPrompt();
-    if (txt_messages.value.length > 1024) txt_messages.value = txt_messages.value.substring(txt_messages.value.length/2);
+    if (txt_messages.value.length > 8192) txt_messages.value = txt_messages.value.substring(txt_messages.value.length/2);
     txt_messages.scrollTop = txt_messages.scrollHeight;
 }
 
@@ -63,12 +62,11 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
         let mole_div = document.getElementById("div-mole");
         mole_div.style.display = "block"; setTimeout(() => { mole_div.style.display = "none"; },5000);
     }
-    else if (type === "phase") { console.log("New phase: " + data.msg); }
     //else if (type === "movelist") updateMoveList(data);
+    else if (type === "phase") { console.log("New phase: " + data.msg); }
     else if (type === "top") updateHighScores(data);
-    else if (type === "info") {
-        writeResponse(JSON.stringify(data));
-    }
+    else if (type === "info") writeResponse(JSON.stringify(data));
+    else if (type === "users") showPlayers(data.users);
     else {
         console.log("Unknown Type: " + type);
     }

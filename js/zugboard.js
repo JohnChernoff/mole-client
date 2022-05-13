@@ -17,8 +17,7 @@ class ZugBoard {
         this.board_background_color = [0,0,0];
         this.billinear = false;
         this.svg_pieces = false;
-        this.square_width = 0;
-        this.square_height = 0;
+        //this.square_width = 0; this.square_height = 0;
         this.pieces_loaded = 0;
         this.max_files = 8;
         this.max_ranks = 8;
@@ -46,8 +45,7 @@ class ZugBoard {
         this.overlay.style.left = "0";
         this.overlay.style.width = "100%";
         this.overlay.style.height = "100%";
-        this.overlay.width = wrapper.clientWidth;
-        this.overlay.height = wrapper.clientHeight;
+        //this.overlay.width = wrapper.clientWidth; this.overlay.height = wrapper.clientHeight;
         this.overlay.style.pointerEvents = "none";
         this.overlay_ctx = this.overlay.getContext("2d");
         wrapper.appendChild(this.overlay);
@@ -83,7 +81,7 @@ class ZugBoard {
     }
 
     drawArrow(move,color) {
-        let coords = this.alg2Pix(move); //console.log(JSON.stringify(coords));
+        let coords = this.alg2Pix(move); //console.log(JSON.stringify(move) + "->" + JSON.stringify(coords));
         this.overlay_ctx.fillStyle = color + "80";
         let dist = ZugBoard.calcDistance(coords);
         this.overlay_ctx.save();
@@ -136,19 +134,21 @@ class ZugBoard {
     }
 
     resize(board,wrapper) {
-        let width = Math.floor(wrapper.clientWidth/8)-1;
-        let height = Math.floor(wrapper.clientHeight/8)-1;
+        this.square_width = Math.floor(wrapper.clientWidth/8)-1;
+        this.square_height = Math.floor(wrapper.clientHeight/8)-1;
         //console.log("Resizing: " + width + ", " + height);
         for (let file=0;file<this.max_files;file++) {
             for (let rank = 0; rank < this.max_ranks; rank++) {
-                this.board[file][rank].canvas.width = width;
-                this.board[file][rank].canvas.height = height;
+                this.board[file][rank].canvas.width = this.square_width;
+                this.board[file][rank].canvas.height = this.square_height;
             }
         }
+        this.overlay.width = wrapper.clientWidth;
+        this.overlay.height = wrapper.clientHeight;
         this.updateBoard();
     }
 
-    updateBoard(fen) {
+    updateBoard(fen) { //console.log("Updating board...");
         zug_board.clearOverlay();
         zug_board.setFEN(fen !== undefined ? fen : this.currentFEN);
         zug_board.drawGridBoard();

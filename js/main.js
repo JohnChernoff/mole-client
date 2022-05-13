@@ -29,19 +29,31 @@ clock shift on flip
  */
 
 //let body = document.getElementById("body"));
+
+function createEnum(values) {
+    const enumObject = {};
+    for (const val of values) enumObject[val] = val;
+    return Object.freeze(enumObject);
+}
+
+let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
+let layout_style = LAYOUT_STYLES.UNDEFINED;
 let main_div = document.getElementById("div-main");
 let main_board_div = document.getElementById("main-board");
+let comm_div = document.getElementById("div-comm");
+let games_div = document.getElementById("div-games");
+let moves_div = document.getElementById("div-moves");
 let top_clock = document.getElementById("counter-top");
 let bottom_clock = document.getElementById("counter-bottom");
 let radio_black = document.getElementById("chk_black");
 let games_select = document.getElementById("select-games");
 let play_tab = document.getElementById("table-players");
-let moves_div = document.getElementById("div-movetab");
+let moves_list = document.getElementById("div-movetab");
 let moves_range = document.getElementById("range-history");
 let score_div = document.getElementById("div-highscores");
 let score_tab = document.getElementById("table-highscores");
-let lobby_input = document.getElementById("lobby-msg");
-let game_input = document.getElementById("game-msg");
+let lobby_chk = document.getElementById("chk_lobby");
+let chat_input = document.getElementById("chat-msg");
 let login_butt = document.getElementById("login-butt");
 let logout_butt = document.getElementById("logout-butt");
 let enter_butt = document.getElementById("enter-butt");
@@ -60,8 +72,10 @@ let oauth_token = null;
 
 window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
     if (e.code === "Enter") {
-        if (lobby_input === document.activeElement) sendChat(lobby_input,"lobby");
-        else if (game_input === document.activeElement) sendChat(game_input, selected_game);
+        if (chat_input === document.activeElement) {
+            if (lobby_chk.checked) sendChat(chat_input,"lobby");
+            else sendChat(chat_input,selected_game);
+        }
     }
 } , false);
 
@@ -141,16 +155,58 @@ function enterGame() {
 }
 
 function resize() {
-    centralizeMainView();
+    setLayout();
     zug_board.resize(main_board,main_board_div);
 }
 
-function centralizeMainView() {
-    let len = Math.floor(Math.min((window.innerWidth / 2),(window.innerHeight * .9)));
-    main_div.style.width =  len + "px";
-    main_div.style.height = len + "px";
-    main_div.style.left = (window.innerWidth * .25) + "px";
-    main_div.style.top = ((window.innerHeight - len) / 2) + "px";
+function setLayout() {
+    let main_div_size;
+    if (window.innerWidth > window.innerHeight) {
+        layout_style = LAYOUT_STYLES.HORIZONTAL;
+        comm_div.style.left = "0px";
+        comm_div.style.top = "0px";
+        comm_div.style.width = "20vw";
+        comm_div.style.height = "99vh";
+
+        main_div_size = Math.floor(Math.min(window.innerWidth /2, window.innerHeight * .89));
+        let extra_width = ((window.innerWidth/2) - main_div_size)/2;
+        main_div.style.left = Math.floor((window.innerWidth * .25) + (extra_width > 0 ? extra_width : 0)) + "px";
+
+        games_div.style.left = "80vw";
+        games_div.style.top = "0px";
+        games_div.style.width = "20vw";
+        games_div.style.height = "49vh";
+
+        moves_div.style.left = "80vw";
+        moves_div.style.top = "50vh";
+        moves_div.style.width = "20vw";
+        moves_div.style.height = "49vh";
+    }
+    else {
+        layout_style = LAYOUT_STYLES.VERTICAL;
+        comm_div.style.left = "0px";
+        comm_div.style.top = "0px";
+        comm_div.style.width = "30vw";
+        comm_div.style.height = "99vh";
+
+        main_div_size = Math.floor(window.innerWidth * .67);
+        main_div.style.left = "33vw"; //(window.innerWidth * .25) + "px";
+
+        let lower_div_height = Math.floor(window.innerWidth * .70);
+
+        games_div.style.left = "33vw";
+        games_div.style.top = lower_div_height + "px";
+        games_div.style.width =  (main_div_size / 2) + "px";
+        games_div.style.height = (window.innerHeight - lower_div_height) + "px";
+
+        moves_div.style.left = "66vw";
+        moves_div.style.top = lower_div_height + "px";
+        moves_div.style.width =  (main_div_size / 2) + "px";
+        moves_div.style.height = (window.innerHeight - lower_div_height) + "px";
+    }
+    main_div.style.top = "1vh";
+    main_div.style.width =  main_div_size + "px";
+    main_div.style.height = main_div_size + "px";
 }
 
 function sendMove(move) {
@@ -163,7 +219,7 @@ function sendMove(move) {
     }
 }
 
-function displayMoveArrows(moves) { //console.log("Displaying Move:" + JSON.stringify(moves));
+function displayMoveArrows(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
     zug_board.updateBoard(moves.fen);
     for (let i=0;i<moves.selected.length;i++) {
         zug_board.drawArrow(moves.selected[0].move,
@@ -184,7 +240,7 @@ function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game)
 }
 
 function updateMoveList(history) { //console.log(JSON.stringify(data));
-    clearElement(moves_div);
+    clearElement(moves_list);
     move_history = [history.length];
     let move_tab = document.createElement("table");
     let move_row = document.createElement("tr");
@@ -214,7 +270,7 @@ function updateMoveList(history) { //console.log(JSON.stringify(data));
             move_tab.appendChild(move_row);
         }
     }
-    moves_div.appendChild(move_tab);
+    moves_list.appendChild(move_tab);
     moves_range.max = history.length-1; //TODO: buggy?
 }
 
@@ -320,6 +376,13 @@ function updateHighScores(data) {
         rating_field.textContent = data[i].rating;
         row.appendChild(play_field); row.appendChild(rating_field);
         score_tab.appendChild(row);
+    }
+}
+
+function showPlayers(players) {
+    writeResponse("Active Players:");
+    for (let i=0;i<players.length;i++) {
+        writeResponse(players[i].name);
     }
 }
 
