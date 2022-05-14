@@ -26,8 +26,10 @@
                     src="help.html">
             </iframe>
         </div>
-        <span id="counter-top" class="counter">Time: 30</span>
-        <span id="counter-bottom" class="counter">Time: 30</span>
+        <div id="div-time">
+            <span id="txt-time"> Welcome to MoleChess 0.1! </span>
+            <canvas id="can-time"></canvas>
+        </div>
         <div id="div-comm" class="modular_view">
             <div id="div-chat">
                 <input type="radio" name="chk_chat" id="chk_lobby" value="lobby" >
@@ -64,6 +66,7 @@
             <button id="obs-butt" onclick="gameCmd('obsgame')">Obs</button>
             <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
             <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
+            <button id="time-butt" onclick="setTime()">Set Time</button>
             <button id="flip-butt" onclick="flipBoard()">Flip</button>
             <br><br>
             <label for="select-games">Game Title: </label>

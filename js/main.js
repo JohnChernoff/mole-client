@@ -26,6 +26,7 @@ support for the Maxthon Browser
 arrows after move
 clock shift on flip
 
+(Owen) also it'd be good if the time bar was smoother - refresh every x number of microseconds?
  */
 
 //let body = document.getElementById("body"));
@@ -38,13 +39,15 @@ function createEnum(values) {
 
 let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
 let layout_style = LAYOUT_STYLES.UNDEFINED;
+let time_div = document.getElementById("div-time");
+let time_txt = document.getElementById("txt-time");
+let time_can = document.getElementById("can-time");
+let time_ctx = time_can.getContext('2d');
 let main_div = document.getElementById("div-main");
 let main_board_div = document.getElementById("main-board");
 let comm_div = document.getElementById("div-comm");
 let games_div = document.getElementById("div-games");
 let moves_div = document.getElementById("div-moves");
-let top_clock = document.getElementById("counter-top");
-let bottom_clock = document.getElementById("counter-bottom");
 let radio_black = document.getElementById("chk_black");
 let games_select = document.getElementById("select-games");
 let play_tab = document.getElementById("table-players");
@@ -88,17 +91,24 @@ games_select.addEventListener("change", () =>  {
 function countdown(data) { //console.log(JSON.stringify(data));
     if (data.title !== selected_game) return;
     if (timer !== null) clearInterval(timer);
-    bottom_clock.style.display = 'none'; top_clock.style.display = 'none';
-    let counter = data.turn === BLACK ?
-        zug_board.povBlack ? bottom_clock : top_clock :
-        zug_board.povBlack ? top_clock : bottom_clock;
-    counter.style.display = 'flex';
+    let max_seconds = data.seconds;
     let seconds = data.seconds;
-    counter.textContent = "Time: " + seconds;
+    let inc = .1;
     timer = setInterval(() => {
-        counter.textContent = "Time: " + (--seconds);
+        time_div.style.background = (data.turn === BLACK ? "black" : "white");
+        seconds = seconds - inc;
+        time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " + Math.floor(seconds) + " seconds";
+        drawTime(seconds,max_seconds);
         if (seconds <= 0) clearInterval(timer);
-    },1000);
+    },1000 * inc);
+}
+
+function drawTime(seconds,max_seconds) {
+    //console.log(JSON.stringify(data));
+    time_ctx.fillStyle = "green";
+    time_ctx.fillRect(0,0,time_can.width,time_can.height);
+    time_ctx.fillStyle = "red";
+    time_ctx.fillRect(0,0,time_can.width * (seconds / max_seconds),time_can.height);
 }
 
 function initGame() {
@@ -172,6 +182,13 @@ function setLayout() {
         let extra_width = ((window.innerWidth/2) - main_div_size)/2;
         main_div.style.left = Math.floor((window.innerWidth * .25) + (extra_width > 0 ? extra_width : 0)) + "px";
 
+        time_div.style.left =  main_div.style.left;
+        time_div.style.top = "";
+        time_div.style.bottom = "1vh";
+        time_div.style.width = main_div_size + "px";
+        time_div.style.height = "7vh";
+        time_can.style.height = (Math.ceil(window.innerHeight * .07) + 1) + "px";
+
         games_div.style.left = "80vw";
         games_div.style.top = "0px";
         games_div.style.width = "20vw";
@@ -194,13 +211,21 @@ function setLayout() {
 
         let lower_div_height = Math.floor(window.innerWidth * .70);
 
+        let clock_height = 50;
+        time_div.style.left = main_div.style.left;
+        time_div.style.top = lower_div_height + "px";
+        time_div.style.bottom = "";
+        time_div.style.width = main_div_size + "px";
+        time_div.style.height = clock_height + "px";
+        time_can.style.height = (clock_height + 1) + "px";
+
         games_div.style.left = "33vw";
-        games_div.style.top = lower_div_height + "px";
+        games_div.style.top = (lower_div_height + clock_height + 20) + "px";
         games_div.style.width =  (main_div_size / 2) + "px";
         games_div.style.height = (window.innerHeight - lower_div_height) + "px";
 
         moves_div.style.left = "66vw";
-        moves_div.style.top = lower_div_height + "px";
+        moves_div.style.top = (lower_div_height + clock_height + 20) + "px";
         moves_div.style.width =  (main_div_size / 2) + "px";
         moves_div.style.height = (window.innerHeight - lower_div_height) + "px";
     }
@@ -406,6 +431,13 @@ function joinGame() {
 
 function gameCmd(cmd) {
     if (selected_game !== undefined) send(cmd, selected_game);
+}
+
+function setTime() {
+    if (selected_game !== undefined) {
+        let t = prompt("Enter move time in seconds: ");
+        if (t > 0) send("time",{ game: selected_game, time : t });
+    }
 }
 
 function rangeSelect() { //TODO: game change bug

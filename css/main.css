@@ -157,3 +157,26 @@ body {
 .splash-butt {
     display: none;
 }
+
+#div-time {
+    position: absolute;
+    background-color: black;
+    border: solid thick #2f4f4f;
+}
+
+#txt-time {
+    position: relative;
+    text-align: center;
+    top: 25%;
+    float: left;
+    width: 50%;
+    height: 75%;
+    color: gray;
+}
+
+#can-time {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    width: 50.1%;
+}
