@@ -3,6 +3,7 @@ function ZugSquare(piece,color,canvas) {
     this.color = color;
     this.canvas = canvas;
     this.visible = true;
+    this.selected = false;
     this.ctx = canvas.getContext("2d");
 }
 
@@ -191,6 +192,8 @@ class ZugBoard {
                 can.addEventListener("mouseup", ev => {
                     if (this.mousedownPiece === this.board[file][rank]) {
                         this.clickedToMove = true;
+                        can.className = "selectedSquare";
+                        this.mousedownPiece.selected = true;
                         this.mousedownPiece.visible = true;
                         this.updateBoard();
                     } else {
@@ -233,6 +236,7 @@ class ZugBoard {
                 this.povRank(rank) === (this.max_ranks - 1)) ?
                 this.current_promotion : null;
             moveHandler(this.drag_move);
+            this.mousedownPiece.selected = false;
             this.mousedownPiece.visible = true;
             this.mousedownPiece = null;
             this.clickedToMove = false;
@@ -279,6 +283,12 @@ class ZugBoard {
                 //this.board[x][y].ctx.fillRect(0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
                 let bkg_img = this.board[x][y].color === this.black_square_color ? this.dark_tex : this.light_tex;
                 this.board[x][y].ctx.drawImage(bkg_img,0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
+                if (this.board[x][y].selected) {
+                    let ctx = this.board[x][y].ctx;
+                    ctx.strokeStyle = "rgb(255, 255, 0)";
+                    ctx.lineWidth = "15";
+                    ctx.strokeRect(0, 0, this.board[x][y].canvas.width, this.board[x][y].canvas.height);
+                }
             }
         }
     }
@@ -303,10 +313,10 @@ class ZugBoard {
 
     drawFloatingPiece(square, x, y) {
         if (square.piece !== 0) {
-            let piece_width,piece_x,piece_height,piece_y;
+            let piece_width, piece_height;
             if (this.svg_pieces) {
-                piece_width = square.canvas.width/2;
-                piece_height = square.canvas.height/2;
+                piece_width = square.canvas.width / 2;
+                piece_height = square.canvas.height / 2;
             }
             else {
                 piece_width = square.canvas.width * .8;
