@@ -2,8 +2,8 @@
 let txt_messages = document.getElementById("txt-messages");
 
 function startSocket() {
-    //openSocket("wss://molechess.com/server",sockHandler);
-    openSocket("ws://localhost:5555",sockHandler);
+    openSocket("wss://molechess.com/server",sockHandler);
+    //openSocket("ws://localhost:5555",sockHandler);
 }
 
 function sockHandler(event_type,event) {
