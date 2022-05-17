@@ -2,6 +2,7 @@ function ZugSquare(piece,color,canvas) {
     this.piece = piece;
     this.color = color;
     this.canvas = canvas;
+    this.visible = true;
     this.ctx = canvas.getContext("2d");
 }
 
@@ -22,6 +23,9 @@ class ZugBoard {
         this.max_files = 8;
         this.max_ranks = 8;
         this.drag_move = null;
+        this.mousedownPiece = null;
+        this.boardUpdated = true;
+        this.clickedToMove = false;
         this.povBlack = false;
         this.currentFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         if (colors !== undefined) {
@@ -38,7 +42,6 @@ class ZugBoard {
         }
         this.current_promotion = "Q"; //TODO: "q" and underpromotions
         this.loadImages(callback);
-        this.initGridBoard(wrapper,move_handler);
         this.overlay = document.createElement("canvas");
         this.overlay.style.position = "absolute";
         this.overlay.style.top = "0";
@@ -49,6 +52,7 @@ class ZugBoard {
         this.overlay.style.pointerEvents = "none";
         this.overlay_ctx = this.overlay.getContext("2d");
         wrapper.appendChild(this.overlay);
+        this.initGridBoard(wrapper,move_handler);
     }
 
     alg2Coord(move) {
@@ -154,6 +158,15 @@ class ZugBoard {
         zug_board.drawGridBoard();
     }
 
+    getMousePos(wrapper, e) {
+        let rect = wrapper.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        };
+    }
+
+
     initGridBoard(wrapper,moveHandler) {
         this.square_width = (wrapper.clientWidth/8);
         this.square_height = (wrapper.clientHeight/8);
@@ -162,39 +175,61 @@ class ZugBoard {
             for (let file=0;file<this.max_files;file++) {
                 let can = document.createElement("canvas");
                 can.id = "" + (file + (rank * this.max_ranks));
-                can.draggable = true;
                 can.width = this.square_width;
                 can.height = this.square_height;
                 wrapper.appendChild(can);
                 let white = file % 2 === 0; if (rank % 2 === 1) white = !white;
                 this.board[file][rank] = new ZugSquare(
                     0,white ? this.white_square_color : this.black_square_color, can);
-                can.addEventListener("dragstart", ev => {
-                    this.drag_move = { from: this.getCoords(ev.target.id), to: null, x: 0, y: 0, promotion: null };
-                })
-                can.addEventListener("dragenter", ev => {
-                    this.drag_move.to = this.getCoords(ev.target.id);
-                });
-                can.addEventListener("dragend", () => {
-                    let rect = wrapper.getBoundingClientRect();
-                    let piece = Math.abs(this.board[this.drag_move.from.x][this.drag_move.from.y].piece);
-                    if (piece === ZugBoard.PAWN &&
-                        (this.drag_move.to.y === 0 || this.drag_move.to.y >= this.max_ranks-1)) {
-                        this.drag_move.promotion = this.current_promotion;
-                    }
-                    if (ZugBoard.inBounds(this.drag_move.x,this.drag_move.y,rect)) {
-                        console.log(ZugBoard.getAlgebraicMove(this.drag_move));
-                        moveHandler(this.drag_move);
+                can.addEventListener("mousedown", ev => {
+                    if (this.mousedownPiece === null){
+                        this.startMove(ev, file, rank);
+                    } else {
+                        this.finishMove(ev, file, rank, moveHandler);
                     }
                 });
-                //for fucking firefox...
-                can.addEventListener("dragover", ev => {
-                    can.dispatchEvent(new MouseEvent('drag', ev)); ev.preventDefault();
-                });
-                can.addEventListener("drag", ev => {
-                    this.drag_move.x = ev.pageX; this.drag_move.y = ev.pageY;
+                can.addEventListener("mouseup", ev => {
+                    if (this.mousedownPiece === this.board[file][rank]) {
+                        this.clickedToMove = true;
+                        this.mousedownPiece.visible = true;
+                        this.updateBoard();
+                    } else {
+                        this.finishMove(ev, file, rank, moveHandler);
+                    }
                 });
             }
+        }
+        wrapper.addEventListener("mousemove", (ev) => {
+            if (this.mousedownPiece != null && !this.clickedToMove) {
+                if (!this.boardUpdated) {
+                    this.updateBoard();
+                    this.boardUpdated = true;
+                }
+                let mousePosition = this.getMousePos(wrapper, ev);
+                this.clearOverlay();
+                this.drawFloatingPiece(this.mousedownPiece, mousePosition.x, mousePosition.y);
+            }
+        });
+    }
+
+    startMove (ev, file, rank) {
+        this.drag_move = {from: {x: this.povFile(file), y: this.povRank(rank)}, to: null, promotion: null};
+        this.mousedownPiece = this.board[file][rank];
+        this.mousedownPiece.visible = false;
+        this.boardUpdated = false;
+    }
+
+    finishMove (ev, file, rank, moveHandler) {
+        if (this.mousedownPiece != null) {
+            this.drag_move.to = {x: this.povFile(file), y: this.povRank(rank)};
+            this.drag_move.promotion = (this.mousedownPiece.piece === ZugBoard.PAWN &&
+                this.povRank(rank) === (this.max_ranks - 1)) ?
+                this.current_promotion : null;
+            moveHandler(this.drag_move);
+            this.mousedownPiece.visible = true;
+            this.mousedownPiece = null;
+            this.clickedToMove = false;
+            this.updateBoard(this.currentFEN);
         }
     }
 
@@ -242,7 +277,7 @@ class ZugBoard {
     }
 
     drawGridPiece(square) {
-        if (square.piece !== 0) {
+        if (square.piece !== 0 && square.visible) {
             let piece_width,piece_x,piece_height,piece_y;
             if (this.svg_pieces) {
                 piece_width = square.canvas.width/2; piece_x = square.canvas.width/4;
@@ -256,6 +291,26 @@ class ZugBoard {
                 square.ctx.drawImage(this.piece_imgs[square.piece-1].white,piece_x,piece_y,piece_width,piece_height);
             }
             else square.ctx.drawImage(this.piece_imgs[-square.piece-1].black,piece_x,piece_y,piece_width,piece_height);
+        }
+    }
+
+    drawFloatingPiece(square, x, y) {
+        if (square.piece !== 0) {
+            let piece_width,piece_x,piece_height,piece_y;
+            if (this.svg_pieces) {
+                piece_width = square.canvas.width/2;
+                piece_height = square.canvas.height/2;
+            }
+            else {
+                piece_width = square.canvas.width * .8;
+                piece_height = square.canvas.height * .8;
+                x = x - square.canvas.width / 2;
+                y = y - square.canvas.height / 2;
+            }
+            if (square.piece > 0) {
+                this.overlay_ctx.drawImage(this.piece_imgs[square.piece-1].white,x,y,piece_width,piece_height);
+            }
+            else this.overlay_ctx.drawImage(this.piece_imgs[-square.piece-1].black,x,y,piece_width,piece_height);
         }
     }
 
