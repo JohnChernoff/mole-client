@@ -210,6 +210,13 @@ class ZugBoard {
                 this.drawFloatingPiece(this.mousedownPiece, mousePosition.x, mousePosition.y);
             }
         });
+        wrapper.addEventListener("mouseleave", (ev) => {
+            if (this.mousedownPiece != null) {
+                this.mousedownPiece.visible = true;
+                this.mousedownPiece = null;
+                this.updateBoard();
+            }
+        });
     }
 
     startMove (ev, file, rank) {
