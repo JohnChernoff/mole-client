@@ -256,7 +256,8 @@ function displayMoveArrows(moves) { //console.log("Displaying Arrows for Move:" 
     moves_range.value = moves.ply;
 }
 
-function exportPGN() { //console.log(JSON.stringify(move_history));
+function exportPGN() {
+    console.log(JSON.stringify(move_history));
     let pgn_txt = "";
     for (let i=0; i<move_history.length; i++) {
         pgn_txt += (move_history[i].selected[0].move.san + " ");
