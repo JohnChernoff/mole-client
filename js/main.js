@@ -39,6 +39,7 @@ function createEnum(values) {
 
 let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
 let layout_style = LAYOUT_STYLES.UNDEFINED;
+let mole_div = document.getElementById("div-mole");
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
@@ -242,6 +243,10 @@ function sendMove(move) {
             promotion: move.promotion
         });
     }
+}
+
+function notifyMole() {
+    mole_div.style.display = "block"; //setTimeout(() => { mole_div.style.display = "none"; },5000);
 }
 
 function displayMoveArrows(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));

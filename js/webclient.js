@@ -2,8 +2,8 @@
 let txt_messages = document.getElementById("txt-messages");
 
 function startSocket() {
-    openSocket("wss://molechess.com/server",sockHandler);
-    //openSocket("ws://localhost:5555",sockHandler);
+    //openSocket("wss://molechess.com/server",sockHandler);
+    openSocket("ws://localhost:5555",sockHandler);
 }
 
 function sockHandler(event_type,event) {
@@ -58,10 +58,7 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
     else if (type === "countdown") countdown(data);
-    else if (type === "mole") {
-        let mole_div = document.getElementById("div-mole");
-        mole_div.style.display = "block"; setTimeout(() => { mole_div.style.display = "none"; },5000);
-    }
+    else if (type === "mole") notifyMole();
     //else if (type === "movelist") updateMoveList(data);
     else if (type === "phase") { console.log("New phase: " + data.msg); }
     else if (type === "top") updateHighScores(data);
