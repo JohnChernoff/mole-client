@@ -192,7 +192,6 @@ class ZugBoard {
                 can.addEventListener("mouseup", ev => {
                     if (this.mousedownPiece === this.board[file][rank]) {
                         this.clickedToMove = true;
-                        can.className = "selectedSquare";
                         this.mousedownPiece.selected = true;
                         this.mousedownPiece.visible = true;
                         this.updateBoard();
@@ -232,9 +231,9 @@ class ZugBoard {
     finishMove (ev, file, rank, moveHandler) {
         if (this.mousedownPiece != null) {
             this.drag_move.to = {x: this.povFile(file), y: this.povRank(rank)};
-            this.drag_move.promotion = (this.mousedownPiece.piece === ZugBoard.PAWN &&
-                this.povRank(rank) === (this.max_ranks - 1)) ?
-                this.current_promotion : null;
+            this.drag_move.promotion = ((this.mousedownPiece.piece === 1 || this.mousedownPiece.piece === -1)
+                && (rank === 0 || rank === 7)) ?
+                "Q" : null; // TODO: Underpromotions
             moveHandler(this.drag_move);
             this.mousedownPiece.selected = false;
             this.mousedownPiece.visible = true;
