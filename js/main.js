@@ -267,7 +267,13 @@ function exportPGN() {
 
 function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game));
     if (game.title === selected_game) {
-        if (game.currentFEN !== undefined) zug_board.updateBoard(game.currentFEN);
+        if (game.currentFEN !== undefined) {
+            if (game.currentFEN !== zug_board.currentFEN) {
+                let cancelMove = zug_board.promoting;
+                zug_board.clearPromotion(cancelMove);
+            }
+            zug_board.updateBoard(game.currentFEN);
+        }
         if (game.history !== undefined) updateMoveList(game.history);
         updatePlayTab(game);
     }
