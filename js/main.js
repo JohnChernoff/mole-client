@@ -295,8 +295,7 @@ function updateMoveList(history) { //console.log(JSON.stringify(data));
         let move_entry = document.createElement("td");
         let m = ""; if (i % 2 === 0) m = (++n) + ".";
         if (history[i].selected.length > 0) {
-            move_entry.textContent =
-                m + history[i].selected[0].move.from + "-" + history[i].selected[0].move.to;
+            move_entry.textContent = m + history[i].selected[0].move.san;
         }
         else move_entry.textContent = "?";
         move_entry.onclick = () => { displayMoveArrows(move_history[i]); };
