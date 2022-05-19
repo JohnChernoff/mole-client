@@ -9,7 +9,7 @@ body {
 
 #div-main {
     border: thick solid #2f4f4f;
-    background-color: black; //rgba(38, 63, 63, 0.5);
+    background-color: black;
 }
 
 .modular_view {
@@ -20,12 +20,6 @@ body {
 
 .board-view {
     width: 100%; height: 100%;
-    /*
-    position: absolute;
-    align-items: stretch;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%);
-    */
 }
 
 .overlay-view {
@@ -59,7 +53,7 @@ body {
 
 #div-moves {
     overflow-y: scroll;
-    background-color: #2f4f4f; //#AAAA88;
+    background-color: #2f4f4f;
 }
 
 #div-movetab > table {
@@ -102,28 +96,14 @@ body {
     height: 10vh;
 }
 
-.counter {
-    display: flex;
-    background-color: aquamarine;
-    color: black;
-    position: absolute;
-    justify-content: center;
-    align-items: center;
-    left: 50vw;
-    height: 3vh;
-    width: 10vh;
-    border: 2px solid;
+#div-mole {
+    background: black url("../img/mole-board.jpg") no-repeat center;
 }
 
-#counter-top { top: 1vh; }
-#counter-bottom { bottom: 0vh; }
-
-#div-mole {
-    display: none;
-    text-blink: true;
-    text-align: center;
-    background-color: black;
-    color: chartreuse;
+#mole-txt {
+    color: mintcream;
+    background: black;
+    width: 33%;
 }
 
 .modal {
