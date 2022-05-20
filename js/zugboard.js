@@ -4,6 +4,7 @@ function ZugSquare(piece,color,canvas) {
     this.canvas = canvas;
     this.visible = true;
     this.selected = false;
+    this.promotionPiece = null;
     this.ctx = canvas.getContext("2d");
 }
 
@@ -41,7 +42,8 @@ class ZugBoard {
             this.white_square_color = ZugBoard.rgb(92,155,92);
             this.black_square_color = ZugBoard.rgb(155,92,92);
         }
-        this.current_promotion = "Q"; //TODO: "q" and underpromotions
+        this.current_promotion = null;
+        this.promoting = false;
         this.loadImages(callback);
         this.overlay = document.createElement("canvas");
         this.overlay.style.position = "absolute";
@@ -183,26 +185,50 @@ class ZugBoard {
                 this.board[file][rank] = new ZugSquare(
                     0,white ? this.white_square_color : this.black_square_color, can);
                 can.addEventListener("mousedown", ev => {
-                    if (this.mousedownPiece === null){
-                        this.startMove(ev, file, rank);
-                    } else {
-                        this.finishMove(ev, file, rank, moveHandler);
+                    if (!this.promoting) { // Not in the middle of promotion
+                        if (this.mousedownPiece === null){
+                            this.startMove(ev, file, rank);
+                        } else {
+                            this.finishMove(ev, file, rank, moveHandler);
+                        }
                     }
                 });
                 can.addEventListener("mouseup", ev => {
-                    if (this.mousedownPiece === this.board[file][rank]) {
-                        this.clickedToMove = true;
-                        this.mousedownPiece.selected = true;
-                        this.mousedownPiece.visible = true;
-                        this.updateBoard();
-                    } else {
+                    if (this.board[file][rank].promotionPiece != null) {
+                        if (rank === 0 || rank === 7) {
+                            this.current_promotion = "Q";
+                        }
+                        if (rank === 1 || rank === 6) {
+                            this.current_promotion = "R";
+                        }
+                        if (rank === 2 || rank === 5) {
+                            this.current_promotion = "B";
+                        }
+                        if (rank === 3 || rank === 4) {
+                            this.current_promotion = "N";
+                        }
+                        if (!this.clickedToMove) {
+                            console.log("finishing");
                         this.finishMove(ev, file, rank, moveHandler);
+                        } else {
+                            console.log("cancelling click");
+                            this.clickedToMove = false;
+                        }
+                    } else {
+                        if (this.mousedownPiece === this.board[file][rank]) {
+                            this.clickedToMove = true;
+                            this.mousedownPiece.selected = true;
+                            this.mousedownPiece.visible = true;
+                            this.updateBoard();
+                        } else {
+                            this.finishMove(ev, file, rank, moveHandler);
+                        }
                     }
                 });
             }
         }
         wrapper.addEventListener("mousemove", (ev) => {
-            if (this.mousedownPiece != null && !this.clickedToMove) {
+            if (this.mousedownPiece != null && !this.clickedToMove && !this.promoting) {
                 if (!this.boardUpdated) {
                     this.updateBoard();
                     this.boardUpdated = true;
@@ -213,9 +239,8 @@ class ZugBoard {
             }
         });
         wrapper.addEventListener("mouseleave", (ev) => {
-            if (this.mousedownPiece != null) {
-                this.mousedownPiece.visible = true;
-                this.mousedownPiece = null;
+            if (!this.clickedToMove) {
+                this.clearPromotion(true);
                 this.updateBoard();
             }
         });
@@ -228,18 +253,80 @@ class ZugBoard {
         this.boardUpdated = false;
     }
 
+    paintPieceSelection (white, file, rank) {
+        if (rank === 0) {
+            this.board[file][rank].promotionPiece = (white)? 5 : -5;
+            this.board[file][rank + 1].promotionPiece = (white)? 4 : -4;
+            this.board[file][rank + 2].promotionPiece = (white)? 3 : -3;
+            this.board[file][rank + 3].promotionPiece = (white)? 2 : -2;
+        } else {
+            this.board[file][rank].promotionPiece = (white)? 5 : -5;
+            this.board[file][rank - 1].promotionPiece = (white)? 4 : -4;
+            this.board[file][rank - 2].promotionPiece = (white)? 3 : -3;
+            this.board[file][rank - 3].promotionPiece = (white)? 2 : -2;
+        }
+        this.updateBoard();
+    }
+
+    setCurrentPromotion (square, file, rank) {
+        this.promoting = true;
+        if (this.drag_move != null) {
+            if (square.piece === 1 && this.drag_move.from.y === 1) {
+                if (!this.povBlack && rank === 0 || this.povBlack && rank === 7) {
+                    this.paintPieceSelection(true, file, rank);
+                }
+            }
+            if (square.piece === -1 && this.drag_move.from.y === 6) {
+                if (!this.povBlack && rank === 7 || this.povBlack && rank === 0) {
+                    this.paintPieceSelection(false, file, rank);
+                }
+            }
+        }
+    }
+
+    cancelMove() {
+        for (let i = 0; i < this.board.length; i++) {
+            for (let k = 0; k < this.board[0].length; k++) {
+                this.board[i][k].promotionPiece = null;
+                this.board[i][k].visible = true;
+                this.board[i][k].selected = false;
+            }
+        }
+        this.mousedownPiece = null;
+        this.drag_move = null;
+        this.boardUpdated = true;
+        this.clickedToMove = false;
+    }
+
+    clearPromotion(thenCancelMove) {
+        for (let i = 0; i < this.board.length; i++) {
+            for (let k = 0; k < this.board[0].length; k++) {
+                this.board[i][k].promotionPiece = null;
+            }
+        }
+        this.current_promotion = null;
+        this.promoting = false;
+        if (thenCancelMove) {
+            this.cancelMove();
+        }
+    }
+
     finishMove (ev, file, rank, moveHandler) {
         if (this.mousedownPiece != null) {
-            this.drag_move.to = {x: this.povFile(file), y: this.povRank(rank)};
-            this.drag_move.promotion = ((this.mousedownPiece.piece === 1 || this.mousedownPiece.piece === -1)
-                && (rank === 0 || rank === 7)) ?
-                "Q" : null; // TODO: Underpromotions
+            if (this.current_promotion != null) { // Finishing promotion
+                this.drag_move.promotion = this.current_promotion;
+                this.clearPromotion(false);
+            } else {
+                this.drag_move.to = {x: this.povFile(file), y: this.povRank(rank)};
+                if (this.mousedownPiece.piece === 1 && this.drag_move.from.y === 1 && this.drag_move.to.y === 0 ||
+                    this.mousedownPiece.piece === -1 && this.drag_move.from.y === 6 && this.drag_move.to.y === 7) {
+                        this.setCurrentPromotion(this.mousedownPiece, file, rank);
+                        return;
+                    }
+            }
             moveHandler(this.drag_move);
-            this.mousedownPiece.selected = false;
-            this.mousedownPiece.visible = true;
-            this.mousedownPiece = null;
-            this.clickedToMove = false;
-            this.updateBoard(this.currentFEN);
+            this.cancelMove();
+            this.updateBoard();
         }
     }
 
@@ -293,7 +380,8 @@ class ZugBoard {
     }
 
     drawGridPiece(square) {
-        if (square.piece !== 0 && square.visible) {
+        let square_piece = square.promotionPiece != null? square.promotionPiece : square.piece;
+        if (square_piece !== 0 && (square.promotionPiece != null || square.visible)) {
             let piece_width,piece_x,piece_height,piece_y;
             if (this.svg_pieces) {
                 piece_width = square.canvas.width/2; piece_x = square.canvas.width/4;
@@ -303,10 +391,10 @@ class ZugBoard {
                 piece_width = square.canvas.width * .8; piece_height = square.canvas.height * .8;
                 piece_x = square.canvas.width * .1; piece_y = square.canvas.height * .1;
             }
-            if (square.piece > 0) {
-                square.ctx.drawImage(this.piece_imgs[square.piece-1].white,piece_x,piece_y,piece_width,piece_height);
+            if (square_piece > 0) {
+                square.ctx.drawImage(this.piece_imgs[square_piece-1].white,piece_x,piece_y,piece_width,piece_height);
             }
-            else square.ctx.drawImage(this.piece_imgs[-square.piece-1].black,piece_x,piece_y,piece_width,piece_height);
+            else square.ctx.drawImage(this.piece_imgs[-square_piece-1].black,piece_x,piece_y,piece_width,piece_height);
         }
     }
 
