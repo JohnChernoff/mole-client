@@ -41,6 +41,7 @@ body {
     color: chartreuse;
     width: 90%;
     height: 90%;
+    resize: none;
 }
 
 .modular_view {
@@ -87,7 +88,7 @@ body {
     background-color: #2f4f4f;
 }
 
-#div-movetab > table {
+#div-movelist > table {
     position: relative;
     top: 12px;
     margin-left: auto;
@@ -95,7 +96,7 @@ body {
     color: black;
 }
 
-#div-movetab > table > tr > td {
+#div-movelist > table > tr > td {
     background-color: black;
     color: white;
     border-style: solid;

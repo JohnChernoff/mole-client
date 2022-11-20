@@ -54,11 +54,11 @@ let games_div = document.getElementById("div-games");
 let moves_div = document.getElementById("div-moves");
 let radio_black = document.getElementById("chk_black");
 let games_select = document.getElementById("select-games");
-let play_tab = document.getElementById("table-players");
-let moves_list = document.getElementById("div-movetab");
+let play_tbl = document.getElementById("table-players");
+let moves_list = document.getElementById("div-movelist");
 let moves_range = document.getElementById("range-history");
 let score_div = document.getElementById("div-highscores");
-let score_tab = document.getElementById("table-highscores");
+let score_tbl = document.getElementById("table-highscores");
 let div_chat = document.getElementById("div-chat");
 let div_msg = document.getElementById("div-messages");
 let chat_input = document.getElementById("chat-msg");
@@ -87,9 +87,13 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
 } , false);
 
 games_select.addEventListener("change", () =>  {
-    selected_game = games_select.value;
-    console.log("Selected: " + selected_game);
+    selected_game = games_select.value; //console.log("Selected: " + selected_game);
     send("update", selected_game);
+});
+
+games_select.addEventListener("dblclick", () =>  {
+    send("update", selected_game); //TODO: refresh time
+    handleMessage("",selected_game); //updates message tab
 });
 
 async function playAudio() {
@@ -291,7 +295,7 @@ function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game)
             zug_board.updateBoard(game.currentFEN);
         }
         if (game.history !== undefined) updateMoveList(game.history);
-        updatePlayTab(game);
+        updatePlayTbl(game);
     }
 }
 
@@ -339,24 +343,24 @@ function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
         games_select.appendChild(title_opt);
         if (games[i].title === selected_game) {
             games_select.selectedIndex = i; selected_game_exists = true;
-            updatePlayTab(games[i]);
+            updatePlayTbl(games[i]);
         }
     }
     if (!selected_game_exists) {
         if (games.length > 0) {
             selected_game = games[0].title;
-            updatePlayTab(games[0]);
+            updatePlayTbl(games[0]);
         }
         else selected_game = "";
     }
 }
 
-function updatePlayTab(game) { //console.log(JSON.stringify(game));
-    clearElement(play_tab);
-    play_tab.appendChild(getHeaders(["Player","Color","Rating","Accuse","Kick"]));
+function updatePlayTbl(game) { //console.log(JSON.stringify(game));
+    clearElement(play_tbl);
+    play_tbl.appendChild(getHeaders(["Player","Color","Rating","Accuse","Kick"]));
     for (let t=0;t<2;t++) {
         for (let p = 0; p < game.teams[t].players.length; p++) {
-            play_tab.appendChild(playRow(game.teams[t].players[p],game.title));
+            play_tbl.appendChild(playRow(game.teams[t].players[p],game.title));
         }
     }
     //for (let i=0; i<games.length; i++) { if (selected_game === games[i].title) {   }  }
@@ -422,7 +426,7 @@ function getActionButton(board,player,action_msg,active) {
 }
 
 function updateHighScores(data) {
-    clearElement(score_tab);
+    clearElement(score_tbl);
     for (let i=0;i<data.length;i++) {
         let row = document.createElement("tr");
         let play_field = document.createElement("td");
@@ -430,7 +434,7 @@ function updateHighScores(data) {
         let rating_field = document.createElement("td");
         rating_field.textContent = data[i].rating;
         row.appendChild(play_field); row.appendChild(rating_field);
-        score_tab.appendChild(row);
+        score_tbl.appendChild(row);
     }
 }
 
@@ -515,6 +519,10 @@ function addChatTab(title) {
     tab.className = TAB_BUTT;
     tab.textContent = title;
     tab.onclick = () => selectTab(title);
+    tab.oncontextmenu = () => {
+        if (title !== "serv") removeChatTab(title);
+        return false;
+    }
     div_chat.appendChild(tab);
     let txt = document.createElement("textarea");
     txt.id = TAB_TXT + title;
@@ -526,6 +534,7 @@ function addChatTab(title) {
 }
 
 function removeChatTab(title) {
+    if (title === undefined) title = current_tab;
     let tabs = document.getElementsByClassName(TAB_BUTT);
     for (const tab of tabs) if (tab.id === (TAB_BUTT + title)) div_chat.removeChild(tab);
     let txts = document.getElementsByClassName(TAB_TXT);
@@ -541,3 +550,12 @@ function writeMessage(text, chat_tab) {
 
 let toggle = true;
 function test() { toggle = !toggle; }
+
+/*
+    let tabs = document.getElementsByClassName(TAB_TXT);
+    for (const tab of tabs) {
+        let active = false;
+        for (let i=0; i<games.length || active; i++) if (tab.id === (TAB_TXT + games[i].title)) active = true;
+        if (!active)
+    }
+ */
