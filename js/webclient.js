@@ -42,28 +42,20 @@ function closeSocket() {
     sock_butt.innerText = "Connect";
 }
 
-function writeResponse(text) {
-    console.log("Response: " + text);
-    txt_messages.value += text + "\n"; //showPrompt();
-    if (txt_messages.value.length > 8192) txt_messages.value = txt_messages.value.substring(txt_messages.value.length/2);
-    txt_messages.scrollTop = txt_messages.scrollHeight;
-}
-
 function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) + ", Data: " + JSON.stringify(data));
-    if (type === "serv_msg") writeResponse(data.msg);
-    //TODO: create game specific area
-    else if (type === "chat") writeResponse(data.player + "(" + data.source + "): " + data.msg);
-    else if (type === "err_msg") writeResponse(data.msg);
-    else if (type === "log_OK") writeResponse(data.msg);
+    if (type === "serv_msg") handleMessage(data.msg,"serv");
+    else if (type === "chat") handleMessage(data.player + ": " + data.msg,data.source);
+    else if (type === "err_msg") handleMessage(data.msg,"serv");
+    else if (type === "log_OK") handleMessage(data.msg,"serv");
+    else if (type === "info") handleMessage(JSON.stringify(data),"serv");
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
     else if (type === "countdown") countdown(data);
     else if (type === "mole") notifyMole();
-    //else if (type === "movelist") updateMoveList(data);
-    else if (type === "phase") { console.log("New phase: " + data.msg); }
     else if (type === "top") updateHighScores(data);
-    else if (type === "info") writeResponse(JSON.stringify(data));
     else if (type === "users") showPlayers(data.users);
+    else if (type === "phase") { console.log("New phase: " + data.msg); }
+    //else if (type === "movelist") updateMoveList(data);
     else {
         console.log("Unknown Type: " + type);
     }

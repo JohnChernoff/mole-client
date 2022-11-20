@@ -12,6 +12,37 @@ body {
     background-color: black;
 }
 
+.chat_tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+.chat_tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+.chat_tab button:hover {
+    background-color: #ddd;
+}
+
+.chat_tab button.active {
+    background-color: #ccc;
+}
+
+.tab-txt {
+    background-color: #203085;
+    color: chartreuse;
+    width: 90%;
+    height: 90%;
+}
+
 .modular_view {
     position: absolute;
     background-color: #2f4f4f;
@@ -79,8 +110,12 @@ body {
 }
 
 #div-messages {
-    height: 90vh;
+    height: 80vh;
     background-color: #2f4f4f;
+}
+
+#div-commands {
+    height: 12vh;
 }
 
 #txt-messages {

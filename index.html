@@ -8,6 +8,7 @@
 
     <body id="body" onload="initGame()">
         <div id="div-splash" class="modal">
+            <button id="audio-butt1" onclick="playAudio()">Theme Music</button>
             <button id="help-butt1" onclick="window.location.assign('help.html')">How to Play</button>
             <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
@@ -40,18 +41,15 @@
         </div>
         <div id="div-comm" class="modular_view">
             <div id="div-chat">
-                <input type="radio" name="chk_chat" id="chk_lobby" value="lobby" >
-                <label for="chk_lobby">Lobby</label>
-                <input type="radio" name="chk_chat" id="chk_game" value="game" checked>
-                <label for="chk_game">Game</label>
-                <br>
-                <input type="text" id="chat-msg"/>
-                <br>
+                <div class="chat_tab"> </div>
             </div>
             <br>
-            <div id="div-messages">
-                <textarea rows="32" readonly id="txt-messages"></textarea>
+            <div id="div-messages"> </div>
+            <div id="div-commands">
+                <label for="chat-msg">Message: </label>
+                <input type="text" id="chat-msg"/>
             </div>
+            <br>
         </div>
         <div id="div-main" class="modular_view">
             <div id="main-board" class="board-view"> </div>

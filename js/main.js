@@ -37,8 +37,11 @@ function createEnum(values) {
     return Object.freeze(enumObject);
 }
 
+const TAB_TXT = "tab-txt", TAB_BUTT = "tab-butt";
+let current_tab = "serv";
 let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
 let layout_style = LAYOUT_STYLES.UNDEFINED;
+let audio_loop = new Audio("audio/intro2.mp3");
 let mole_div = document.getElementById("div-mole");
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
@@ -56,7 +59,8 @@ let moves_list = document.getElementById("div-movetab");
 let moves_range = document.getElementById("range-history");
 let score_div = document.getElementById("div-highscores");
 let score_tab = document.getElementById("table-highscores");
-let lobby_chk = document.getElementById("chk_lobby");
+let div_chat = document.getElementById("div-chat");
+let div_msg = document.getElementById("div-messages");
 let chat_input = document.getElementById("chat-msg");
 let login_butt = document.getElementById("login-butt");
 let logout_butt = document.getElementById("logout-butt");
@@ -77,8 +81,7 @@ let oauth_token = null;
 window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
     if (e.code === "Enter") {
         if (chat_input === document.activeElement) {
-            if (lobby_chk.checked) sendChat(chat_input,"lobby");
-            else sendChat(chat_input,selected_game);
+            sendChat(chat_input,current_tab);
         }
     }
 } , false);
@@ -88,6 +91,14 @@ games_select.addEventListener("change", () =>  {
     console.log("Selected: " + selected_game);
     send("update", selected_game);
 });
+
+async function playAudio() {
+    try {
+        await audio_loop.play();
+    } catch(err) {
+        console.log("Error: " + err);
+    }
+}
 
 function countdown(data) { //console.log(JSON.stringify(data));
     if (data.title !== selected_game) return;
@@ -424,9 +435,9 @@ function updateHighScores(data) {
 }
 
 function showPlayers(players) {
-    writeResponse("Active Players:");
+    writeMessage("Active Players:","serv");
     for (let i=0;i<players.length;i++) {
-        writeResponse(players[i].name);
+        writeMessage(players[i].name,"serv");
     }
 }
 
@@ -478,6 +489,54 @@ function sendChat(input, source) {
         send("chat",{ msg: input.value, source: source });
     }
     input.value = "";
+}
+
+function handleMessage(msg,src) {
+    writeMessage(msg,selectTab(src));
+}
+
+function selectTab(title) {
+    let selected = null;
+    let txts = document.getElementsByClassName(TAB_TXT);
+    for (const txt of txts) {
+        if (txt.id === TAB_TXT + title) {
+            txt.style.display = "block"; selected = txt;
+        }
+        else txt.style.display = "none";
+    }
+    if (selected == null) selected = addChatTab(title);
+    current_tab = title;
+    return selected;
+}
+
+function addChatTab(title) {
+    let tab = document.createElement("button");
+    tab.id = TAB_BUTT + title;
+    tab.className = TAB_BUTT;
+    tab.textContent = title;
+    tab.onclick = () => selectTab(title);
+    div_chat.appendChild(tab);
+    let txt = document.createElement("textarea");
+    txt.id = TAB_TXT + title;
+    txt.className = TAB_TXT;
+    txt.rows = 32;
+    txt.readOnly = true;
+    div_msg.appendChild(txt);
+    return txt;
+}
+
+function removeChatTab(title) {
+    let tabs = document.getElementsByClassName(TAB_BUTT);
+    for (const tab of tabs) if (tab.id === (TAB_BUTT + title)) div_chat.removeChild(tab);
+    let txts = document.getElementsByClassName(TAB_TXT);
+    for (const txt of txts) if (txt.id === (TAB_TXT + title)) div_msg.removeChild(txt);
+}
+
+function writeMessage(text, chat_tab) {
+    console.log("Response: " + text);
+    chat_tab.value += text + "\n"; //showPrompt();
+    if (chat_tab.value.length > 8192) chat_tab.value = chat_tab.value.substring(chat_tab.value.length/2);
+    chat_tab.scrollTop = chat_tab.scrollHeight;
 }
 
 let toggle = true;
