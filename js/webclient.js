@@ -1,9 +1,41 @@
-//let sock_butt = document.getElementById("sock-butt");
-let txt_messages = document.getElementById("txt-messages");
+let web_socket;
+const SOCK_EVENT = {
+    CONNECTION_OPEN: "Connection Open",
+    CONNECTION_ALREADY_OPEN: "WebSocket is already opened",
+    CONNECTION_INCOMING_MSG: "Incoming Message",
+    CONNECTION_CLOSED: "Connection closed",
+    CONNECTION_ERROR: "Connection error",
+}
+const SERV = "serv";
 
 function startSocket() {
-    //openSocket("wss://molechess.com/server",sockHandler);
-    openSocket("ws://localhost:5555",sockHandler);
+    //openSocket("wss://molechess.com/server",sockHandler); //remote
+    openSocket("ws://localhost:5555",sockHandler); //local
+}
+
+function openSocket(url,sockHandler) {
+
+    if (web_socket !== undefined && web_socket.readyState !== WebSocket.CLOSED) {
+        sockHandler(SOCK_EVENT.CONNECTION_ALREADY_OPEN); return;
+    }
+
+    web_socket = new WebSocket(url);
+    web_socket.onopen = event => {
+        sockHandler(SOCK_EVENT.CONNECTION_OPEN,event);
+    };
+
+    web_socket.onmessage = event => {  //console.log("Data: " + event.data);
+        sockHandler(SOCK_EVENT.CONNECTION_INCOMING_MSG,event);
+    };
+
+    web_socket.onclose = event => {
+        sockHandler(SOCK_EVENT.CONNECTION_CLOSED,event);
+    };
+
+    web_socket.onerror = event => {
+        sockHandler(SOCK_EVENT.CONNECTION_ERROR,event);
+    }
+
 }
 
 function sockHandler(event_type,event) {
@@ -12,8 +44,7 @@ function sockHandler(event_type,event) {
             console.log(SOCK_EVENT.CONNECTION_ALREADY_OPEN); break;
         case SOCK_EVENT.CONNECTION_OPEN:
             console.log(SOCK_EVENT.CONNECTION_OPEN);
-            if (event.data !== undefined) { writeResponse(event.data); }
-            //sock_butt.innerHTML = "Disconnect"; sock_butt.onclick = () => { closeSocket(); };
+            if (event.data !== undefined) { handleMessage(event.data,SERV); }
             send("login",oauth_token); //send("login",prompt("Enter your name"));
             break;
         case SOCK_EVENT.CONNECTION_INCOMING_MSG:
@@ -21,33 +52,30 @@ function sockHandler(event_type,event) {
             if (json.type !== undefined && json.data !== undefined) msgHandler(json.type,json.data);
             break;
         case SOCK_EVENT.CONNECTION_CLOSED:
-            writeResponse("Connection closed");
-            sock_butt.innerHTML = " Connect ";
-            sock_butt.onclick = () => { openSocket(); };
+            handleMessage("Connection closed",SERV);
             break;
         case SOCK_EVENT.CONNECTION_ERROR:
-            writeResponse("Connection error: " + event.data);
+            handleMessage("Connection error: " + event.data,SERV);
             break;
     }
 }
 
 function send(type,data) {
-    if (web_socket === undefined || web_socket.readyState === WebSocket.CLOSED) { writeResponse("Not connected"); }
+    if (web_socket === undefined || web_socket.readyState === WebSocket.CLOSED) { handleMessage("Not connected",SERV); }
     else { web_socket.send(JSON.stringify({type: type, data: data})); }
 }
 
 function closeSocket() {
-    console.log("Closing socket...");
+    handleMessage("Closing socket...",SERV);
     web_socket.close();
-    sock_butt.innerText = "Connect";
 }
 
 function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) + ", Data: " + JSON.stringify(data));
-    if (type === "serv_msg") handleMessage(data.msg,"serv");
+    if (type === "serv_msg") handleMessage(data.msg,SERV);
     else if (type === "chat") handleMessage(data.player + ": " + data.msg,data.source);
-    else if (type === "err_msg") handleMessage(data.msg,"serv");
-    else if (type === "log_OK") handleMessage(data.msg,"serv");
-    else if (type === "info") handleMessage(JSON.stringify(data),"serv");
+    else if (type === "err_msg") handleMessage(data.msg,SERV);
+    else if (type === "log_OK") handleMessage(data.msg,SERV);
+    else if (type === "info") handleMessage(JSON.stringify(data),SERV);
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
     else if (type === "countdown") countdown(data);
