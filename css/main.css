@@ -37,7 +37,8 @@ body {
 }
 
 .tab-txt {
-    background-color: #203085;
+    overflow-y: scroll;
+    background-color: black;
     color: chartreuse;
     width: 90%;
     height: 90%;

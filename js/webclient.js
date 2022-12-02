@@ -70,10 +70,14 @@ function closeSocket() {
     web_socket.close();
 }
 
-function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) + ", Data: " + JSON.stringify(data));
-    if (type === "serv_msg") handleMessage(data.msg,SERV);
-    else if (type === "chat") handleMessage(data.player + ": " + data.msg,data.source);
-    else if (type === "err_msg") handleMessage(data.msg,SERV);
+function msgHandler(type,data) { console.log("Type: " + JSON.stringify(type) + ", Data: " + JSON.stringify(data));
+    if (type === "chat") {
+        if (data.source == "serv") handleMessage(data.user + ": " + data.msg,data.source,null);
+        else handleMessage(data.player.user.name + ": " + data.msg,data.source,data.player);
+    }
+    else if (type === "serv_msg") handleMessage(data.msg,data.source,data.player);
+    else if (type === "game_msg") handleMessage(data.msg,data.source,data.player);
+    else if (type === "err_msg") handleMessage(data.msg,data.source);
     else if (type === "log_OK") handleMessage(data.msg,SERV);
     else if (type === "info") handleMessage(JSON.stringify(data),SERV);
     else if (type === "games_update") updateGames(data);

@@ -357,7 +357,7 @@ function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
 
 function updatePlayTbl(game) { //console.log(JSON.stringify(game));
     clearElement(play_tbl);
-    play_tbl.appendChild(getHeaders(["Player","Color","Rating","Accuse","Kick"]));
+    play_tbl.appendChild(getHeaders(["Player","Color","Rating","Vote","Accuse","Kick"]));
     for (let t=0;t<2;t++) {
         for (let p = 0; p < game.teams[t].players.length; p++) {
             play_tbl.appendChild(playRow(game.teams[t].players[p],game.title));
@@ -405,6 +405,10 @@ function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     let play_rating = document.createElement("td");
     if (pdata.user.data) play_rating.textContent = pdata.user.data.rating; else play_rating.textContent = "?";
     play_row.appendChild(play_rating);
+
+    let play_vote = document.createElement("td");
+    play_vote.textContent = pdata.votename;
+    play_row.appendChild(play_vote);
 
     play_row.appendChild(getActionButton(title,pdata.user.name,"voteoff",true));
     play_row.appendChild(getActionButton(title,pdata.user.name,"kickoff",pdata.kickable));
@@ -495,8 +499,9 @@ function sendChat(input, source) {
     input.value = "";
 }
 
-function handleMessage(msg,src) {
-    writeMessage(msg,selectTab(src));
+function handleMessage(msg,src,player) {
+    if (player === undefined || player === null) writeMessage(msg,selectTab(src),"white");
+    else writeMessage(msg,selectTab(src), player.play_col);
 }
 
 function selectTab(title) {
@@ -524,11 +529,9 @@ function addChatTab(title) {
         return false;
     }
     div_chat.appendChild(tab);
-    let txt = document.createElement("textarea");
+    let txt = document.createElement("div");
     txt.id = TAB_TXT + title;
     txt.className = TAB_TXT;
-    txt.rows = 32;
-    txt.readOnly = true;
     div_msg.appendChild(txt);
     return txt;
 }
@@ -541,21 +544,17 @@ function removeChatTab(title) {
     for (const txt of txts) if (txt.id === (TAB_TXT + title)) div_msg.removeChild(txt);
 }
 
-function writeMessage(text, chat_tab) {
-    console.log("Response: " + text);
-    chat_tab.value += text + "\n"; //showPrompt();
-    if (chat_tab.value.length > 8192) chat_tab.value = chat_tab.value.substring(chat_tab.value.length/2);
-    chat_tab.scrollTop = chat_tab.scrollHeight;
+function writeMessage(text, chat_div, c) { //console.log("Response: " + text);
+    let span = document.createElement("span"); span.style.color = c;
+    span.appendChild(document.createTextNode(text));
+    chat_div.appendChild(span);
+    chat_div.appendChild(document.createElement("br"));
+    chat_div.scrollTop = chat_div.scrollHeight;
+    if (chat_div.childElementCount > 128) chat_div.removeChild(chat_div.childNodes[0]);
 }
 
 let toggle = true;
 function test() { toggle = !toggle; }
 
-/*
-    let tabs = document.getElementsByClassName(TAB_TXT);
-    for (const tab of tabs) {
-        let active = false;
-        for (let i=0; i<games.length || active; i++) if (tab.id === (TAB_TXT + games[i].title)) active = true;
-        if (!active)
-    }
- */
+//chat_tab.value += text + "\n"; //showPrompt();
+//if (chat_tab.value.length > 8192) chat_tab.value = chat_tab.value.substring(chat_tab.value.length/2);
