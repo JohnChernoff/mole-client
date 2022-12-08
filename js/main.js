@@ -77,6 +77,7 @@ let seconds = 0;
 let zug_board;
 let lichess = new LichessLogger("https://lichess.org", "molechess.com"); //"example.com");
 let oauth_token = null;
+let starting = false;
 
 window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
     if (e.code === "Enter") {
@@ -459,8 +460,9 @@ function clearElement(e) {
 }
 
 function createGame() {
-    let title = prompt("Enter a new game title");
-    if (title !== "null") send("newgame",title);
+    let title = prompt("Enter a new game title","");
+    console.log("Starting: " + title);
+    if (title !== "") send("newgame",{ title: title, color: radio_black.checked ? BLACK : WHITE });
 }
 
 function joinGame() {
@@ -469,6 +471,11 @@ function joinGame() {
 
 function gameCmd(cmd) {
     if (selected_game !== undefined) send(cmd, selected_game);
+}
+
+function startGame() {
+    starting = true;
+    send("status",selected_game);
 }
 
 function setTime() {
@@ -502,6 +509,14 @@ function sendChat(input, source) {
 function handleMessage(msg,src,player) {
     if (player === undefined || player === null) writeMessage(msg,selectTab(src),"white");
     else writeMessage(msg,selectTab(src), player.play_col);
+}
+
+function handleStatus(msg,src) {
+    if (starting) {
+        if (msg === "voting" || msg === "postgame" || msg === "wtf") alert("Bad Phase: " + msg);
+        else if (msg === "ready" || confirm("Game not ready - add AI?")) gameCmd('startgame');
+        starting = false;
+    }
 }
 
 function selectTab(title) {

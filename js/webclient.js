@@ -87,6 +87,7 @@ function msgHandler(type,data) { console.log("Type: " + JSON.stringify(type) + "
     else if (type === "top") updateHighScores(data);
     else if (type === "users") showPlayers(data.users);
     else if (type === "phase") { console.log("New phase: " + data.msg); }
+    else if (type === "status") { handleStatus(data.msg, data.source); }
     //else if (type === "movelist") updateMoveList(data);
     else {
         console.log("Unknown Type: " + type);
