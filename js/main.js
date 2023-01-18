@@ -37,7 +37,8 @@ function createEnum(values) {
     return Object.freeze(enumObject);
 }
 
-const TAB_TXT = "tab-txt", TAB_BUTT = "tab-butt";
+const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
+const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
 let current_tab = "serv";
 let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
 let layout_style = LAYOUT_STYLES.UNDEFINED;
@@ -52,15 +53,15 @@ let main_board_div = document.getElementById("main-board");
 let comm_div = document.getElementById("div-comm");
 let games_div = document.getElementById("div-games");
 let moves_div = document.getElementById("div-moves");
-let radio_black = document.getElementById("chk_black");
 let games_select = document.getElementById("select-games");
 let play_tbl = document.getElementById("table-players");
 let moves_list = document.getElementById("div-movelist");
 let moves_range = document.getElementById("range-history");
 let score_div = document.getElementById("div-highscores");
 let score_tbl = document.getElementById("table-highscores");
-let div_chat = document.getElementById("div-chat");
-let div_msg = document.getElementById("div-messages");
+let sidebar_left = document.getElementById("div-sidebar-left");
+let div_left_tabs = document.getElementById("div-left-tabs");
+let div_infotab = document.getElementById("div-info");
 let chat_input = document.getElementById("chat-msg");
 let login_butt = document.getElementById("login-butt");
 let logout_butt = document.getElementById("logout-butt");
@@ -120,11 +121,11 @@ function countdown(data) { //console.log(JSON.stringify(data));
     },1000 * inc);
 }
 
-function drawTime(seconds,max_seconds) {
-    //console.log(JSON.stringify(data));
-    time_ctx.fillStyle = "green";
+//TODO: Shufflebox!
+function drawTime(seconds,max_seconds) { //console.log(JSON.stringify(data));
+    time_ctx.fillStyle = time_div.style.background;
     time_ctx.fillRect(0,0,time_can.width,time_can.height);
-    time_ctx.fillStyle = "red";
+    time_ctx.fillStyle = time_div.style.background == "black" ? "white" : "black";
     time_ctx.fillRect(0,0,time_can.width * (seconds / max_seconds),time_can.height);
 }
 
@@ -190,10 +191,10 @@ function setLayout() {
     let main_div_size;
     if (window.innerWidth > window.innerHeight) {
         layout_style = LAYOUT_STYLES.HORIZONTAL;
-        comm_div.style.left = "0px";
-        comm_div.style.top = "0px";
-        comm_div.style.width = "20vw";
-        comm_div.style.height = "99vh";
+        sidebar_left.style.left = "0px";
+        sidebar_left.style.top = "0px";
+        sidebar_left.style.width = "20vw";
+        sidebar_left.style.height = "99vh";
 
         main_div_size = Math.floor(Math.min(window.innerWidth /2, window.innerHeight * .89));
         let extra_width = ((window.innerWidth/2) - main_div_size)/2;
@@ -359,6 +360,11 @@ function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
 function updatePlayTbl(game) { //console.log(JSON.stringify(game));
     clearElement(play_tbl);
     play_tbl.appendChild(getHeaders(["Player","Color","Rating","Vote","Accuse","Kick"]));
+    if (game.bucket !== undefined) {
+        for (let p = 0; p < game.bucket.length; p++) {
+            play_tbl.appendChild(playRow(game.bucket[p],game.title));
+        }
+    }
     for (let t=0;t<2;t++) {
         for (let p = 0; p < game.teams[t].players.length; p++) {
             play_tbl.appendChild(playRow(game.teams[t].players[p],game.title));
@@ -399,12 +405,14 @@ function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     play_row.appendChild(play_name);
 
     let play_color = document.createElement("td");
-    play_color.style.background = pdata.game_col === 0 ? "black" : "white";
+    if (pdata.game_col === COLOR_UNKNOWN) play_color.style.background = "grey";
+    else if (pdata.game_col === COLOR_BLACK) play_color.style.background = "black";
+    else play_color.style.background = "white";
     play_color.style.width = "8px";
     play_row.appendChild(play_color);
 
-    let play_rating = document.createElement("td");
-    if (pdata.user.data) play_rating.textContent = pdata.user.data.rating; else play_rating.textContent = "?";
+    let play_rating = document.createElement("td"); //TODO: include both ratings
+    if (pdata.user.blitz) play_rating.textContent = pdata.user.blitz; else play_rating.textContent = "?";
     play_row.appendChild(play_rating);
 
     let play_vote = document.createElement("td");
@@ -444,9 +452,9 @@ function updateHighScores(data) {
 }
 
 function showPlayers(players) {
-    writeMessage("Active Players:","serv");
+    writeMessage("Active Players:",selectTab("serv").messages);
     for (let i=0;i<players.length;i++) {
-        writeMessage(players[i].name,"serv");
+        writeMessage(players[i].name,selectTab("serv").messages);
     }
 }
 
@@ -462,11 +470,11 @@ function clearElement(e) {
 function createGame() {
     let title = prompt("Enter a new game title","");
     console.log("Starting: " + title);
-    if (title !== "") send("newgame",{ title: title, color: radio_black.checked ? BLACK : WHITE });
+    if (title !== "") send("newgame",{ title: title, color: COLOR_UNKNOWN }); //radio_black.checked ? BLACK : WHITE });
 }
 
 function joinGame() {
-    send("joingame",{ title: selected_game, color: radio_black.checked ? BLACK : WHITE });
+    send("joingame",{ title: selected_game, color: COLOR_UNKNOWN }); //radio_black.checked ? BLACK : WHITE });
 }
 
 function gameCmd(cmd) {
@@ -507,8 +515,8 @@ function sendChat(input, source) {
 }
 
 function handleMessage(msg,src,player) {
-    if (player === undefined || player === null) writeMessage(msg,selectTab(src),"white");
-    else writeMessage(msg,selectTab(src), player.play_col);
+    if (player === undefined || player === null) writeMessage(msg,selectTab(src).messages,"white");
+    else writeMessage(msg,selectTab(src).messages, player.play_col);
 }
 
 function handleStatus(msg,src) {
@@ -519,44 +527,52 @@ function handleStatus(msg,src) {
     }
 }
 
-function selectTab(title) {
+function selectTab(title) { //TODO: don't switch tabs?
     let selected = null;
-    let txts = document.getElementsByClassName(TAB_TXT);
-    for (const txt of txts) {
-        if (txt.id === TAB_TXT + title) {
-            txt.style.display = "block"; selected = txt;
+    let tab_areas = document.getElementsByClassName(TAB_PFX);
+    for (const area of tab_areas) {
+        if (area.id === TAB_PFX + title) {
+            area.style.display = "block"; selected = area;
         }
-        else txt.style.display = "none";
+        else area.style.display = "none";
     }
-    if (selected == null) selected = addChatTab(title);
+    if (selected == null) selected = addTabArea(title);
     current_tab = title;
-    return selected;
+
+     return {
+        "messages" : selected.getElementsByClassName("msg-class")[0],
+        "votes" : selected.getElementsByClassName("vote-class")[0]
+    };
 }
 
-function addChatTab(title) {
+function addTabArea(title) {
     let tab = document.createElement("button");
     tab.id = TAB_BUTT + title;
     tab.className = TAB_BUTT;
     tab.textContent = title;
     tab.onclick = () => selectTab(title);
     tab.oncontextmenu = () => {
-        if (title !== "serv") removeChatTab(title);
+        if (title !== "serv") removeTabArea(title);
         return false;
     }
-    div_chat.appendChild(tab);
-    let txt = document.createElement("div");
-    txt.id = TAB_TXT + title;
-    txt.className = TAB_TXT;
-    div_msg.appendChild(txt);
-    return txt;
+    div_left_tabs.appendChild(tab);
+    let area = document.createElement("div");
+    area.id = TAB_PFX + title;
+    area.className = TAB_PFX;
+
+    let messages=document.createElement("div"); messages.className="msg-class"; area.appendChild(messages);
+    let vote_tbl=document.createElement("table"); vote_tbl.className="vote-class"; area.appendChild(vote_tbl);
+
+    div_infotab.appendChild(area);
+    return area;
 }
 
-function removeChatTab(title) {
+function removeTabArea(title) {
     if (title === undefined) title = current_tab;
     let tabs = document.getElementsByClassName(TAB_BUTT);
-    for (const tab of tabs) if (tab.id === (TAB_BUTT + title)) div_chat.removeChild(tab);
-    let txts = document.getElementsByClassName(TAB_TXT);
-    for (const txt of txts) if (txt.id === (TAB_TXT + title)) div_msg.removeChild(txt);
+    for (const tab of tabs) if (tab.id === (TAB_BUTT + title)) div_left_tabs.removeChild(tab);
+    let areas = document.getElementsByClassName(TAB_PFX);
+    for (const area of areas) if (area.id === (TAB_PFX + title)) div_infotab.removeChild(area);
 }
 
 function writeMessage(text, chat_div, c) { //console.log("Response: " + text);
@@ -566,6 +582,24 @@ function writeMessage(text, chat_div, c) { //console.log("Response: " + text);
     chat_div.appendChild(document.createElement("br"));
     chat_div.scrollTop = chat_div.scrollHeight;
     if (chat_div.childElementCount > 128) chat_div.removeChild(chat_div.childNodes[0]);
+}
+
+function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.stringify(votelist));
+    let area = selectTab(source);
+    area.votes.innerHTML = "";
+    let thead = document.createElement('thead');
+    let th1 = document.createElement('th'); th1.textContent = "Player"; thead.appendChild(th1);
+    let th2 = document.createElement('th'); th2.textContent = "Move"; thead.appendChild(th2);
+    area.votes.appendChild(thead);
+    let tbody = document.createElement('tbody');
+    for (let i=0;i<votelist.length;i++) {
+        let row = document.createElement("tr");
+        let name = document.createElement("td"); name.textContent = votelist[i].player_name;
+        let move = document.createElement("td"); move.textContent = votelist[i].player_move;
+        row.appendChild(name); row.appendChild(move);
+        tbody.appendChild(row);
+    }
+    area.votes.appendChild(tbody);
 }
 
 let toggle = true;

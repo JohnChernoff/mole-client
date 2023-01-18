@@ -12,13 +12,13 @@ body {
     background-color: black;
 }
 
-.chat_tab {
+.left_tab {
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
 }
 
-.chat_tab button {
+.left_tab button {
     background-color: inherit;
     float: left;
     border: none;
@@ -28,21 +28,12 @@ body {
     transition: 0.3s;
 }
 
-.chat_tab button:hover {
+.left_tab button:hover {
     background-color: #ddd;
 }
 
-.chat_tab button.active {
+.left_tab button.active {
     background-color: #ccc;
-}
-
-.tab-txt {
-    overflow-y: scroll;
-    background-color: black;
-    color: chartreuse;
-    width: 90%;
-    height: 90%;
-    resize: none;
 }
 
 .modular_view {
@@ -107,17 +98,30 @@ body {
     height: 5vh;
 }
 
-#div-chat {
+#div-left-tabs {
     height: 5vh;
 }
 
-#div-messages {
-    height: 80vh;
+#div-info {
+    height: 90vh;
+    background-color: #2f4f4f;
+}
+
+.msg-class {
+    overflow-y: scroll;
+    height: 70vh;
+    background-color: black;
+}
+
+.vote-class {
+    overflow-y: scroll;
+    height: 20vh;
+    width: 100%;
     background-color: #2f4f4f;
 }
 
 #div-commands {
-    height: 12vh;
+    /* height: 12vh; */
 }
 
 #txt-messages {
@@ -196,4 +200,26 @@ body {
     top: -1px;
     left: 50%;
     width: 50.1%;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    background-color: silver;
+    width: 75%;
+    height: 5%;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: black;
+    opacity: 0.5;
+    width: 10px;
+    height: 26px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: black; /* #04AA6D
+    cursor: pointer; /* Cursor on hover */
 }
