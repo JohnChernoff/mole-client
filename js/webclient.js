@@ -83,7 +83,7 @@ function msgHandler(type,data) { console.log("Type: " + JSON.stringify(type) + "
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
     else if (type === "countdown") countdown(data);
-    else if (type === "mole") notifyMole();
+    else if (type === "mole") notifyMole(data.msg === "true");
     else if (type === "top") updateHighScores(data);
     else if (type === "users") showPlayers(data.users);
     else if (type === "phase") { console.log("New phase: " + data.msg); }

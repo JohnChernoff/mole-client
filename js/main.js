@@ -1,19 +1,6 @@
 /*
- I'm not sure about the mechanics, but it seems like voting should be possible on any move. Because it only takes one move to lose the game.
-Railbird80: like all the mole has to do is hang the queen.
-and the arrows should be visible after each move maybe
-move history scrollbar
  draw arrows as people vote and have them go away like 5 seconds after the move is made
  after voting it would be cool if player whose move was selected was flashed across the board
-fix clock
-Railbird80: When you review the game it would be cool to see which moves the moles made.
-
-OwenKraweki: wait I mised the beginning
-OwenKraweki: idk if i'm the mole
-
-OwenKraweki: is says Bad Move: g2g1
-ornicar2: I dig the new board
-OwenKraweki: yeah when I tried to play Qc8 is also said bad move
 
 (Owen): also there should be a way to send messages to specific people in the game chat
 OwenKraweki: maybe using @
@@ -26,10 +13,7 @@ support for the Maxthon Browser
 arrows after move
 clock shift on flip
 
-(Owen) also it'd be good if the time bar was smoother - refresh every x number of microseconds?
  */
-
-//let body = document.getElementById("body"));
 
 function createEnum(values) {
     const enumObject = {};
@@ -44,6 +28,7 @@ let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
 let layout_style = LAYOUT_STYLES.UNDEFINED;
 let audio_loop = new Audio("audio/intro2.mp3");
 let mole_div = document.getElementById("div-mole");
+let mole_txt = document.getElementById("mole-txt");
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
@@ -262,8 +247,25 @@ function sendMove(move) {
     }
 }
 
-function notifyMole() {
+function notifyMole(mole) {
+    for (const e of mole_txt.getElementsByClassName("mole-header")) mole_txt.removeChild(e);
+    let h1 = document.createElement("h1"); h1.className = "mole-header";
+    let h2 = document.createElement("h2"); h2.className = "mole-header";
+    if (mole) {
+        h1.textContent = "You're the Mole!"
+        h2.textContent = "Your job is to try and lose the game for your side, but be careful - " +
+            "if the moves you make are too obviously bad, your teammates may try and vote you out."
+        mole_div.style.backgroundImage = 'url("img/mole-board.jpg")';
+    }
+    else {
+        h1.textContent = "You're not the Mole!"
+        h2.textContent = "Your job is to try and win the game for your side, but be careful - " +
+            "there's a Mole on your team!"
+        mole_div.style.backgroundImage = 'url("img/mole-board.jpg")';
+    }
+    mole_txt.appendChild(h1); mole_txt.appendChild(h2);
     mole_div.style.display = "block"; //setTimeout(() => { mole_div.style.display = "none"; },5000);
+
 }
 
 function displayMoveArrows(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
