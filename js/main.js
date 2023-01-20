@@ -46,7 +46,7 @@ let score_div = document.getElementById("div-highscores");
 let score_tbl = document.getElementById("table-highscores");
 let sidebar_left = document.getElementById("div-sidebar-left");
 let div_left_tabs = document.getElementById("div-left-tabs");
-let div_infotab = document.getElementById("div-info");
+let div_info_tab = document.getElementById("div-info");
 let chat_input = document.getElementById("chat-msg");
 let login_butt = document.getElementById("login-butt");
 let logout_butt = document.getElementById("logout-butt");
@@ -91,33 +91,72 @@ async function playAudio() {
     }
 }
 
-function countdown(data) { //console.log(JSON.stringify(data));
-    if (data.title !== selected_game) return;
-    if (timer !== null) clearInterval(timer);
-    let max_seconds = data.seconds;
-    let seconds = data.seconds;
-    let inc = .1;
-    timer = setInterval(() => {
-        time_div.style.background = (data.turn === BLACK ? "black" : "white");
-        seconds = seconds - inc;
-        time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " + Math.floor(seconds) + " seconds";
-        drawTime(seconds,max_seconds);
-        if (seconds <= 0) clearInterval(timer);
-    },1000 * inc);
+function get2D(n, w) {
+    return { "y" :  Math.floor(n/w), "x" : n % w }
 }
 
-//TODO: Shufflebox!
+function shuffle2D(array) {
+    let w = array.length; let h = array[0].length; let n =  w * h; //console.log(w + "," + h + "," + n);
+    for (let i = n - 1; i > 0; i--) {
+        let c1 = get2D(i,w);
+        const currentElement = array[c1.x][c1.y]; //console.log(JSON.stringify(currentElement));
+        const swapIndex = Math.floor(Math.random() * (i + 1));
+        let c2 = get2D(swapIndex,w);
+        const swapElement = array[c2.x][c2.y]; //console.log(JSON.stringify(swapElement));
+        array[c1.x][c1.y] = swapElement;
+        array[c2.x][c2.y] = currentElement;
+    }
+}
+
+function countdown(data) { //console.log(JSON.stringify(data));
+
+    if (data.title !== selected_game) return;
+
+    let max_seconds = data.seconds; //console.log("Seconds: " + max_seconds);
+    let millis = ((max_seconds-3) * 1000);
+    let inc = .1, interval = 1000 * inc;
+    let iter = Math.pow(Math.ceil(Math.sqrt(millis / interval)),2); //console.log("Iter: " + iter);
+    time_can.width = iter; time_can.height = iter;
+    let s = Math.ceil(Math.sqrt(iter));
+    iter = s*s;
+
+    let time_mat = new Array(s);
+    for (let x = 0; x < time_mat.length; x++) {
+        time_mat[x] = new Array(s);
+        for (let y = 0; y < time_mat[x].length; y++) { //console.log(x + "," + y);
+            time_mat[x][y] = { "filled" : false, "rndX" : x * s, "rndY" : y * s }
+        }
+    }
+    shuffle2D(time_mat);
+
+    if (timer !== null) clearInterval(timer);
+    let seconds = max_seconds, t = 0;
+    time_ctx.fillStyle = "gray"; time_ctx.fillRect(0,0,time_can.width,time_can.height);
+    timer = setInterval(() => {
+        time_div.style.background = (data.turn === BLACK ? "white" : "black");
+        seconds = seconds - inc;
+        time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " + Math.floor(seconds) + " seconds";
+        //drawTime(seconds,max_seconds);
+        if (t < iter) drawTime2(t++,time_mat,s,s);
+        if (seconds <= 0) clearInterval(timer);
+    },interval);
+}
+
 function drawTime(seconds,max_seconds) { //console.log(JSON.stringify(data));
-    time_ctx.fillStyle = time_div.style.background;
-    time_ctx.fillRect(0,0,time_can.width,time_can.height);
+    time_ctx.fillStyle = time_div.style.background; time_ctx.fillRect(0,0,time_can.width,time_can.height);
     time_ctx.fillStyle = time_div.style.background == "black" ? "white" : "black";
     time_ctx.fillRect(0,0,time_can.width * (seconds / max_seconds),time_can.height);
 }
 
+function drawTime2(i,time_mat,w,h) {
+    time_ctx.fillStyle = time_div.style.background == "black" ? "white" : "black";
+    let c = get2D(i,time_mat.length);
+    time_ctx.fillRect(time_mat[c.x][c.y].rndX,time_mat[c.x][c.y].rndY,w,h);
+}
+
 function initGame() {
     zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
-        square: { black: "#2F4F4F", white: "#AAAA88" }, //square: { black: "#227722", white: "#AAAA88" },
-        piece: { black: "#000000", white: "#FFFFFF"}
+        square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
     });
 }
 
@@ -191,6 +230,7 @@ function setLayout() {
         time_div.style.width = main_div_size + "px";
         time_div.style.height = "7vh";
         time_can.style.height = (Math.ceil(window.innerHeight * .07) + 1) + "px";
+        time_can.style.width = main_div_size/2 + "px";
 
         games_div.style.left = "80vw";
         games_div.style.top = "0px";
@@ -221,6 +261,7 @@ function setLayout() {
         time_div.style.width = main_div_size + "px";
         time_div.style.height = clock_height + "px";
         time_can.style.height = (clock_height + 1) + "px";
+        time_can.style.width = main_div_size/2 + "px";
 
         games_div.style.left = "33vw";
         games_div.style.top = (lower_div_height + clock_height + 20) + "px";
@@ -565,7 +606,7 @@ function addTabArea(title) {
     let messages=document.createElement("div"); messages.className="msg-class"; area.appendChild(messages);
     let vote_tbl=document.createElement("table"); vote_tbl.className="vote-class"; area.appendChild(vote_tbl);
 
-    div_infotab.appendChild(area);
+    div_info_tab.appendChild(area);
     return area;
 }
 
@@ -574,7 +615,7 @@ function removeTabArea(title) {
     let tabs = document.getElementsByClassName(TAB_BUTT);
     for (const tab of tabs) if (tab.id === (TAB_BUTT + title)) div_left_tabs.removeChild(tab);
     let areas = document.getElementsByClassName(TAB_PFX);
-    for (const area of areas) if (area.id === (TAB_PFX + title)) div_infotab.removeChild(area);
+    for (const area of areas) if (area.id === (TAB_PFX + title)) div_info_tab.removeChild(area);
 }
 
 function writeMessage(text, chat_div, c) { //console.log("Response: " + text);
@@ -606,6 +647,3 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
 
 let toggle = true;
 function test() { toggle = !toggle; }
-
-//chat_tab.value += text + "\n"; //showPrompt();
-//if (chat_tab.value.length > 8192) chat_tab.value = chat_tab.value.substring(chat_tab.value.length/2);
