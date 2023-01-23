@@ -540,6 +540,12 @@ function rangeSelect() { //TODO: game change bug
     displayMoveArrows(move_history[moves_range.value]);
 }
 
+function flipAtStart(isBlack) {
+    if (isBlack && !zug_board.povBlack || !isBlack && zug_board.povBlack) {
+        flipBoard();
+    }
+}
+
 function flipBoard() {
     zug_board.flip();
 }
