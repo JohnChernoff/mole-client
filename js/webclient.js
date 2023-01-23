@@ -89,6 +89,7 @@ function msgHandler(type,data) { console.log("Type: " + JSON.stringify(type) + "
     else if (type === "phase") { console.log("New phase: " + data.msg); }
     else if (type === "status") { handleStatus(data.msg, data.source); }
     else if (type === "votelist") { handleVote(data.list, data.move, data.source); }
+    else if (type === "color") { flipAtStart(data.msg === "black"); }
     //else if (type === "movelist") updateMoveList(data);
     else {
         console.log("Unknown Type: " + type);
