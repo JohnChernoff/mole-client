@@ -511,9 +511,9 @@ function clearElement(e) {
 }
 
 function createGame() {
-    let title = prompt("Enter a new game title","");
+    let title = prompt("Enter a new game title",username);
     console.log("Starting: " + title);
-    if (title !== "") send("newgame",{ title: title, color: COLOR_UNKNOWN }); //radio_black.checked ? BLACK : WHITE });
+    if (title !== null) send("newgame",{ title: title, color: COLOR_UNKNOWN }); //radio_black.checked ? BLACK : WHITE });
 }
 
 function joinGame() {
