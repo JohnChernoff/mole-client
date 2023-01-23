@@ -302,7 +302,7 @@ function notifyMole(mole) {
         h1.textContent = "You're not the Mole!"
         h2.textContent = "Your job is to try and win the game for your side, but be careful - " +
             "there's a Mole on your team!"
-        mole_div.style.backgroundImage = 'url("img/mole-board.jpg")';
+        mole_div.style.backgroundImage = 'url("img/not-mole.png")';
     }
     mole_txt.appendChild(h1); mole_txt.appendChild(h2);
     mole_div.style.display = "block"; //setTimeout(() => { mole_div.style.display = "none"; },5000);

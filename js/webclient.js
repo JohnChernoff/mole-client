@@ -9,17 +9,15 @@ const SOCK_EVENT = {
 const SERV = "serv";
 
 function startSocket() {
-    //openSocket("wss://molechess.com/server",sockHandler); //remote
-    openSocket("ws://localhost:5555",sockHandler); //local
+    openSocket(MOLE_ENV.host,sockHandler);
 }
 
 function openSocket(url,sockHandler) {
-
     if (web_socket !== undefined && web_socket.readyState !== WebSocket.CLOSED) {
         sockHandler(SOCK_EVENT.CONNECTION_ALREADY_OPEN); return;
     }
 
-    web_socket = new WebSocket(url);
+    web_socket = new WebSocket(url); if (web_socket === undefined) return false;
     web_socket.onopen = event => {
         sockHandler(SOCK_EVENT.CONNECTION_OPEN,event);
     };
@@ -36,6 +34,7 @@ function openSocket(url,sockHandler) {
         sockHandler(SOCK_EVENT.CONNECTION_ERROR,event);
     }
 
+    return true;
 }
 
 function sockHandler(event_type,event) {
