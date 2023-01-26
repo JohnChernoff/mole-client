@@ -15,18 +15,34 @@ clock shift on flip
 
  */
 
-function createEnum(values) {
-    const enumObject = {};
-    for (const val of values) enumObject[val] = val;
-    return Object.freeze(enumObject);
+function createEnum(arr) {
+    let obj = Object.create(null);
+    for (let val of arr) {
+        obj[val] = Symbol(val);
+    }
+    return Object.freeze(obj);
+}
+function createList(list) {
+    let obj = Object.create(null);
+    for (let i = 0; i < list.length; i++) {
+        obj[list[i]] = { "name" : list[i], "index" : i }
+    }
+    return {
+        "enum" : Object.freeze(obj),
+        "length" : list.length
+    };
 }
 
+let AUDIO = false;
+let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
+const AUDIO_CLIPS = createList(['INTRO','EPIC']); //,'CREATE','BEGIN','END','VOTE','ACCUSE']);
+let clips = [AUDIO_CLIPS.length];
+let current_clip;
+const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
+let layout_style = LAYOUT_STYLES.UNDEFINED;
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
 let current_tab = "serv";
-let LAYOUT_STYLES = createEnum('UNDEFINED','HORIZONTAL','VERTICAL');
-let layout_style = LAYOUT_STYLES.UNDEFINED;
-let audio_loop = new Audio("audio/intro2.mp3");
 let mole_div = document.getElementById("div-mole");
 let mole_txt = document.getElementById("mole-txt");
 let time_div = document.getElementById("div-time");
@@ -83,12 +99,43 @@ games_select.addEventListener("dblclick", () =>  {
     handleMessage("",selected_game); //updates message tab
 });
 
-async function playAudio() {
-    try {
-        await audio_loop.play();
-    } catch(err) {
-        console.log("Error: " + err);
+function loadAudio(onload) {
+    AUDIO_LOAD = 0; let track = 0;
+    for (let clip in AUDIO_CLIPS.enum) {
+        clips[track] = new Audio("audio/" + clip.toLowerCase() + ".mp3");
+        clips[track++].addEventListener('canplaythrough', () => {
+            console.log("Loaded: " + clip);
+            if (++AUDIO_LOAD === AUDIO_CLIPS.length) {
+                onload();
+            }
+        });
     }
+}
+
+async function toggleAudio() {
+    AUDIO = !AUDIO;
+    let buttons = document.getElementsByClassName("audio_toggle");
+    for (let i =0; i < buttons.length; i++) {
+        buttons[i].innerHTML = AUDIO ? "Sound Off" : "Sound On";
+    }
+    if (AUDIO) await playClip(current_clip); else pauseClip(current_clip);
+}
+
+async function playClip(clip,switch_clips = true) {
+    if (clip === undefined) return;
+    if (clip !== current_clip && switch_clips) {
+        pauseClip(current_clip);
+        current_clip = clip;
+    }
+    if (AUDIO) {
+        console.log("Playing: " + clip.name);
+        try {  await clips[clip.index].play(); }
+        catch(err) { console.log("Error: " + err); }
+    }
+}
+
+function pauseClip(clip) {
+    if (clip !== undefined) clips[clip.index].pause();
 }
 
 function get2D(n, w) {
@@ -155,6 +202,7 @@ function drawTime2(i,time_mat,w,h) {
 }
 
 function initGame() {
+    loadAudio(() => { playClip(AUDIO_CLIPS.enum.INTRO); });
     zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
         square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
     });
