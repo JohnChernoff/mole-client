@@ -35,7 +35,7 @@ function createList(list) {
 
 let AUDIO = false;
 let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
-const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP']);
+const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP','IS_MOLE','NOT_MOLE']);
 let clips = [AUDIO_CLIPS.length];
 let current_clip, fader;
 const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
@@ -67,6 +67,7 @@ let chat_input = document.getElementById("chat-msg");
 let login_butt = document.getElementById("login-butt");
 let logout_butt = document.getElementById("logout-butt");
 let enter_butt = document.getElementById("enter-butt");
+let welcome_screen = document.getElementById("div-welcome");
 let splash_screen = document.getElementById("div-splash");
 let BLACK = 0, WHITE = 1;
 let main_board = [];
@@ -112,9 +113,9 @@ function loadAudio(onload) {
     }
 }
 
-async function toggleAudio() {
-    AUDIO = !AUDIO;
-    let buttons = document.getElementsByClassName("audio_toggle");
+async function toggleAudio(audio) {
+    if (audio !== undefined) AUDIO = audio; else AUDIO = !AUDIO;
+    let buttons = document.getElementsByClassName("audio-toggle");
     for (let i =0; i < buttons.length; i++) {
         buttons[i].innerHTML = AUDIO ? "Sound Off" : "Sound On";
     }
@@ -122,6 +123,7 @@ async function toggleAudio() {
 }
 
 async function playClip(clip,switch_clips = true) {
+    let prev_clip = current_clip;
     if (clip === undefined) return;
     if (clip !== current_clip && switch_clips) {
         pauseClip(current_clip);
@@ -131,7 +133,16 @@ async function playClip(clip,switch_clips = true) {
     if (AUDIO) {
         console.log("Playing: " + clip.name);
         clips[clip.index].volume = .8;
-        try {  await clips[clip.index].play(); }
+        try {
+            clips[clip.index].addEventListener("ended",() => {
+                if (prev_clip !== undefined) {
+                    current_clip = prev_clip;
+                    clips[current_clip.index].play();
+                }
+            });
+            await clips[clip.index].play();
+
+        }
         catch(err) { console.log("Error: " + err); }
     }
 }
@@ -218,7 +229,9 @@ function drawTime2(i,time_mat,w,h) {
     time_ctx.fillRect(time_mat[c.x][c.y].rndX,time_mat[c.x][c.y].rndY,w,h);
 }
 
-function initGame() {
+function initGame(audio) {
+    welcome_screen.style.display = "none"; splash_screen.style.display = "block";
+    toggleAudio(audio);
     loadAudio(() => { playClip(AUDIO_CLIPS.enum.INTRO); });
     zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
         square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
@@ -362,12 +375,14 @@ function notifyMole(mole) {
         h2.textContent = "Your job is to try and lose the game for your side, but be careful - " +
             "if the moves you make are too obviously bad, your teammates may try and vote you out."
         mole_div.style.backgroundImage = 'url("img/mole-board.jpg")';
+        playClip(AUDIO_CLIPS.enum.IS_MOLE);
     }
     else {
         h1.textContent = "You're not the Mole!"
         h2.textContent = "Your job is to try and win the game for your side, but be careful - " +
             "there's a Mole on your team!"
         mole_div.style.backgroundImage = 'url("img/not-mole.png")';
+        playClip(AUDIO_CLIPS.enum.NOT_MOLE);
     }
     mole_txt.appendChild(h1); mole_txt.appendChild(h2);
     mole_div.style.display = "block"; //setTimeout(() => { mole_div.style.display = "none"; },5000);
@@ -586,7 +601,7 @@ function createGame() {
     console.log("Starting: " + title);
     if (title !== null) {
         send("newgame", {title: title, color: COLOR_UNKNOWN});
-        playClip(AUDIO_CLIPS.enum.CREATE,false);
+        playClip(AUDIO_CLIPS.enum.BUMP);
     }
 }
 

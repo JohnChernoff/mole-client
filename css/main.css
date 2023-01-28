@@ -12,6 +12,26 @@ body {
     background-color: black;
 }
 
+#div-welcome {
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    color: white;
+    background: black url("../img/backgrounds/welcome.png") no-repeat;
+    background-size: cover;
+}
+
+.center-div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid white;
+}
+
 .left_tab {
     overflow: hidden;
     border: 1px solid #ccc;
@@ -168,7 +188,6 @@ body {
 }
 
 #div-splash {
-    display: block;
     left: 0;
     top: 0;
     width: 100%; /* Full width */

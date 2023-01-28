@@ -6,9 +6,15 @@
         <link rel="stylesheet" href="css/main.css">
     </head>
 
-    <body id="body" onload="initGame()">
+    <body id="body">
+        <div id="div-welcome" class="modal">
+            <div class="center-div">
+                <button onclick="initGame(true)">Sound</button>
+                <button onclick="initGame(false)">No Sound</button>
+            </div>
+        </div>
         <div id="div-splash" class="modal">
-            <button id="audio-butt1" class="audio_toggle" onclick="toggleAudio()">Sound On</button>
+            <button id="audio-butt1" class="audio-toggle" onclick="toggleAudio()">Sound On</button>
             <button id="help-butt1" onclick="window.location.assign('help.html')">How to Play</button>
             <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
@@ -51,7 +57,7 @@
             <div id="main-board" class="board-view"> </div>
         </div>
         <div id="div-games" class="modular_view">
-            <button id="audio-butt2" class="audio_toggle" onclick="toggleAudio()">Sound On</button>
+            <button id="audio-butt2" class="audio-toggle" onclick="toggleAudio()">Sound On</button>
             <button id="help-butt2" onclick="showHelp()">Help</button>
             <button id="best-butt" onclick="showHighScores()">Best</button>
             <button id="new-butt" onclick="createGame()">New Game</button>
