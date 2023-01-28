@@ -130,22 +130,22 @@ async function toggleAudio(audio) {
 async function playClip(clip,switch_clips = true) {
     if (clip === undefined) return;
     let prev_clip = current_clip;
-    if (clip !== current_clip && switch_clips) {
-        pauseClip(current_clip);
-        current_clip = clip;
-        clips[current_clip.index].currentTime = 0;
-    }
+    current_clip = clip;
+    if (switch_clips) pauseClip(prev_clip);
+    if (current_clip !== prev_clip || clips[prev_clip.index].ended) clips[current_clip.index].currentTime = 0;
+
     if (AUDIO) {
         console.log("Playing: " + clip.name);
-        clips[clip.index].volume = .8;
+        clips[current_clip.index].volume = .8;
         try {
-            clips[clip.index].addEventListener("ended",() => {
-                if (prev_clip !== undefined) {
-                    current_clip = prev_clip;
-                    clips[current_clip.index].play();
-                }
+            if (switch_clips && prev_clip !== undefined && prev_clip !== current_clip && !clips[prev_clip.index].ended)
+            clips[current_clip.index].addEventListener("ended",() => {
+                current_clip = prev_clip;
+                clips[current_clip.index].play();
             });
-            await clips[clip.index].play();
+            else clips[current_clip.index].addEventListener("ended",() => {});
+            clips[current_clip.index].loop = false;
+            await clips[current_clip.index].play();
 
         }
         catch(err) { console.log("Error: " + err); }
