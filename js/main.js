@@ -35,9 +35,9 @@ function createList(list) {
 
 let AUDIO = false;
 let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
-const AUDIO_CLIPS = createList(['INTRO','EPIC']); //,'CREATE','BEGIN','END','VOTE','ACCUSE']);
+const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP']);
 let clips = [AUDIO_CLIPS.length];
-let current_clip;
+let current_clip, fader;
 const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
 let layout_style = LAYOUT_STYLES.UNDEFINED;
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
@@ -126,9 +126,11 @@ async function playClip(clip,switch_clips = true) {
     if (clip !== current_clip && switch_clips) {
         pauseClip(current_clip);
         current_clip = clip;
+        clips[current_clip.index].currentTime = 0;
     }
     if (AUDIO) {
         console.log("Playing: " + clip.name);
+        clips[clip.index].volume = .8;
         try {  await clips[clip.index].play(); }
         catch(err) { console.log("Error: " + err); }
     }
@@ -136,6 +138,21 @@ async function playClip(clip,switch_clips = true) {
 
 function pauseClip(clip) {
     if (clip !== undefined) clips[clip.index].pause();
+}
+
+function fadeAndPlay(clip) { //console.log("Fading...");
+    let audio = clips[current_clip.index];
+    if (fader !== undefined) clearInterval(fader);
+    fader = setInterval(()=> {
+     let v = audio.volume - 0.1;
+        if (AUDIO && v >= 0) { //console.log("Volume: " + v);
+            audio.volume = v;
+        }
+        else {
+            clearInterval(fader);
+            playClip(clip);
+        }
+    },200);
 }
 
 function get2D(n, w) {
@@ -552,6 +569,12 @@ function showPlayers(players) {
 function showHighScores() {
     score_div.style.display = "block";
     send("top",10);
+    fadeAndPlay(AUDIO_CLIPS.enum.EPIC);
+}
+
+function showHelp() {
+    document.getElementById('div-help').style.display='block';
+    fadeAndPlay(AUDIO_CLIPS.enum.FUGUE)
 }
 
 function clearElement(e) {
@@ -561,11 +584,14 @@ function clearElement(e) {
 function createGame() {
     let title = prompt("Enter a new game title",username);
     console.log("Starting: " + title);
-    if (title !== null) send("newgame",{ title: title, color: COLOR_UNKNOWN }); //radio_black.checked ? BLACK : WHITE });
+    if (title !== null) {
+        send("newgame", {title: title, color: COLOR_UNKNOWN});
+        playClip(AUDIO_CLIPS.enum.CREATE,false);
+    }
 }
 
 function joinGame() {
-    send("joingame",{ title: selected_game, color: COLOR_UNKNOWN }); //radio_black.checked ? BLACK : WHITE });
+    send("joingame",{ title: selected_game, color: COLOR_UNKNOWN });
 }
 
 function gameCmd(cmd) {

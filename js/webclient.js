@@ -78,7 +78,11 @@ function msgHandler(type,data) { console.log("Type: " + JSON.stringify(type) + "
     else if (type === "serv_msg") handleMessage(data.msg,data.source,data.player);
     else if (type === "game_msg") handleMessage(data.msg,data.source,data.player);
     else if (type === "err_msg") handleMessage(data.msg,data.source);
-    else if (type === "log_OK")  { handleMessage(data.welcome,SERV); username = data.name; }
+    else if (type === "log_OK")  {
+        handleMessage(data.welcome,SERV);
+        username = data.name;
+        fadeAndPlay(AUDIO_CLIPS.enum.BUMP);
+    }
     else if (type === "info") handleMessage(JSON.stringify(data),SERV);
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
