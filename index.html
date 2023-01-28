@@ -21,11 +21,11 @@
             <button id="enter-butt" class="splash-butt" onclick="enterGame()"></button>
         </div>
         <div id="div-highscores" class="modal">
-            <button onclick="document.getElementById('div-highscores').style.display='none'">Return</button>
+            <button onclick="closeModalWindow(document.getElementById('div-highscores'))">Return</button>
             <table id="table-highscores"></table>
         </div>
         <div id="div-help" class="modal">
-            <button onclick="document.getElementById('div-help').style.display='none'">Return</button> <br>
+            <button onclick="closeModalWindow(document.getElementById('div-help'))">Return</button> <br>
             <iframe id="help-frame"
                     title="MoleChess Help"
                     width="99%"
@@ -35,7 +35,7 @@
         </div>
         <div id="div-mole" class="modal">
             <div id="mole-txt">
-                <button onclick="document.getElementById('div-mole').style.display='none'">OK</button> <br>
+                <button onclick="closeModalWindow(document.getElementById('div-mole'))">OK</button> <br>
             </div>
         </div>
         <div id="div-time">

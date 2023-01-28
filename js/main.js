@@ -100,6 +100,11 @@ games_select.addEventListener("dblclick", () =>  {
     handleMessage("",selected_game); //updates message tab
 });
 
+function closeModalWindow(element) {
+    element.style.display = "none";
+    fadeAndPlay();
+}
+
 function loadAudio(onload) {
     AUDIO_LOAD = 0; let track = 0;
     for (let clip in AUDIO_CLIPS.enum) {
@@ -123,8 +128,8 @@ async function toggleAudio(audio) {
 }
 
 async function playClip(clip,switch_clips = true) {
-    let prev_clip = current_clip;
     if (clip === undefined) return;
+    let prev_clip = current_clip;
     if (clip !== current_clip && switch_clips) {
         pauseClip(current_clip);
         current_clip = clip;
@@ -147,23 +152,27 @@ async function playClip(clip,switch_clips = true) {
     }
 }
 
-function pauseClip(clip) {
-    if (clip !== undefined) clips[clip.index].pause();
+function fadeAndPlay(clip) { //console.log("Fading...");
+    if (current_clip != undefined) {
+        let audio = clips[current_clip.index];
+        if (fader !== undefined) clearInterval(fader);
+        fader = setInterval(()=> {
+            let v = audio.volume - 0.1;
+            if (AUDIO && v >= 0) { //console.log("Volume: " + v);
+                audio.volume = v;
+            }
+            else {
+                clearInterval(fader);
+                current_clip = undefined;
+                playClip(clip);
+            }
+        },200);
+    }
+    else playClip(clip);
 }
 
-function fadeAndPlay(clip) { //console.log("Fading...");
-    let audio = clips[current_clip.index];
-    if (fader !== undefined) clearInterval(fader);
-    fader = setInterval(()=> {
-     let v = audio.volume - 0.1;
-        if (AUDIO && v >= 0) { //console.log("Volume: " + v);
-            audio.volume = v;
-        }
-        else {
-            clearInterval(fader);
-            playClip(clip);
-        }
-    },200);
+function pauseClip(clip) {
+    if (clip !== undefined) clips[clip.index].pause();
 }
 
 function get2D(n, w) {
