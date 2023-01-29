@@ -193,7 +193,6 @@ function shuffle2D(array) {
 }
 
 function countdown(data) { //console.log(JSON.stringify(data));
-
     if (data.title !== selected_game) return;
 
     let max_seconds = data.seconds; //console.log("Seconds: " + max_seconds);
@@ -220,8 +219,7 @@ function countdown(data) { //console.log(JSON.stringify(data));
         time_div.style.background = (data.turn === BLACK ? "white" : "black");
         seconds = seconds - inc;
         time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " + Math.floor(seconds) + " seconds";
-        //drawTime(seconds,max_seconds);
-        if (t < iter) drawTime2(t++,time_mat,s,s);
+        if (t < iter) drawTime2(t++,time_mat,s,s); //drawTime(seconds,max_seconds);
         if (seconds <= 0) clearInterval(timer);
     },interval);
 }
@@ -245,6 +243,7 @@ function initGame(audio) {
     zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
         square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
     });
+    colorCycle(splash_screen,250);
 }
 
 function onPieceLoad() {
@@ -288,9 +287,11 @@ function logout() {
 }
 
 function enterGame() {
+    stopCycle();
     splash_screen.style.display = "none";
     window.onresize = () => { resize(); }; resize();
     if (oauth_token !== null) startSocket();
+    fadeAndPlay(AUDIO_CLIPS.enum.BUMP);
 }
 
 function resize() {
