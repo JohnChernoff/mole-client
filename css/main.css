@@ -193,7 +193,7 @@ body {
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     background-size: contain;
-    background: white url("../img/mole-logo.png") no-repeat center;
+    /* background: white url("../img/mole-logo.png") no-repeat center; */
 }
 
 .splash-butt {
@@ -219,6 +219,11 @@ body {
 #can-time {
     position: absolute;
     left: 50%;
+}
+
+#splash-can {
+    width: 90%;
+    height: 90%;
 }
 
 input[type=range] {

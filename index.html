@@ -19,6 +19,8 @@
             <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
             <button id="enter-butt" class="splash-butt" onclick="enterGame()"></button>
+            <br><br>
+            <canvas id="splash-can"></canvas>
         </div>
         <div id="div-highscores" class="modal">
             <button onclick="closeModalWindow(document.getElementById('div-highscores'))">Return</button>
@@ -83,7 +85,7 @@
             </div>
         </div>
 
-        <script>var exports = {};</script>
+        <script>let exports = {};</script>
         <script type="text/javascript" src="js/oauth2-auth-code-pkce-master/pkce.js"></script>
         <script type="text/javascript" src="js/env.js"></script>
         <script type="text/javascript" src="js/lichess.js"></script>

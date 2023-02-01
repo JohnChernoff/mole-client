@@ -48,7 +48,8 @@ let mole_txt = document.getElementById("mole-txt");
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
-let time_ctx = time_can.getContext('2d');
+let countdown_can = document.createElement("canvas");
+let countdown_ctx = countdown_can.getContext("2d");
 let main_div = document.getElementById("div-main");
 let main_board_div = document.getElementById("main-board");
 let comm_div = document.getElementById("div-comm");
@@ -69,18 +70,26 @@ let logout_butt = document.getElementById("logout-butt");
 let enter_butt = document.getElementById("enter-butt");
 let welcome_screen = document.getElementById("div-welcome");
 let splash_screen = document.getElementById("div-splash");
+let splash_can = document.getElementById("splash-can");
+let splash_img = new Image();
 let BLACK = 0, WHITE = 1;
 let main_board = [];
 let move_history = [];
 let games;
 let selected_game = "";
 let selected_player;
-let timer;
-let seconds = 0;
 let zug_board;
 let lichess = new LichessLogger("https://lichess.org", "molechess.com"); //"example.com");
 let oauth_token = null;
 let starting = false;
+document.addEventListener("visibilitychange", (event) => {
+    if (document.visibilityState == "visible") {
+        console.log("tab is active");
+    } else {
+        console.log("tab is inactive");
+        if (checker_timer != undefined) clearInterval(checker_timer);
+    }
+});
 
 window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
     if (e.code === "Enter") {
@@ -109,9 +118,11 @@ function loadAudio(onload) {
     AUDIO_LOAD = 0; let track = 0;
     for (let clip in AUDIO_CLIPS.enum) {
         clips[track] = new Audio("audio/" + clip.toLowerCase() + ".mp3");
-        clips[track++].addEventListener('canplaythrough', () => {
-            console.log("Loaded: " + clip);
-            if (++AUDIO_LOAD === AUDIO_CLIPS.length) {
+        clips[track++].addEventListener('loadeddata', () => {
+            AUDIO_LOAD++;
+            console.log("Loaded: " + clip + " (" + AUDIO_LOAD + "/" + AUDIO_CLIPS.length + ")");
+            if (AUDIO_LOAD === AUDIO_CLIPS.length) {
+                console.log("Loaded all audio files");
                 onload();
             }
         });
@@ -175,80 +186,37 @@ function pauseClip(clip) {
     if (clip !== undefined) clips[clip.index].pause();
 }
 
-function get2D(n, w) {
-    return { "y" :  Math.floor(n/w), "x" : n % w }
-}
-
-function shuffle2D(array) {
-    let w = array.length; let h = array[0].length; let n =  w * h; //console.log(w + "," + h + "," + n);
-    for (let i = n - 1; i > 0; i--) {
-        let c1 = get2D(i,w);
-        const currentElement = array[c1.x][c1.y]; //console.log(JSON.stringify(currentElement));
-        const swapIndex = Math.floor(Math.random() * (i + 1));
-        let c2 = get2D(swapIndex,w);
-        const swapElement = array[c2.x][c2.y]; //console.log(JSON.stringify(swapElement));
-        array[c1.x][c1.y] = swapElement;
-        array[c2.x][c2.y] = currentElement;
-    }
-}
-
 function countdown(data) { //console.log(JSON.stringify(data));
     if (data.title !== selected_game) return;
-
-    let max_seconds = data.seconds; //console.log("Seconds: " + max_seconds);
-    let millis = ((max_seconds-3) * 1000);
-    let inc = .1, interval = 1000 * inc;
-    let iter = Math.pow(Math.ceil(Math.sqrt(millis / interval)),2); //console.log("Iter: " + iter);
-    time_can.width = iter; time_can.height = iter;
-    let s = Math.ceil(Math.sqrt(iter));
-    iter = s*s;
-
-    let time_mat = new Array(s);
-    for (let x = 0; x < time_mat.length; x++) {
-        time_mat[x] = new Array(s);
-        for (let y = 0; y < time_mat[x].length; y++) { //console.log(x + "," + y);
-            time_mat[x][y] = { "filled" : false, "rndX" : x * s, "rndY" : y * s }
-        }
-    }
-    shuffle2D(time_mat);
-
-    if (timer !== null) clearInterval(timer);
-    let seconds = max_seconds, t = 0;
-    time_ctx.fillStyle = "gray"; time_ctx.fillRect(0,0,time_can.width,time_can.height);
-    timer = setInterval(() => {
-        time_div.style.background = (data.turn === BLACK ? "white" : "black");
-        seconds = seconds - inc;
-        time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " + Math.floor(seconds) + " seconds";
-        if (t < iter) drawTime2(t++,time_mat,s,s); //drawTime(seconds,max_seconds);
-        if (seconds <= 0) clearInterval(timer);
-    },interval);
+    let max_seconds = data.seconds;
+    let millis = ((max_seconds) * 1000);
+    countdown_ctx.fillStyle = (data.turn === BLACK ? "white" : "black");
+    countdown_ctx.fillRect(0,0,countdown_can.width,countdown_can.height);
+    createImageBitmap(countdown_can).then(img => {
+        rndCheckerFill(img,millis,.1,time_can,"green",() => {
+            time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " +
+                Math.floor(checker_timer.seconds) + " seconds";
+        })
+    });
 }
-
-function drawTime(seconds,max_seconds) { //console.log(JSON.stringify(data));
-    time_ctx.fillStyle = time_div.style.background; time_ctx.fillRect(0,0,time_can.width,time_can.height);
-    time_ctx.fillStyle = time_div.style.background == "black" ? "white" : "black";
-    time_ctx.fillRect(0,0,time_can.width * (seconds / max_seconds),time_can.height);
-}
-
-function drawTime2(i,time_mat,w,h) {
-    time_ctx.fillStyle = time_div.style.background == "black" ? "white" : "black";
-    let c = get2D(i,time_mat.length);
-    time_ctx.fillRect(time_mat[c.x][c.y].rndX,time_mat[c.x][c.y].rndY,w,h);
-}
-
 function initGame(audio) {
     welcome_screen.style.display = "none"; splash_screen.style.display = "block";
     toggleAudio(audio);
-    loadAudio(() => { playClip(AUDIO_CLIPS.enum.INTRO); });
-    zug_board = new ZugBoard(main_board_div,sendMove,onPieceLoad,{ board_tex: "plain", pieces: "comp" },{
-        square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
-    });
-    colorCycle(splash_screen,250);
-}
-
-function onPieceLoad() {
-    console.log("Pieces loaded");
-    initLichess().then(() => showLogin());
+    splash_img.onload = () => {
+        console.log("Loaded Image: " + splash_img);
+        rndCheckerFill(splash_img,8000,.01,splash_can,"black");
+        loadAudio(() => {
+            zug_board = new ZugBoard(main_board_div,sendMove,() => {
+                console.log("Pieces loaded");
+                initLichess().then(() => showLogin());
+            },{ board_tex: "plain", pieces: "comp" },{
+                square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
+            });
+            colorCycle(splash_screen,250);
+            playClip(AUDIO_CLIPS.enum.INTRO);
+        });
+    };
+    splash_img.src = "img/mole-logo.png";
 }
 
 function showLogin() {
