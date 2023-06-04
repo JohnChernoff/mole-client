@@ -1,0 +1,12 @@
+body {
+    max-width: 42em;
+    margin: auto;
+    width: 99%;
+    height: 99%;
+    background-color: black;
+    color: antiquewhite;
+}
+
+a {
+    color: #227722;
+}

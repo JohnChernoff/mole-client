@@ -1,0 +1,297 @@
+body {
+    width: 99%;
+    height: 99%;
+    background: black url("../img/backgrounds/moleback.png");
+    background-size: cover;
+    font-family: monospace;
+    overflow: hidden;
+}
+
+#div-main {
+    border: thick solid #2f4f4f;
+    background-color: black;
+}
+
+#div-welcome {
+    display: block;
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    color: white;
+    background: black url("../img/backgrounds/welcome.png") no-repeat;
+    background-size: cover;
+}
+
+.center-div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid white;
+}
+
+.left_tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+.left_tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+.left_tab button:hover {
+    background-color: #ddd;
+}
+
+.left_tab button.active {
+    background-color: #ccc;
+}
+
+.modular_view {
+    position: absolute;
+    background-color: #2f4f4f;
+    color: white;
+}
+
+.board-view {
+    width: 100%; height: 100%;
+}
+
+.overlay-view {
+    position: absolute;
+    width: 100%; height: 100%;
+    top: 0; left: 0;
+}
+
+#main-board {
+    display: grid;
+    grid-template-columns: repeat(8,1fr);
+    grid-template-rows: repeat(8,auto);
+}
+
+#main-board > div > canvas {
+    cursor: move;
+}
+
+#div-games {
+    overflow: scroll;
+}
+
+#div-games > table {
+    color: black;
+    display: table;
+}
+
+#div-games > table > tr > td {
+    border-style: solid;
+}
+
+#div-moves {
+    overflow-y: scroll;
+    background-color: #2f4f4f;
+}
+
+#div-movelist > table {
+    position: relative;
+    top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    color: black;
+}
+
+#div-movelist > table > tr > td {
+    background-color: black;
+    color: white;
+    border-style: solid;
+}
+
+#div-buttons {
+    height: 5vh;
+}
+
+#div-left-tabs {
+    height: 5vh;
+}
+
+#div-info {
+    height: 85vh;
+    background-color: #2f4f4f;
+}
+
+#div-links {
+    height: 5vh;
+}
+
+.img-link {
+    height: 100%;
+    width: 25%;
+}
+
+.msg-class {
+    overflow-y: scroll;
+    height: 70vh;
+    background-color: black;
+}
+
+.vote-class {
+    overflow-y: scroll;
+    height: 15vh;
+    width: 100%;
+    background-color: #2f4f4f;
+}
+
+#div-commands {
+    /* height: 12vh; */
+}
+
+#txt-messages {
+    position: relative;
+    resize: none;
+    background-color: black;
+    color: chartreuse;
+    width: 90%;
+    height: 99%;
+}
+
+#div-inputs {
+    height: 10vh;
+}
+
+#div-mole {
+    background-color: black;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#mole-txt {
+    color: mintcream;
+    background: black;
+    width: 33%;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    left: 25vw;
+    top: 25vh;
+    width: 50%;
+    height: 50%;
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: #2f4f4f;
+}
+
+#div-highscores > table > tr > td {
+    background-color: black;
+    color: white;
+    border-style: solid;
+}
+
+#div-splash {
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-size: contain;
+    /* background: white url("../img/mole-logo.png") no-repeat center; */
+}
+
+.splash-butt {
+    display: none;
+}
+
+#div-time {
+    position: absolute;
+    background-color: black;
+    border: solid thick #2f4f4f;
+}
+
+#txt-time {
+    position: relative;
+    text-align: center;
+    top: 25%;
+    float: left;
+    width: 50%;
+    height: 75%;
+    color: gray;
+}
+
+#can-time {
+    position: absolute;
+    left: 50%;
+}
+
+#splash-can {
+    width: 90%;
+    height: 90%;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    background-color: silver;
+    width: 75%;
+    height: 5%;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: black;
+    opacity: 0.5;
+    width: 10px;
+    height: 26px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: black; /* #04AA6D
+    cursor: pointer; /* Cursor on hover */
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #000000;
+    color: #FFF000;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
