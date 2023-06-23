@@ -47,6 +47,9 @@ let layout_style = LAYOUT_STYLES.UNDEFINED;
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
 let current_tab = "serv";
+let current_ply = 0;
+let current_hover = null;
+let move_cells = [];
 let mole_div = document.getElementById("div-mole");
 let mole_txt = document.getElementById("mole-txt");
 let time_div = document.getElementById("div-time");
@@ -101,7 +104,16 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
             sendChat(chat_input,current_tab);
         }
     }
+    else if (e.code === "ArrowLeft") {
+        if (current_ply > 0) selectMove(move_history[current_ply - 1]);
+    }
+    else if (e.code === "ArrowRight") {
+        if (current_ply < move_history.length - 1) selectMove(move_history[current_ply + 1]);
+    }
 } , false);
+
+
+
 
 games_select.addEventListener("change", () =>  {
     selected_game = games_select.value; //console.log("Selected: " + selected_game);
@@ -371,8 +383,13 @@ function notifyMole(mole) {
 
 }
 
-function displayMoveArrows(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
+function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
+    if (current_hover !== null) current_hover.style.visibility = "hidden";
     zug_board.updateBoard(moves.fen);
+    move_cells[current_ply].style.color = "#FFFFFF";
+    move_cells[current_ply].style.border = "none";
+    let tools = move_cells[current_ply].getElementsByClassName("tooltiptext");
+    tools[0].style.visibility = "hidden";
     for (let i=0;i<moves.selected.length;i++) {
         zug_board.drawArrow(moves.selected[0].move,
             moves.selected[i].player === null ? "#555555" : moves.selected[i].player.play_col);
@@ -380,7 +397,11 @@ function displayMoveArrows(moves) { //console.log("Displaying Arrows for Move:" 
     for (let i=0;i<moves.alts.length;i++) {
         zug_board.drawArrow(moves.alts[i].move,moves.alts[i].player.play_col);
     }
-    moves_range.value = moves.ply;
+    current_ply = moves_range.value = moves.ply;
+    move_cells[current_ply].style.color = "#FFFF00";
+    move_cells[current_ply].style.border = "solid";
+    tools = move_cells[current_ply].getElementsByClassName("tooltiptext");
+    tools[0].style.visibility = "visible";
 }
 
 function exportPGN() {
@@ -406,44 +427,61 @@ function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game)
     }
 }
 
-function voteSummary(votes) {
-    console.log(votes.selected[0]);
-    let txt = votes.selected[0].move.san + " -> " +
+function voteSummary(votes) {  //console.log(votes.selected[0]);
+    let n = Math.ceil((votes.ply + 1) / 2) +  (votes.ply % 2 === 0 ? "." : "...");
+    let txt = n + votes.selected[0].move.san + " -> " +
         (votes.selected[0].player !== null ? votes.selected[0].player.user.name : "?") + " <br> ";
     for (let i=0; i < votes.alts.length; i++) {
-        txt += votes.alts[i].move.san + " -> " + votes.alts[i].player.user.name + " <br> ";
+        txt += n + votes.alts[i].move.san + " -> " + votes.alts[i].player.user.name + " <br> ";
     }
     return txt;
 }
 
 function updateMoveList(history) { //console.log(JSON.stringify(data));
+    move_cells = [];
     clearElement(moves_list);
     move_history = [history.length];
     let move_tab = document.createElement("table");
+    /* let head_row = document.createElement("tr");
+    let head_txt = document.createElement("th");
+    head_txt.textContent = "Movelist";
+    head_row.appendChild(head_txt);
+    move_tab.appendChild(head_row); */
+
     let move_row = document.createElement("tr");
     let n = 0;
-    for (let i=0; i<history.length; i++) {
+    for (let i= 0; i<history.length; i++) {
         move_history[i] = {
             ply: i,
             turn: history[i].turn,
-            fen: history[i].fen,
+            fen: i < 1 ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : history[i-1].fen,
             selected: history[i].selected,
             alts: history[i].alts
         };
         let move_entry = document.createElement("td");
+        move_entry.style.color = "#FFFFFF";
         let m = ""; if (i % 2 === 0) m = (++n) + ".";
         if (history[i].selected.length > 0) {
             move_entry.textContent = m + history[i].selected[0].move.san;
         }
         else move_entry.textContent = "?";
-        move_entry.onclick = () => { displayMoveArrows(move_history[i]); };
+        move_entry.onclick = () => { selectMove(move_history[i]); };
         move_entry.className = "tooltip";
         let move_span = document.createElement("span");
         move_span.className = "tooltiptext";
         move_span.innerHTML = voteSummary(move_history[i]); //JSON.stringify(move_history[i]);
+        move_entry.addEventListener("mouseover", () => {
+            move_span.style.visibility = "visible";
+            current_hover = move_span;
+        });
+        move_entry.addEventListener("mouseout", () => {
+            move_span.style.visibility = "hidden";
+            current_hover = null;
+        });
         move_entry.appendChild(move_span);
         move_row.appendChild(move_entry);
-        if ((i+1) % 4 === 0) {
+        move_cells.push(move_entry);
+        if ((i+1) % 2 === 0) {
             move_tab.appendChild(move_row);
             move_row = document.createElement("tr");
         }
@@ -623,7 +661,7 @@ function setTime() {
 }
 
 function rangeSelect() { //TODO: game change bug
-    displayMoveArrows(move_history[moves_range.value]);
+    selectMove(move_history[moves_range.value]);
 }
 
 function flipAtStart(isBlack) {

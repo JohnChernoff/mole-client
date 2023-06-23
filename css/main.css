@@ -101,6 +101,7 @@ body {
 }
 
 #div-movelist > table {
+    width: 200px;
     position: relative;
     top: 12px;
     margin-left: auto;
@@ -109,9 +110,14 @@ body {
 }
 
 #div-movelist > table > tr > td {
+
+    box-sizing:border-box;
+    -moz-box-sizing:border-box; /* Firefox */
+    -webkit-box-sizing:border-box; /* Safari */
+
+    width: 40%;
     background-color: black;
-    color: white;
-    border-style: solid;
+    border-style: hidden;
 }
 
 #div-buttons {
@@ -238,7 +244,7 @@ body {
 input[type=range] {
     -webkit-appearance: none;
     background-color: silver;
-    width: 75%;
+    width: 99%;
     height: 5%;
 }
 
@@ -265,26 +271,27 @@ input[type="range"]::-moz-range-thumb {
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 200px;
+    width: max-content;
     background-color: #000000;
     color: #FFF000;
-    text-align: center;
+    text-align: left;
     border-radius: 6px;
     padding: 5px 0;
-    position: absolute;
+    position: fixed;
     z-index: 1;
-    bottom: 125%;
-    left: 50%;
+    top: 55%;
+    left: 80%;
     margin-left: -60px;
-    opacity: 0;
-    transition: opacity 0.3s;
+    opacity: 1;
+    transition: opacity 0.5s;
 }
 
+/*
 .tooltip .tooltiptext::after {
     content: "";
     position: absolute;
     top: 100%;
-    left: 50%;
+    left: 100%;
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
@@ -295,3 +302,5 @@ input[type="range"]::-moz-range-thumb {
     visibility: visible;
     opacity: 1;
 }
+ */
+
