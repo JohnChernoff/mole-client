@@ -114,9 +114,6 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
     }
 } , false);
 
-
-
-
 games_select.addEventListener("change", () =>  {
     selected_game = games_select.value; //console.log("Selected: " + selected_game);
     send("update", selected_game);
@@ -439,55 +436,57 @@ function voteSummary(votes) {  //console.log(votes.selected[0]);
     return txt;
 }
 
-function updateMoveList(history) { //console.log(JSON.stringify(data));
+function updateMoveList(history) {
     move_cells = [];
     clearElement(moves_list);
     move_history = [history.length];
     let move_tab = document.createElement("table");
-    /* let head_row = document.createElement("tr");
-    let head_txt = document.createElement("th");
-    head_txt.textContent = "Movelist";
-    head_row.appendChild(head_txt);
-    move_tab.appendChild(head_row); */
-
     let move_row = document.createElement("tr");
     let n = 0;
-    for (let i= 0; i<history.length; i++) {
-        move_history[i] = {
-            ply: i,
-            turn: history[i].turn,
-            fen: i < 1 ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : history[i-1].fen,
-            selected: history[i].selected,
-            alts: history[i].alts
-        };
+    for (let i= 0; i<=history.length; i++) {
         let move_entry = document.createElement("td");
-        move_entry.style.color = "#FFFFFF";
         let m = ""; if (i % 2 === 0) m = (++n) + ".";
-        if (history[i].selected.length > 0) {
-            move_entry.textContent = m + history[i].selected[0].move.san;
+        if (i < history.length) {
+            move_history[i] = {
+                ply: i,
+                turn: history[i].turn,
+                fen: i < 1 ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : history[i-1].fen,
+                selected: history[i].selected,
+                alts: history[i].alts
+            };
+
+            if (history[i].selected.length > 0) {
+                move_entry.textContent = m + history[i].selected[0].move.san;
+            }
+            else move_entry.textContent = "?";
+            move_entry.onclick = () => { selectMove(move_history[i]); };
+
+            let move_span = document.createElement("span");
+            move_span.className = "tooltiptext";
+            move_span.innerHTML = voteSummary(move_history[i]);
+            move_entry.addEventListener("mouseover", () => {
+                move_span.style.visibility = "visible";
+                current_hover = move_span;
+            });
+            move_entry.addEventListener("mouseout", () => {
+                move_span.style.visibility = "hidden";
+                current_hover = null;
+            });
+            move_entry.appendChild(move_span);
+            move_cells.push(move_entry);
         }
-        else move_entry.textContent = "?";
-        move_entry.onclick = () => { selectMove(move_history[i]); };
-        move_entry.className = "tooltip";
-        let move_span = document.createElement("span");
-        move_span.className = "tooltiptext";
-        move_span.innerHTML = voteSummary(move_history[i]); //JSON.stringify(move_history[i]);
-        move_entry.addEventListener("mouseover", () => {
-            move_span.style.visibility = "visible";
-            current_hover = move_span;
-        });
-        move_entry.addEventListener("mouseout", () => {
-            move_span.style.visibility = "hidden";
-            current_hover = null;
-        });
-        move_entry.appendChild(move_span);
+        else {
+            move_entry.textContent = "Current position (click to update)";
+            move_entry.onclick = () => { send("update", selected_game); };
+        }
+
         move_row.appendChild(move_entry);
-        move_cells.push(move_entry);
+
         if ((i+1) % 2 === 0) {
             move_tab.appendChild(move_row);
             move_row = document.createElement("tr");
         }
-        else if (i === history.length-1) {
+        else if (i === history.length) {
             move_tab.appendChild(move_row);
         }
     }
@@ -545,7 +544,7 @@ function getHeaders(txt) {
 function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     let play_row = document.createElement("tr");
     let play_name = document.createElement("td");
-    play_name.innerHTML = pdata.away ? pdata.user.name.strike() : pdata.user.name; //+= "(away)";
+    play_name.innerHTML = pdata.away ? pdata.user.name.strike() : pdata.user.name;
     play_name.style.color = "black";
     play_name.style.background = pdata.play_col;
     if (selected_player !== undefined && selected_player.name === pdata.user.name && selected_player.title === title) {

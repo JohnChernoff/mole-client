@@ -1,7 +1,7 @@
 body {
     width: 99%;
     height: 99%;
-    background: black url("../img/bkg/moleback.png");
+    background: black url("../img/bkg/moleback2.png");
     background-size: cover;
     font-family: monospace;
     overflow: hidden;
@@ -94,13 +94,35 @@ body {
     overflow: scroll;
 }
 
+#div-games > label {
+    font-size: x-large;
+}
+
+#div-games > select {
+    color: lemonchiffon;
+    background-color: black;
+    width: 25%;
+    height: 5%;
+}
+
 #div-games > table {
+    width: 100%;
+    font-size: medium;
+    font-family: cursive;
+    font-weight: bold;
     color: black;
     display: table;
+    background-color: burlywood;
 }
 
 #div-games > table > tr > td {
     border-style: solid;
+}
+
+#div-games > table > tr > td > button {
+    width: 100%;
+    height: 100%;
+    background-color: chocolate;
 }
 
 #div-moves {
@@ -120,12 +142,35 @@ body {
 #div-movelist > table > tr > td {
 
     box-sizing:border-box;
-    -moz-box-sizing:border-box; /* Firefox */
-    -webkit-box-sizing:border-box; /* Safari */
+    -moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    border-style: hidden;
+    position: relative;
+
+    display: inline-block;
+    border-bottom: 1px dotted black;
 
     width: 40%;
+    color: white;
     background-color: black;
-    border-style: hidden;
+    float: left;
+}
+
+#div-movelist > table > tr > td .tooltiptext {
+    visibility: hidden;
+    width: max-content;
+    background-color: #000000;
+    color: #FFF000;
+    text-align: left;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: fixed;
+    z-index: 1;
+    top: 55%;
+    left: 80%;
+    margin-left: -60px;
+    opacity: 1;
+    transition: opacity 0.5s;
 }
 
 #div-buttons {
@@ -285,45 +330,4 @@ input[type="range"]::-moz-range-thumb {
     background: black; /* #04AA6D
     cursor: pointer; /* Cursor on hover */
 }
-
-.tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
-}
-
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: max-content;
-    background-color: #000000;
-    color: #FFF000;
-    text-align: left;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: fixed;
-    z-index: 1;
-    top: 55%;
-    left: 80%;
-    margin-left: -60px;
-    opacity: 1;
-    transition: opacity 0.5s;
-}
-
-/*
-.tooltip .tooltiptext::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 100%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #555 transparent transparent transparent;
-}
-
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
-}
- */
 
