@@ -220,7 +220,7 @@ function initGame(audio) {
     toggleAudio(audio);
     splash_img.onload = () => {
         console.log("Loaded Image: " + splash_img);
-        rndCheckerFill(splash_img,8000,.01,splash_can,"black");
+        //rndCheckerFill(splash_img,1000,.001,splash_can,"black", null,() => { splash_can.style.visibility = "hidden"; });
         loadAudio(() => {
             zug_board = new ZugBoard(main_board_div,sendMove,() => {
                 console.log("Pieces loaded");
@@ -232,7 +232,7 @@ function initGame(audio) {
             playClip(AUDIO_CLIPS.enum.INTRO);
         });
     };
-    splash_img.src = "img/mole-logo.png";
+    splash_img.src = "img/bkg/mole-splash2a.png";
 }
 
 function showLogin() {

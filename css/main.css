@@ -1,7 +1,7 @@
 body {
     width: 99%;
     height: 99%;
-    background: black url("../img/backgrounds/moleback.png");
+    background: black url("../img/bkg/moleback.png");
     background-size: cover;
     font-family: monospace;
     overflow: hidden;
@@ -19,8 +19,16 @@ body {
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     color: white;
-    background: black url("../img/backgrounds/welcome.png") no-repeat;
+    background: grey url("../img/bkg/mole-splash1e.png") no-repeat;
     background-size: cover;
+}
+
+.top-div {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .center-div {
@@ -207,12 +215,17 @@ body {
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
-    background-size: contain;
-    /* background: white url("../img/mole-logo.png") no-repeat center; */
+    background: white url("../img/bkg/mole-splash2b.png") no-repeat;
+    background-size: 100%;
 }
 
 .splash-butt {
     display: none;
+}
+
+.big-butt {
+    width: 200px;
+    height: 50px;
 }
 
 #div-time {
@@ -237,8 +250,8 @@ body {
 }
 
 #splash-can {
-    width: 90%;
-    height: 90%;
+    width: 100%;
+    height: 100%;
 }
 
 input[type=range] {

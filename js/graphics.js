@@ -66,7 +66,7 @@ function shuffle2D(array) {
     }
 }
 
-function rndCheckerFill(img,millis,inc,canvas,color,fun) { //console.log(img);
+function rndCheckerFill(img,millis,inc,canvas,color,callback1, callback2) { //console.log(img);
     if (document.visibilityState !== "visible") return; //console.log("CheckerFilling...");
     if (checker_timer != undefined) clearInterval(checker_timer.timer);
 
@@ -92,12 +92,15 @@ function rndCheckerFill(img,millis,inc,canvas,color,fun) { //console.log(img);
     let t = 0;
     checker_timer = {
         "timer" : setInterval(() => {
-        if (fun !== undefined) fun();
-        checker_timer.seconds -= inc;
-        if (t < iter) checkerFill(t++,img,matrix,ctx,dim,dim); //drawTime(seconds,max_seconds);
-        else clearInterval(checker_timer.timer); //if (checker_timer.seconds <= 0)
-    },interval) ,
-    "seconds" : (millis/1000)
+            checker_timer.seconds -= inc;
+            if (callback1 !== null && callback1 !== undefined) callback1();
+            if (t < iter) checkerFill(t++,img,matrix,ctx,dim,dim); //drawTime(seconds,max_seconds);
+            else {
+                clearInterval(checker_timer.timer);
+                if (callback2 !== undefined) callback2();
+            } //if (checker_timer.seconds <= 0)
+        },interval) ,
+        "seconds" : (millis/1000)
     };
 
 }

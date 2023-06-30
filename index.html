@@ -8,17 +8,17 @@
 
     <body id="body">
         <div id="div-welcome" class="modal">
-            <div class="center-div">
+            <div class="top-div">
                 <button onclick="initGame(true)">Sound</button>
                 <button onclick="initGame(false)">No Sound</button>
             </div>
         </div>
         <div id="div-splash" class="modal">
-            <button id="audio-butt1" class="audio-toggle" onclick="toggleAudio()">Sound On</button>
-            <button id="help-butt1" onclick="window.location.assign('help.html')">How to Play</button>
-            <button id="login-butt" class="splash-butt" onclick="login()">Login with Lichess</button>
-            <button id="logout-butt" class="splash-butt" onclick="logout()">Logout</button>
-            <button id="enter-butt" class="splash-butt" onclick="enterGame()"></button>
+            <button id="audio-butt1" class="audio-toggle big-butt" onclick="toggleAudio()">Sound On</button>
+            <button id="help-butt1" class = "big-butt" onclick="window.location.assign('help.html')">How to Play</button>
+            <button id="login-butt" class="splash-butt big-butt" onclick="login()">Login with Lichess</button>
+            <button id="logout-butt" class="splash-butt big-butt" onclick="logout()">Logout</button>
+            <button id="enter-butt" class="splash-butt big-butt" onclick="enterGame()"></button>
             <br><br>
             <canvas id="splash-can"></canvas>
         </div>
