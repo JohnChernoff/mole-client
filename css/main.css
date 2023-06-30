@@ -224,8 +224,18 @@ body {
 }
 
 .big-butt {
-    width: 200px;
-    height: 50px;
+    float: left;
+    border: 1px solid green;
+    font-size: 24px;
+    padding: 32px 16px;
+    border-radius: 12px;
+    transition-duration: 0.4s;
+    /*  width: 200px; height: 50px; */
+}
+
+.big-butt:hover {
+    background-color: #4CAF50; /* Green */
+    color: white;
 }
 
 #div-time {

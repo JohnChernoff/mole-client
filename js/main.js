@@ -10,6 +10,8 @@ support for the Maxthon Browser
 ~OwenKraweki: (clock) bottom right
 ~OwenKraweki: and top right when it's opponents move
 
+Clarify current position in movelist
+
 arrows after move
 clock shift on flip
 
@@ -368,14 +370,14 @@ function notifyMole(mole) {
         h1.textContent = "You're the Mole!"
         h2.textContent = "Your job is to try and lose the game for your side, but be careful - " +
             "if the moves you make are too obviously bad, your teammates may try and vote you out."
-        mole_div.style.backgroundImage = 'url("img/mole-board.jpg")';
+        mole_div.style.backgroundImage = 'url("img/bkg/mole-board.jpg")';
         playClip(AUDIO_CLIPS.enum.IS_MOLE);
     }
     else {
         h1.textContent = "You're not the Mole!"
         h2.textContent = "Your job is to try and win the game for your side, but be careful - " +
             "there's a Mole on your team!"
-        mole_div.style.backgroundImage = 'url("img/not-mole.png")';
+        mole_div.style.backgroundImage = 'url("img/bkg/not-mole.png")';
         playClip(AUDIO_CLIPS.enum.NOT_MOLE);
     }
     mole_txt.appendChild(h1); mole_txt.appendChild(h2);
