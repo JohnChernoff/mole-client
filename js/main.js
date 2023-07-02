@@ -201,15 +201,14 @@ function pauseClip(clip) {
     if (clip !== undefined) clips[clip.index].pause();
 }
 
-function countdown(data) { //console.log(JSON.stringify(data));
-    if (data.title !== selected_game) return;
-    let max_seconds = data.seconds;
+function countdown(title,turn,max_seconds) { //console.log(JSON.stringify(data));
+    if (title !== selected_game) return;
     let millis = ((max_seconds) * 1000);
-    countdown_ctx.fillStyle = (data.turn === BLACK ? "white" : "black");
+    countdown_ctx.fillStyle = (turn === BLACK ? "white" : "black");
     countdown_ctx.fillRect(0,0,countdown_can.width,countdown_can.height);
     createImageBitmap(countdown_can).then(img => { //console.log(img);
         rndCheckerFill(img,millis,.1,time_can,rndColor(),() => {
-            time_txt.innerHTML = (data.turn === BLACK ? "Black" : "White") + ": " +
+            time_txt.innerHTML = (turn === BLACK ? "Black" : "White") + ": " +
                 Math.floor(checker_timer.seconds) + " seconds";
         })
     });
@@ -229,6 +228,7 @@ function initGame(audio) {
             });
             colorCycle(splash_screen,250);
             playClip(AUDIO_CLIPS.enum.INTRO);
+            animateMole(5000);
         });
     };
     splash_img.src = "img/bkg/mole-splash2a.png";
@@ -420,6 +420,7 @@ function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game)
                 zug_board.clearPromotion(cancelMove);
             }
             zug_board.updateBoard(game.currentFEN);
+            if (game.timeRemaining !== undefined) countdown(selected_game,game.turn,game.timeRemaining);
         }
         if (game.history !== undefined) updateMoveList(game.history);
         updatePlayTbl(game);

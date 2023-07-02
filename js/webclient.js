@@ -85,11 +85,11 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "info") handleMessage(JSON.stringify(data),SERV);
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
-    else if (type === "countdown") countdown(data);
+    //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     else if (type === "mole") notifyMole(data.msg === "true");
     else if (type === "top") updateHighScores(data);
     else if (type === "users") showPlayers(data.users);
-    else if (type === "phase") { console.log("New phase: " + data.msg); }
+    else if (type === "phase") { console.log("New phase: " + data.phase); updateGame(data); }
     else if (type === "status") { handleStatus(data.msg, data.source); }
     else if (type === "votelist") { handleVote(data.list, data.move, data.source); }
     else if (type === "color") { flipAtStart(data.msg === "black"); }

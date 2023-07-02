@@ -9,8 +9,8 @@
     <body id="body">
         <div id="div-welcome" class="modal">
             <div class="top-div">
-                <button onclick="initGame(true)">Sound</button>
-                <button onclick="initGame(false)">No Sound</button>
+                <button onclick="initGame(false)">Enter without Sound</button>
+                <button onclick="initGame(true)">Enter with Sound</button>
             </div>
         </div>
         <div id="div-splash" class="modal">
@@ -21,6 +21,7 @@
             <button id="enter-butt" class="splash-butt big-butt" onclick="enterGame()"></button>
             <br><br>
             <canvas id="splash-can"></canvas>
+            <div id="mole-sprite"></div>
         </div>
         <div id="div-highscores" class="modal">
             <button onclick="closeModalWindow(document.getElementById('div-highscores'))">Return</button>
@@ -92,9 +93,8 @@
             </div>
         </div>
 
-
-
         <script>let exports = {};</script>
+        <script type="text/javascript" src="js/anime.min.js"></script>
         <script type="text/javascript" src="js/oauth2-auth-code-pkce-master/pkce.js"></script>
         <script type="text/javascript" src="js/env.js"></script>
         <script type="text/javascript" src="js/lichess.js"></script>
@@ -103,6 +103,7 @@
         <script type="text/javascript" src="js/webclient.js"></script>
         <script type="text/javascript" src="js/zugboard.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
+
     </body>
 
 </html>

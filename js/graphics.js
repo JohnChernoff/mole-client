@@ -111,3 +111,44 @@ function checkerFill(i,img,mat,ctx,w,h) { //console.log(i + "," + img);
     let fx = (img.width / ctx.width), fy = (img.height / ctx.height);
     ctx.drawImage(img,x * fx,y * fy,w * fx,h * fy,x,y,w,h);
 }
+
+function animateMole(duration) {
+    const mole = document.getElementById("mole-sprite");
+    let x = "-44vw"; //"-262%";
+    let y = "33vh";
+
+    let mole_legs = mole.animate([
+        { background: 'url("img/sprites/molesprite1.png") center/cover'},
+        { background: 'url("img/sprites/molesprite2.png") center/cover'}
+    ], {
+        duration: 250,
+        direction: 'alternate',
+        iterations: 'Infinity'
+    });
+
+    let mole_ani = mole.animate([
+        { transform: "translateX(" + x + ")", offset: .5 },
+        { transform: "translateX(" + x + ") rotate(-90deg) scaleY(-1)"  },
+        { transform: "translate(" + x + "," + y + ") rotate(-90deg) scaleY(-1)" }
+    ], {
+        duration: duration,
+        fill: 'forwards'
+    });
+
+    mole_ani.finished.then( () => {
+        mole_legs.cancel();
+        mole.animate([
+            { opacity: "0" },
+        ], {
+            duration: 2500,
+            fill: 'forwards'
+        });
+        splash_screen.animate([
+            { backgroundImage: 'url("img/bkg/mole-splash2b.png")'}
+        ], {
+            duration: 2500, //easing: "cubic-bezier(0.42, 0, 1, 1)",
+            fill: 'forwards'
+        }).finished.then( () => { mole.style.visibility = "hidden"; });
+    });
+
+}
