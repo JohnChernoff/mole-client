@@ -54,7 +54,8 @@ function get2D(n, w) {
 }
 
 function shuffle2D(array) {
-    let w = array.length; let h = array[0].length; let n =  w * h; //console.log(w + "," + h + "," + n);
+    let w = array.length; let h = w; //array[0].length;
+    let n =  w * h; //console.log(w + "," + h + "," + n);
     for (let i = n - 1; i > 0; i--) {
         let c1 = get2D(i,w);
         const currentElement = array[c1.x][c1.y]; //console.log(JSON.stringify(currentElement));
@@ -66,7 +67,7 @@ function shuffle2D(array) {
     }
 }
 
-function rndCheckerFill(img,millis,inc,canvas,color,callback1, callback2) { //console.log(img);
+function rndCheckerFill(img,millis,inc,canvas,color,callback1,callback2) { //console.log("Check, millis: " +  millis + ", inc: " + inc);
     if (document.visibilityState !== "visible") return; //console.log("CheckerFilling...");
     if (checker_timer != undefined) clearInterval(checker_timer.timer);
 
@@ -75,7 +76,6 @@ function rndCheckerFill(img,millis,inc,canvas,color,callback1, callback2) { //co
     let iter = Math.pow(Math.floor(Math.sqrt(i)),2); //console.log("Iter: " + iter);
     canvas.width = iter; canvas.height = iter; //img.width = iter; img.height = iter;
     let dim = Math.floor(Math.sqrt(iter)); //iter = dim*dim;
-
     let matrix = new Array(dim);
     for (let x = 0; x < matrix.length; x++) {
         matrix[x] = new Array(dim);
@@ -118,8 +118,8 @@ function animateMole(duration) {
     let y = "33vh";
 
     let mole_legs = mole.animate([
-        { background: 'url("img/sprites/molesprite1.png") center/cover'},
-        { background: 'url("img/sprites/molesprite2.png") center/cover'}
+        { backgroundImage: 'url("img/sprites/molesprite1.png") '},
+        { backgroundImage: 'url("img/sprites/molesprite2.png") '}
     ], {
         duration: 250,
         direction: 'alternate',

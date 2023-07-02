@@ -1,7 +1,7 @@
 body {
     width: 99%;
     height: 99%;
-    background: black url("../img/bkg/moleback2.png");
+    background: black url("../img/bkg/moleback3.png");
     background-size: cover;
     font-family: monospace;
     overflow: hidden;
@@ -10,6 +10,19 @@ body {
 #div-main {
     border: thick solid #2f4f4f;
     background-color: black;
+}
+
+.modular_view > button {
+    font-size: larger;
+}
+
+.tab-butt {
+    height: 80%;
+    font-size: larger;
+    border-style: solid ;
+    border-color: white;
+    background-color: black;
+    color: white;
 }
 
 #div-splash {
@@ -41,7 +54,7 @@ body {
 }
 
 #mole-sprite {
-    background: url("../img/sprites/molesprite1.png");
+    background-image: url("../img/sprites/molesprite1.png");
     background-size: 100% 100%;
     position: absolute;
     width: 15%;
@@ -176,12 +189,8 @@ body {
 }
 
 #div-movelist > table {
-    width: 200px;
-    position: relative;
-    top: 12px;
-    margin-left: auto;
-    margin-right: auto;
     color: black;
+    font-size: x-large;
 }
 
 #div-movelist > table > tr > td {
@@ -211,7 +220,7 @@ body {
     padding: 5px 0;
     position: fixed;
     z-index: 1;
-    top: 55%;
+    bottom: 50%;
     left: 80%;
     margin-left: -60px;
     opacity: 1;
@@ -232,18 +241,19 @@ body {
 }
 
 #div-links {
-    height: 5vh;
+    height: 8vh;
 }
 
 .img-link {
     height: 100%;
-    width: 25%;
+    width: 50%;
 }
 
 .msg-class {
     overflow-y: scroll;
     height: 70vh;
-    background-color: black;
+    background: black; /* url("../img/bkg/molebox1.png") */
+    background-size: 100% 100%;
 }
 
 .vote-class {
@@ -251,6 +261,8 @@ body {
     height: 15vh;
     width: 100%;
     background-color: #2f4f4f;
+    text-align: left;
+    font-size: larger;
 }
 
 #div-commands {
@@ -309,16 +321,19 @@ body {
 #txt-time {
     position: relative;
     text-align: center;
-    top: 25%;
-    float: left;
+    font-size: larger;
     width: 50%;
-    height: 75%;
-    color: gray;
+    top: 50%;
+    transform: translateY(-50%);
+    float: left;
+    color: white;
 }
 
 #can-time {
-    position: absolute;
-    left: 50%;
+    position: relative;
+    width: 50%;
+    height: 100%;
+    float: left;
 }
 
 #splash-can {

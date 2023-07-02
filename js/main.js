@@ -289,7 +289,7 @@ function setLayout() {
         sidebar_left.style.left = "0px";
         sidebar_left.style.top = "0px";
         sidebar_left.style.width = "20vw";
-        sidebar_left.style.height = "99vh";
+        sidebar_left.style.height = "100vh";
 
         main_div_size = Math.floor(Math.min(window.innerWidth /2, window.innerHeight * .89));
         let extra_width = ((window.innerWidth/2) - main_div_size)/2;
@@ -300,18 +300,16 @@ function setLayout() {
         time_div.style.bottom = "1vh";
         time_div.style.width = main_div_size + "px";
         time_div.style.height = "7vh";
-        time_can.style.height = (Math.ceil(window.innerHeight * .07) + 1) + "px";
-        time_can.style.width = main_div_size/2 + "px";
 
         games_div.style.left = "80vw";
         games_div.style.top = "0px";
         games_div.style.width = "20vw";
-        games_div.style.height = "49vh";
+        games_div.style.height = "50vh";
 
         moves_div.style.left = "80vw";
         moves_div.style.top = "50vh";
         moves_div.style.width = "20vw";
-        moves_div.style.height = "49vh";
+        moves_div.style.height = "50vh";
     }
     else {
         layout_style = LAYOUT_STYLES.VERTICAL;
@@ -331,8 +329,6 @@ function setLayout() {
         time_div.style.bottom = "";
         time_div.style.width = main_div_size + "px";
         time_div.style.height = clock_height + "px";
-        time_can.style.height = (clock_height + 1) + "px";
-        time_can.style.width = main_div_size/2 + "px";
 
         games_div.style.left = "33vw";
         games_div.style.top = (lower_div_height + clock_height + 20) + "px";
