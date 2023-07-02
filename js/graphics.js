@@ -144,7 +144,7 @@ function animateMole(duration) {
             fill: 'forwards'
         });
         splash_screen.animate([
-            { backgroundImage: 'url("img/bkg/mole-splash2b.png")'}
+            { backgroundImage: 'url("img/bkg/mole-splash2c.png")'}
         ], {
             duration: 2500, //easing: "cubic-bezier(0.42, 0, 1, 1)",
             fill: 'forwards'
