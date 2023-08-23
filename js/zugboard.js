@@ -156,9 +156,9 @@ class ZugBoard {
     }
 
     updateBoard(fen) { //console.log("Updating board...");
-        zug_board.clearOverlay();
-        zug_board.setFEN(fen !== undefined ? fen : this.currentFEN);
-        zug_board.drawGridBoard();
+        this.clearOverlay();
+        this.setFEN(fen !== undefined ? fen : this.currentFEN);
+        this.drawGridBoard();
     }
 
     getMousePos(wrapper, e) {

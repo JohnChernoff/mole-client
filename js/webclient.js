@@ -9,7 +9,7 @@ const SOCK_EVENT = {
 const SERV = "serv";
 
 function startSocket() {
-    openSocket(MOLE_ENV.host,sockHandler);
+    openSocket(MOLE_ENV.host,gameSockHandler);
 }
 
 function openSocket(url,sockHandler) {
@@ -37,14 +37,14 @@ function openSocket(url,sockHandler) {
     return true;
 }
 
-function sockHandler(event_type,event) {
+function gameSockHandler(event_type,event) {
     switch (event_type) {
         case SOCK_EVENT.CONNECTION_ALREADY_OPEN:
             console.log(SOCK_EVENT.CONNECTION_ALREADY_OPEN); break;
         case SOCK_EVENT.CONNECTION_OPEN:
             console.log(SOCK_EVENT.CONNECTION_OPEN);
             if (event.data !== undefined) { handleMessage(event.data,SERV); }
-            send("login",oauth_token); //send("login",prompt("Enter your name"));
+            if (obs) send("obs",obs); else send("login",oauth_token);
             break;
         case SOCK_EVENT.CONNECTION_INCOMING_MSG:
             let json = JSON.parse(event.data);
@@ -86,7 +86,7 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
-    else if (type === "mole") notifyMole(data.msg === "true");
+    else if (type === "mole" && !obs) notifyMole(data.msg === "true");
     else if (type === "top") updateHighScores(data);
     else if (type === "users") showPlayers(data.users);
     else if (type === "phase") { console.log("New phase: " + data.phase); updateGame(data); }

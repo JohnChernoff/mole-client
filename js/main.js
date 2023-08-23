@@ -79,7 +79,6 @@ let logout_butt = document.getElementById("logout-butt");
 let enter_butt = document.getElementById("enter-butt");
 let welcome_screen = document.getElementById("div-welcome");
 let splash_screen = document.getElementById("div-splash");
-let splash_can = document.getElementById("splash-can");
 let splash_img = new Image();
 let BLACK = 0, WHITE = 1;
 let main_board = [];
@@ -88,12 +87,17 @@ let games;
 let selected_game = "";
 let selected_player;
 let zug_board;
-let lichess = new LichessLogger("https://lichess.org", "molechess.com"); //"example.com");
-let oauth_token = null;
+let lichess = new LichessLogger("https://lichess.org", "molechess.com");
 let starting = false;
+
+let oauth_token;
+const obs =  new URL(document.location).searchParams.get("obs");
+if (obs) initGame(false);
+
 document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState == "visible") {
         console.log("tab is active");
+        send("update", selected_game);
     } else {
         console.log("tab is inactive");
         if (checker_timer != undefined) clearInterval(checker_timer);
@@ -218,7 +222,6 @@ function initGame(audio) {
     toggleAudio(audio);
     splash_img.onload = () => {
         console.log("Loaded Image: " + splash_img);
-        //rndCheckerFill(splash_img,1000,.001,splash_can,"black", null,() => { splash_can.style.visibility = "hidden"; });
         loadAudio(() => {
             zug_board = new ZugBoard(main_board_div,sendMove,() => {
                 console.log("Pieces loaded");
@@ -226,9 +229,14 @@ function initGame(audio) {
             },{ board_tex: "plain", pieces: "comp" },{
                 square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
             });
-            colorCycle(splash_screen,250);
-            playClip(AUDIO_CLIPS.enum.INTRO);
-            animateMole(5000);
+            if (obs) {
+                enterGame();
+            }
+            else {
+                colorCycle(splash_screen,250);
+                playClip(AUDIO_CLIPS.enum.INTRO);
+                animateMole(5000);
+            }
         });
     };
     splash_img.src = "img/bkg/mole-splash2a.png";
@@ -236,7 +244,7 @@ function initGame(audio) {
 
 function showLogin() {
     logout_butt.style.display = "inline"; enter_butt.style.display = "none";
-    if (oauth_token === null) {
+    if (!oauth_token) {
         login_butt.style.display = "inline";
     }
     else {
@@ -273,7 +281,7 @@ function enterGame() {
     stopCycle();
     splash_screen.style.display = "none";
     window.onresize = () => { resize(); }; resize();
-    if (oauth_token !== null) startSocket();
+    if (oauth_token || obs) startSocket();
     fadeAndPlay(AUDIO_CLIPS.enum.BUMP);
 }
 
@@ -409,7 +417,7 @@ function exportPGN() {
 }
 
 function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game));
-    if (game.title === selected_game) {
+    if (game.title === selected_game || obs) {
         if (game.currentFEN !== undefined) {
             if (game.currentFEN !== zug_board.currentFEN) {
                 let cancelMove = zug_board.promoting;
@@ -541,7 +549,9 @@ function getHeaders(txt) {
 function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     let play_row = document.createElement("tr");
     let play_name = document.createElement("td");
-    play_name.innerHTML = pdata.away ? pdata.user.name.strike() : pdata.user.name;
+    play_name.innerHTML = pdata.user.name;
+    if (pdata.away || pdata.kicked) play_name.style.setProperty('text-decoration', 'line-through');
+
     play_name.style.color = "black";
     play_name.style.background = pdata.play_col;
     if (selected_player !== undefined && selected_player.name === pdata.user.name && selected_player.title === title) {
@@ -699,6 +709,7 @@ function handleStatus(msg,src) {
 }
 
 function selectTab(title) { //TODO: don't switch tabs?
+    if (!title || title === "") title = "serv";
     let selected = null;
     let tab_areas = document.getElementsByClassName(TAB_PFX);
     for (const area of tab_areas) {

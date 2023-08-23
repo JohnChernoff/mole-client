@@ -70,7 +70,7 @@ body {
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     color: white;
-    background: grey url("../img/bkg/mole-splash1f.png");
+    background: grey url("../img/bkg/mole-splash1a.png");
     background-size: 100% 100%;
 }
 
@@ -128,7 +128,15 @@ body {
     color: white;
 }
 
+.obs_view {
+    width: 100vw;
+    height: 100vh;
+}
+
 .board-view {
+    display: grid;
+    grid-template-columns: repeat(8,1fr);
+    grid-template-rows: repeat(8,auto);
     width: 100%; height: 100%;
 }
 
@@ -136,12 +144,6 @@ body {
     position: absolute;
     width: 100%; height: 100%;
     top: 0; left: 0;
-}
-
-#main-board {
-    display: grid;
-    grid-template-columns: repeat(8,1fr);
-    grid-template-rows: repeat(8,auto);
 }
 
 #main-board > div > canvas {
@@ -204,10 +206,11 @@ body {
     display: inline-block;
     border-bottom: 1px dotted black;
 
-    width: 40%;
+    width: 50%;
     color: white;
     background-color: black;
     float: left;
+    font-size: larger;
 }
 
 #div-movelist > table > tr > td .tooltiptext {
