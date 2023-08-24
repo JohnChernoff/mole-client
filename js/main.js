@@ -52,8 +52,7 @@ let current_tab = "serv";
 let current_ply = 0;
 let current_hover = null;
 let move_cells = [];
-let mole_div = document.getElementById("div-mole");
-let mole_txt = document.getElementById("mole-txt");
+
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
@@ -79,6 +78,11 @@ let logout_butt = document.getElementById("logout-butt");
 let enter_butt = document.getElementById("enter-butt");
 let welcome_screen = document.getElementById("div-welcome");
 let splash_screen = document.getElementById("div-splash");
+let turntime_range = document.getElementById("range-time");
+let turntime_out = document.getElementById("turn-time-out");
+let maxplayers_range = document.getElementById("range-max-players");
+let maxplayers_out = document.getElementById("max-players-out");
+
 let splash_img = new Image();
 let BLACK = 0, WHITE = 1;
 let main_board = [];
@@ -93,6 +97,9 @@ let starting = false;
 let oauth_token;
 const obs =  new URL(document.location).searchParams.get("obs");
 if (obs) initGame(false);
+
+turntime_range.oninput = () => { turntime_out.innerHTML = turntime_range.value; };
+maxplayers_range.oninput = () => { maxplayers_out.innerHTML = maxplayers_range.value; };
 
 document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState == "visible") {
@@ -364,26 +371,8 @@ function sendMove(move) {
 }
 
 function notifyMole(mole) {
-    for (const e of mole_txt.getElementsByClassName("mole-header")) mole_txt.removeChild(e);
-    let h1 = document.createElement("h1"); h1.className = "mole-header";
-    let h2 = document.createElement("h2"); h2.className = "mole-header";
-    if (mole) {
-        h1.textContent = "You're the Mole!"
-        h2.textContent = "Your job is to try and lose the game for your side, but be careful - " +
-            "if the moves you make are too obviously bad, your teammates may try and vote you out."
-        mole_div.style.backgroundImage = 'url("img/bkg/mole-board.jpg")';
-        playClip(AUDIO_CLIPS.enum.IS_MOLE);
-    }
-    else {
-        h1.textContent = "You're not the Mole!"
-        h2.textContent = "Your job is to try and win the game for your side, but be careful - " +
-            "there's a Mole on your team!"
-        mole_div.style.backgroundImage = 'url("img/bkg/not-mole.png")';
-        playClip(AUDIO_CLIPS.enum.NOT_MOLE);
-    }
-    mole_txt.appendChild(h1); mole_txt.appendChild(h2);
-    mole_div.style.display = "block"; //setTimeout(() => { mole_div.style.display = "none"; },5000);
-
+if (mole) document.getElementById("div-mole").style.display = "block";
+else document.getElementById("div-not-mole").style.display = "block";
 }
 
 function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
@@ -782,6 +771,30 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
         tbody.appendChild(row);
     }
     area.votes.appendChild(tbody);
+}
+
+function showOptions() { //TODO: initialize current options
+    document.getElementById("div-opt").style.display = "block";
+    document.getElementById("turn-time-out").innerHTML = document.getElementById("range-time").value;
+    document.getElementById("max-players-out").innerHTML = document.getElementById("range-max-players").value;
+}
+
+function cancelOptions() {
+    closeModalWindow(document.getElementById("div-opt"));
+}
+
+function submitOptions() {
+    send("opt",{
+        game: selected_game,
+        time: document.getElementById("range-time").value,
+        max_players: document.getElementById("range-max-players").value,
+        mole_veto: document.getElementById("chk-mole-veto").checked,
+        hide_move_vote: document.getElementById("chk-hide-move-vote").checked,
+        mole_predict_move: document.getElementById("chk-mole-move-prediction").checked,
+        mole_predict_piece: document.getElementById("chk-mole-piece-prediction").checked,
+        team_predict_move: document.getElementById("chk-team-move-prediction").checked
+    });
+    closeModalWindow(document.getElementById("div-opt"));
 }
 
 let toggle = true;

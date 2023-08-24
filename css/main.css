@@ -291,10 +291,20 @@ body {
     background-position: center;
 }
 
-#mole-txt {
+.mole-txt {
     color: mintcream;
     background: black;
     width: 33%;
+}
+
+#div-mole {
+    background-image: url("../img/bkg/mole-board.jpg");
+    background-size: cover;
+}
+
+#div-not-mole {
+    background-image: url("../img/bkg/not-mole.png");
+    background-size: cover;
 }
 
 .modal {
@@ -307,6 +317,7 @@ body {
     z-index: 1; /* Sit on top */
     overflow: auto; /* Enable scroll if needed */
     background-color: #2f4f4f;
+    color: snow;
 }
 
 #div-highscores > table > tr > td {

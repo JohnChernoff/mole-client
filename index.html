@@ -37,9 +37,51 @@
             </iframe>
         </div>
         <div id="div-mole" class="modal">
-            <div id="mole-txt">
+            <div class="mole-txt">
+                <h1>You're the Mole!</h1>
+                <h2> Your job is to try and lose the game for your side, but be careful -
+                    if the moves you make are too obviously bad, your teammates may try and vote you out. </h2>
                 <button onclick="closeModalWindow(document.getElementById('div-mole'))">OK</button> <br>
             </div>
+        </div>
+        <div id="div-not-mole" class="modal">
+            <div class="mole-txt">
+                <h1>You're not the Mole!</h1>
+                <h2> Your job is to try and win the game for your side, but be careful -
+                    there's a Mole on your team! </h2>
+                <button onclick="closeModalWindow(document.getElementById('div-not-mole'))">OK</button> <br>
+            </div>
+        </div>
+        <div id="div-opt" class="modal">
+            <input type="checkbox" id="chk-hide-move-vote">
+            <label for="chk-hide-move-vote">Hide Current Move Vote </label><br>
+
+            <input type="checkbox" id="chk-mole-veto">
+            <label for="chk-mole-veto">Mole Move Veto </label><br>
+
+            <input type="checkbox" id="chk-mole-piece-prediction">
+            <label for="chk-mole-piece-prediction">Mole Piece Prediction </label><br>
+
+            <input type="checkbox" id="chk-mole-move-prediction">
+            <label for="chk-mole-move-prediction">Mole Move Prediction </label><br>
+
+            <input type="checkbox" id="chk-team-move-prediction">
+            <label for="chk-team-move-prediction">Team Move Prediction </label><br>
+
+            <br><br>
+
+            <label for="range-time">Max Players per Side: <span id="max-players-out"></span> </label><br>
+            <input type="range" id="range-max-players" min="3" max="16" value="6" step="1">
+
+            <br><br>
+
+            <label for="range-time">Time per Turn (in seconds):  <span id="turn-time-out"></span> </label><br>
+            <input type="range" id="range-time" min="12" max="300" value="30" step="1">
+
+            <br><br>
+
+            <button onclick="submitOptions()">Update</button>
+            <button onclick="cancelOptions()">Cancel</button>
         </div>
         <div id="div-time">
             <span id="txt-time"> Welcome to MoleChess 0.1! </span>
@@ -77,8 +119,8 @@
             <br><br>
             <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
             <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
-            <button id="time-butt" onclick="setTime()">Set Time</button>
             <button id="flip-butt" onclick="flipBoard()">Flip</button>
+            <button id="opt-butt" onclick="showOptions()">Options</button>
             <br><br>
             <label for="select-games">Game Title: </label>
             <select id="select-games"></select>
