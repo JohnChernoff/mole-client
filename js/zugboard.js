@@ -10,17 +10,15 @@ function ZugSquare(piece,color,canvas) {
 
 class ZugBoard {
     static PIECE_CHRS = "kqrbnp-PNBRQK";
-    static PAWN = 1;
 
-    constructor(wrapper,move_handler,callback,style,colors) {
+    constructor(wrapper,move_handler,callback,style,colors) { //for (let e of wrapper.childNodes) wrapper.removeChild(e);
         this.board = [];
-        this.style = style;
+        this.board_style = style;
         this.piece_imgs = [];
         this.light_tex = new Image(); this.dark_tex = new Image();
         this.board_background_color = [0,0,0];
         this.billinear = false;
         this.svg_pieces = false;
-        //this.square_width = 0; this.square_height = 0;
         this.pieces_loaded = 0;
         this.max_files = 8;
         this.max_ranks = 8;
@@ -31,16 +29,16 @@ class ZugBoard {
         this.povBlack = false;
         this.currentFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         if (colors !== undefined) {
-            this.black_square_color = ZugBoard.hexToRgb(colors.square.black);
-            this.white_square_color = ZugBoard.hexToRgb(colors.square.white);
+            this.black_square_color = colors.square.black; //ZugBoard.hexToRgb(colors.square.black);
+            this.white_square_color = colors.square.white; //ZugBoard.hexToRgb(colors.square.white);
             this.black_piece_color = colors.piece.black;
             this.white_piece_color = colors.piece.white;
         }
         else {
             this.white_piece_color = "#ffffff";
             this.black_piece_color = "#000000";
-            this.white_square_color = ZugBoard.rgb(92,155,92);
-            this.black_square_color = ZugBoard.rgb(155,92,92);
+            this.white_square_color = "#2F4F4F"; //ZugBoard.rgb(92,155,92);
+            this.black_square_color = "#AAAA88"; //"ZugBoard.rgb(155,92,92);
         }
         this.current_promotion = null;
         this.promoting = false;
@@ -51,11 +49,17 @@ class ZugBoard {
         this.overlay.style.left = "0";
         this.overlay.style.width = "100%";
         this.overlay.style.height = "100%";
-        //this.overlay.width = wrapper.clientWidth; this.overlay.height = wrapper.clientHeight;
         this.overlay.style.pointerEvents = "none";
         this.overlay_ctx = this.overlay.getContext("2d");
         wrapper.appendChild(this.overlay);
         this.initGridBoard(wrapper,move_handler);
+    }
+
+    setPieceStyle(piece_style) {
+        if (this.board_style.pieces !== piece_style) { console.log("New Style: " + piece_style);
+            this.board_style.pieces = piece_style;
+            this.loadImages(() => { this.updateBoard(); });
+        }
     }
 
     alg2Coord(move) {
@@ -110,8 +114,9 @@ class ZugBoard {
 
     loadImages(callback) {
         console.log("Loading pieces...");
-        this.light_tex.src = "img/tex/" + this.style.board_tex + "/light_tex.png";
-        this.dark_tex.src = "img/tex/" + this.style.board_tex + "/dark_tex.png";
+        this.pieces_loaded = 0;
+        this.light_tex.src = "img/tex/" + this.board_style.board_tex + "/light_tex.png";
+        this.dark_tex.src = "img/tex/" + this.board_style.board_tex + "/dark_tex.png";
         for (let i=0;i<6;i++) {
             this.piece_imgs[i] = { black: new Image(), white: new Image() };
             this.fetchPiece("b",i+1,this.piece_imgs[i].black,callback);
@@ -122,7 +127,7 @@ class ZugBoard {
     fetchPiece(color,i,img,callback) {
         let id = color + i;
         if (this.svg_pieces) {
-            fetch("img/pieces/" + this.style.pieces + "/" + id +  ".svg", {cache: "reload"}).
+            fetch("img/pieces/" + this.board_style.pieces + "/" + id +  ".svg", {cache: "reload"}).
             then(response => response.text()).
             then(text => {
                 let svg = document.createElement("template");
@@ -135,7 +140,7 @@ class ZugBoard {
             });
         }
         else {
-            img.src = "img/pieces/" + this.style.pieces + "/" + id + ".png";
+            img.src = "img/pieces/" + this.board_style.pieces + "/" + id + ".png";
             img.onload = () => {  if (++this.pieces_loaded >= 12) { callback(); } };
         }
     }
@@ -365,14 +370,18 @@ class ZugBoard {
     drawNormalSquares() {
         for (let y = 0; y < this.max_ranks; y++) {
             for (let x = 0; x < this.max_files; x++) {
-                //this.board[x][y].ctx.fillStyle = this.board[x][y].color;
-                //this.board[x][y].ctx.fillRect(0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
-                let bkg_img = this.board[x][y].color === this.black_square_color ? this.dark_tex : this.light_tex;
-                this.board[x][y].ctx.drawImage(bkg_img,0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
+
+                //let bkg_img = this.board[x][y].color === this.black_square_color ? this.dark_tex : this.light_tex;
+                //this.board[x][y].ctx.drawImage(bkg_img,0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
+
+                let bkg_color = ((x % 2) !== (y % 2)) ? this.black_square_color : this.white_square_color;
+                this.board[x][y].ctx.fillStyle = bkg_color;
+                this.board[x][y].ctx.fillRect(0,0,this.board[x][y].canvas.width,this.board[x][y].canvas.height);
+
                 if (this.board[x][y].selected) {
                     let ctx = this.board[x][y].ctx;
                     ctx.strokeStyle = "rgb(255, 255, 0)";
-                    ctx.lineWidth = "15";
+                    ctx.lineWidth = 15;
                     ctx.strokeRect(0, 0, this.board[x][y].canvas.width, this.board[x][y].canvas.height);
                 }
             }
@@ -533,8 +542,7 @@ class ZugBoard {
         return Math.sqrt(x2 + y2);
     }
 
-    static calcAngle(coords) {
-        //let dist = ZugBoard.calcDistance(coords);
+    static calcAngle(coords) { //let dist = ZugBoard.calcDistance(coords);
         return Math.atan2((coords.to.y - coords.from.y),(coords.to.x - coords.from.x));
     }
 }

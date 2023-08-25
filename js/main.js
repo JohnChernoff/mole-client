@@ -82,7 +82,11 @@ let turntime_range = document.getElementById("range-time");
 let turntime_out = document.getElementById("turn-time-out");
 let maxplayers_range = document.getElementById("range-max-players");
 let maxplayers_out = document.getElementById("max-players-out");
+let select_piece_style = document.getElementById("select-piece-style");
+let color_dark_square = document.getElementById("color-dark-square");
+let color_light_square = document.getElementById("color-light-square");
 
+let current_board_style;
 let splash_img = new Image();
 let BLACK = 0, WHITE = 1;
 let main_board = [];
@@ -100,6 +104,9 @@ if (obs) initGame(false);
 
 turntime_range.oninput = () => { turntime_out.innerHTML = turntime_range.value; };
 maxplayers_range.oninput = () => { maxplayers_out.innerHTML = maxplayers_range.value; };
+select_piece_style.onchange = () => { zug_board.setPieceStyle(select_piece_style.value); };
+color_dark_square.onchange = () => { zug_board.black_square_color = color_dark_square.value; zug_board.updateBoard(); };
+color_light_square.onchange = () => { zug_board.white_square_color = color_light_square.value; zug_board.updateBoard(); };
 
 document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState == "visible") {
@@ -233,7 +240,7 @@ function initGame(audio) {
             zug_board = new ZugBoard(main_board_div,sendMove,() => {
                 console.log("Pieces loaded");
                 initLichess().then(() => showLogin());
-            },{ board_tex: "plain", pieces: "comp" },{
+            },{ board_tex: "plain", pieces: "standard-mole" },{
                 square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
             });
             if (obs) {
@@ -307,6 +314,7 @@ function setLayout() {
         sidebar_left.style.height = "100vh";
 
         main_div_size = Math.floor(Math.min(window.innerWidth /2, window.innerHeight * .89));
+        main_div_size -= (main_div_size % 8); //to make squares equally divisible in the grid
         let extra_width = ((window.innerWidth/2) - main_div_size)/2;
         main_div.style.left = Math.floor((window.innerWidth * .25) + (extra_width > 0 ? extra_width : 0)) + "px";
 
@@ -777,10 +785,24 @@ function showOptions() { //TODO: initialize current options
     document.getElementById("div-opt").style.display = "block";
     document.getElementById("turn-time-out").innerHTML = document.getElementById("range-time").value;
     document.getElementById("max-players-out").innerHTML = document.getElementById("range-max-players").value;
+
+    current_board_style = {
+        dark_square :  zug_board.black_square_color,
+        light_square : zug_board.white_square_color,
+        piece_style : zug_board.board_style.pieces
+    };
+
+    color_dark_square.value = current_board_style.dark_square;
+    color_light_square.value = current_board_style.light_square;
+    select_piece_style.value = current_board_style.piece_style;
 }
 
 function cancelOptions() {
     closeModalWindow(document.getElementById("div-opt"));
+    zug_board.setPieceStyle(current_board_style.piece_style);
+    zug_board.black_square_color = current_board_style.dark_square;
+    zug_board.white_square_color = current_board_style.light_square;
+    zug_board.updateBoard();
 }
 
 function submitOptions() {

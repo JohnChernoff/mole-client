@@ -8,7 +8,7 @@ body {
 }
 
 #div-main {
-    border: thick solid #2f4f4f;
+    /* border: thick ridge #2f4f4f; */
     background-color: black;
 }
 
