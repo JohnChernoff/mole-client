@@ -114,7 +114,7 @@ function checkerFill(i,img,mat,ctx,w,h) { //console.log(i + "," + img);
 
 function animateMole(duration) {
     const mole = document.getElementById("mole-sprite");
-    let x = "-44vw"; //"-262%";
+    let x = "-44vw";
     let y = "33vh";
 
     let mole_legs = mole.animate([
@@ -152,3 +152,46 @@ function animateMole(duration) {
     });
 
 }
+
+function animateDefection(duration,player) {
+
+    main_div.style.display = "none";
+    div_defect.style.display = "block";
+
+    let color_txt = player.game_col ? "white" : "black";
+    document.getElementById("defect-txt").innerHTML = player.user.name + " defects to " + color_txt + "!";
+
+    const mole = document.getElementById("mole-defect-sprite");
+    mole.style.top = player.game_col ? "60%" : "50%";
+
+    let mole_legs = mole.animate([
+        { backgroundImage: 'url("img/sprites/molesprite1.png") '},
+        { backgroundImage: 'url("img/sprites/molesprite2.png") '}
+    ], {
+        duration: 250,
+        direction: 'alternate',
+        iterations: 'Infinity'
+    });
+
+    let gradient =
+        "linear-gradient(to " + (player.game_col  ? "top" : "bottom") + ", rgba(0,0,0,0) 20%,rgba(0,0,0,.95) 80%)";
+    let bkg_ani = div_defect_overlay.animate([
+        { background: gradient, offset: 1 },
+    ], {
+        duration: duration,
+    });
+
+    let x = "-" + div_defect.clientWidth + "px";
+    let mole_ani = mole.animate([
+        { transform: "translateX(" + x + ")", offset: 1 },
+    ], {
+        duration: duration,
+    });
+
+    mole_ani.finished.then( () => {
+        mole_legs.cancel(); bkg_ani.cancel();
+        main_div.style.display = "block";
+        div_defect.style.display = "none";
+    });
+}
+

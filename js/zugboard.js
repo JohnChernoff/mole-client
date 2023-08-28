@@ -9,16 +9,17 @@ function ZugSquare(piece,color,canvas) {
 }
 
 class ZugBoard {
+    static PIECE_FILE_CHRS = "PNBRQK";
     static PIECE_CHRS = "kqrbnp-PNBRQK";
 
-    constructor(wrapper,move_handler,callback,style,colors) { //for (let e of wrapper.childNodes) wrapper.removeChild(e);
+    constructor(wrapper,move_handler,callback,style,colors) {
         this.board = [];
         this.board_style = style;
         this.piece_imgs = [];
         this.light_tex = new Image(); this.dark_tex = new Image();
         this.board_background_color = [0,0,0];
         this.billinear = false;
-        this.svg_pieces = false;
+        this.img_format = ".png";
         this.pieces_loaded = 0;
         this.max_files = 8;
         this.max_ranks = 8;
@@ -55,11 +56,9 @@ class ZugBoard {
         this.initGridBoard(wrapper,move_handler);
     }
 
-    setPieceStyle(piece_style) {
-        if (this.board_style.pieces !== piece_style) { console.log("New Style: " + piece_style);
-            this.board_style.pieces = piece_style;
-            this.loadImages(() => { this.updateBoard(); });
-        }
+    setBoardStyle(style) {
+        this.board_style = style;
+        this.loadImages(() => { this.updateBoard(); });
     }
 
     alg2Coord(move) {
@@ -125,8 +124,8 @@ class ZugBoard {
     }
 
     fetchPiece(color,i,img,callback) {
-        let id = color + i;
-        if (this.svg_pieces) {
+        let id = color + ZugBoard.PIECE_FILE_CHRS.charAt(i-1);
+        if (this.img_format === ".svg") {
             fetch("img/pieces/" + this.board_style.pieces + "/" + id +  ".svg", {cache: "reload"}).
             then(response => response.text()).
             then(text => {
@@ -140,7 +139,10 @@ class ZugBoard {
             });
         }
         else {
-            img.src = "img/pieces/" + this.board_style.pieces + "/" + id + ".png";
+            if (i === 1 && this.board_style.pawns) {
+                img.src = "img/pieces/" + this.board_style.pawns + "/" + id + this.img_format;
+            }
+            else img.src = "img/pieces/" + this.board_style.pieces + "/" + id + this.img_format;
             img.onload = () => {  if (++this.pieces_loaded >= 12) { callback(); } };
         }
     }
@@ -392,7 +394,7 @@ class ZugBoard {
         let square_piece = square.promotionPiece != null? square.promotionPiece : square.piece;
         if (square_piece !== 0 && (square.promotionPiece != null || square.visible)) {
             let piece_width,piece_x,piece_height,piece_y;
-            if (this.svg_pieces) {
+            if (this.img_format === ".svg") {
                 piece_width = square.canvas.width/2; piece_x = square.canvas.width/4;
                 piece_height = square.canvas.height/2; piece_y = square.canvas.height/3;
             }
@@ -410,7 +412,7 @@ class ZugBoard {
     drawFloatingPiece(square, x, y) {
         if (square.piece !== 0) {
             let piece_width, piece_height;
-            if (this.svg_pieces) {
+            if (this.img_format === ".svg") {
                 piece_width = square.canvas.width / 2;
                 piece_height = square.canvas.height / 2;
             }

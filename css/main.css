@@ -8,7 +8,6 @@ body {
 }
 
 #div-main {
-    /* border: thick ridge #2f4f4f; */
     background-color: black;
 }
 
@@ -53,14 +52,43 @@ body {
     color: white;
 }
 
-#mole-sprite {
+.mole-sprites {
     background-image: url("../img/sprites/molesprite1.png");
     background-size: 100% 100%;
     position: absolute;
     width: 15%;
     height: 10%;
+}
+
+#mole-sprite {
     right: 15%;
     top: 10%;
+}
+
+#mole-defect-sprite {
+    right: 0;
+    top: 50%;
+}
+
+#defect-txt {
+    font-size: xxx-large;
+    width: 100%;
+    height: 20%;
+}
+
+#div-defect-anim {
+    width: 100%;
+    height: 80%;
+    background-image: url("../img/bkg/chessboard1.png");
+    background-size: cover;
+    background-repeat: round;
+    overflow: hidden;
+}
+
+#defect-overlay {
+    width: 100%;
+    height: 100%;
+    background: black;
 }
 
 #div-welcome {

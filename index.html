@@ -21,7 +21,7 @@
             <button id="enter-butt" class="splash-butt big-butt" onclick="enterGame()"></button>
             <br><br>
             <canvas id="splash-can"></canvas>
-            <div id="mole-sprite"></div>
+            <div id="mole-sprite" class="mole-sprites"></div>
         </div>
         <div id="div-highscores" class="modal">
             <button onclick="closeModalWindow(document.getElementById('div-highscores'))">Return</button>
@@ -52,6 +52,13 @@
                 <button onclick="closeModalWindow(document.getElementById('div-not-mole'))">OK</button> <br>
             </div>
         </div>
+        <div id="div-defect" class="modal">
+            <div id="defect-txt"></div>
+            <div id="div-defect-anim">
+                <div id="defect-overlay"> </div>
+            </div>
+            <div id="mole-defect-sprite" class="mole-sprites"></div>
+        </div>
         <div id="div-opt" class="modal">
             <input type="checkbox" id="chk-hide-move-vote">
             <label for="chk-hide-move-vote">Hide Current Move Vote </label><br>
@@ -67,6 +74,9 @@
 
             <input type="checkbox" id="chk-team-move-prediction">
             <label for="chk-team-move-prediction">Team Move Prediction </label><br>
+
+            <input type="checkbox" id="chk-mole-pawns">
+            <label for="chk-mole-pawns">Mole Pawns </label><br>
 
             <br><br>
 
@@ -86,20 +96,15 @@
             <input type="color" id="color-light-square">
             <label for="color-light-square"> Light Squares </label><br>
 
-            <input type="color" id="color-black-piece">
-            <label for="color-black-piece"> Black Pieces </label><br>
-
-            <input type="color" id="color-white-piece">
-            <label for="color-white-piece"> White Pieces </label><br>
-
             <br><br>
 
             <label for="select-piece-style"> Board Style :</label>
             <select id="select-piece-style">
-                <option value="standard-mole">Standard</option>
-                <option value="leipzig-mole">Leipzig</option>
+                <option value="companion">Standard</option>
+                <option value="leipzig">Leipzig</option>
                 <option value="calif">California</option>
                 <option value="dub">Dubrovny</option>
+                <option value="horsey">Horsey</option>
             </select>
 
             <br><br>

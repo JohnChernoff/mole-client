@@ -85,6 +85,9 @@ let maxplayers_out = document.getElementById("max-players-out");
 let select_piece_style = document.getElementById("select-piece-style");
 let color_dark_square = document.getElementById("color-dark-square");
 let color_light_square = document.getElementById("color-light-square");
+let mole_pawns = document.getElementById("chk-mole-pawns");
+let div_defect = document.getElementById("div-defect");
+let div_defect_overlay = document.getElementById("defect-overlay");
 
 let current_board_style;
 let splash_img = new Image();
@@ -104,9 +107,17 @@ if (obs) initGame(false);
 
 turntime_range.oninput = () => { turntime_out.innerHTML = turntime_range.value; };
 maxplayers_range.oninput = () => { maxplayers_out.innerHTML = maxplayers_range.value; };
-select_piece_style.onchange = () => { zug_board.setPieceStyle(select_piece_style.value); };
-color_dark_square.onchange = () => { zug_board.black_square_color = color_dark_square.value; zug_board.updateBoard(); };
-color_light_square.onchange = () => { zug_board.white_square_color = color_light_square.value; zug_board.updateBoard(); };
+mole_pawns.onchange = select_piece_style.onchange = () => {
+    zug_board.setBoardStyle(
+        { board_tex: "plain", pieces: select_piece_style.value, pawns: mole_pawns.checked ? "mole-pawns" : undefined }
+    );
+};
+color_dark_square.onchange = () => {
+    zug_board.black_square_color = color_dark_square.value; zug_board.updateBoard();
+};
+color_light_square.onchange = () => {
+    zug_board.white_square_color = color_light_square.value; zug_board.updateBoard();
+};
 
 document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState == "visible") {
@@ -240,8 +251,13 @@ function initGame(audio) {
             zug_board = new ZugBoard(main_board_div,sendMove,() => {
                 console.log("Pieces loaded");
                 initLichess().then(() => showLogin());
-            },{ board_tex: "plain", pieces: "standard-mole" },{
-                square: { black: "#2F4F4F", white: "#AAAA88" }, piece: { black: "#000000", white: "#FFFFFF"}
+            },{
+                board_tex: "plain",
+                pieces: select_piece_style.value,
+                pawns: mole_pawns.checked ? "mole-pawns" : undefined
+            },{
+                square: { black: "#2F4F4F", white: "#AAAA88" },
+                piece: { black: "#000000", white: "#FFFFFF"}
             });
             if (obs) {
                 enterGame();
@@ -781,7 +797,7 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
     area.votes.appendChild(tbody);
 }
 
-function showOptions() { //TODO: initialize current options
+function showOptions() { //TODO: initialize current game options
     document.getElementById("div-opt").style.display = "block";
     document.getElementById("turn-time-out").innerHTML = document.getElementById("range-time").value;
     document.getElementById("max-players-out").innerHTML = document.getElementById("range-max-players").value;
@@ -789,17 +805,25 @@ function showOptions() { //TODO: initialize current options
     current_board_style = {
         dark_square :  zug_board.black_square_color,
         light_square : zug_board.white_square_color,
-        piece_style : zug_board.board_style.pieces
+        piece_style : zug_board.board_style.pieces,
+        mole_pawns : zug_board.board_style.pawns
     };
 
     color_dark_square.value = current_board_style.dark_square;
     color_light_square.value = current_board_style.light_square;
     select_piece_style.value = current_board_style.piece_style;
+    mole_pawns.checked = current_board_style.mole_pawns;
 }
 
 function cancelOptions() {
     closeModalWindow(document.getElementById("div-opt"));
-    zug_board.setPieceStyle(current_board_style.piece_style);
+    zug_board.setBoardStyle(
+        {
+            board_tex: "plain",
+            pieces:  current_board_style.piece_style,
+            pawns: current_board_style.mole_pawns ? "mole-pawns" : undefined
+        }
+    );
     zug_board.black_square_color = current_board_style.dark_square;
     zug_board.white_square_color = current_board_style.light_square;
     zug_board.updateBoard();
