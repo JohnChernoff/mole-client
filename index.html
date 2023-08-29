@@ -13,6 +13,7 @@
                 <button onclick="initGame(true)">Enter with Sound</button>
             </div>
         </div>
+
         <div id="div-splash" class="modal">
             <button id="audio-butt1" class="audio-toggle big-butt" onclick="toggleAudio()">Sound On</button>
             <button id="help-butt1" class = "big-butt" onclick="window.location.assign('help.html')">How to Play</button>
@@ -23,10 +24,12 @@
             <canvas id="splash-can"></canvas>
             <div id="mole-sprite" class="mole-sprites"></div>
         </div>
+
         <div id="div-highscores" class="modal">
             <button onclick="closeModalWindow(document.getElementById('div-highscores'))">Return</button>
             <table id="table-highscores"></table>
         </div>
+
         <div id="div-help" class="modal">
             <button onclick="closeModalWindow(document.getElementById('div-help'))">Return</button> <br>
             <iframe id="help-frame"
@@ -36,6 +39,7 @@
                     src="help.html">
             </iframe>
         </div>
+
         <div id="div-mole" class="modal">
             <div class="mole-txt">
                 <h1>You're the Mole!</h1>
@@ -44,6 +48,7 @@
                 <button onclick="closeModalWindow(document.getElementById('div-mole'))">OK</button> <br>
             </div>
         </div>
+
         <div id="div-not-mole" class="modal">
             <div class="mole-txt">
                 <h1>You're not the Mole!</h1>
@@ -52,6 +57,7 @@
                 <button onclick="closeModalWindow(document.getElementById('div-not-mole'))">OK</button> <br>
             </div>
         </div>
+
         <div id="div-defect" class="modal">
             <div id="defect-txt"></div>
             <div id="div-defect-anim">
@@ -59,6 +65,15 @@
             </div>
             <div id="mole-defect-sprite" class="mole-sprites"></div>
         </div>
+
+        <div id="div-ramp" class="modal">
+            <div id="ramp-txt"></div>
+            <div id="div-ramp-anim">
+                <div id="ramp-overlay"> </div>
+            </div>
+            <div id="mole-ramp-sprite" class="mole-sprites"></div>
+        </div>
+
         <div id="div-opt" class="modal">
             <input type="checkbox" id="chk-hide-move-vote">
             <label for="chk-hide-move-vote">Hide Current Move Vote </label><br>
@@ -112,10 +127,12 @@
             <button onclick="submitOptions()">Update</button>
             <button onclick="cancelOptions()">Cancel</button>
         </div>
+
         <div id="div-time">
             <span id="txt-time"> Welcome to MoleChess 0.1! </span>
             <canvas id="can-time"></canvas>
         </div>
+
         <div id="div-sidebar-left" class="modular_view">
             <div id="div-left-tabs">
                 <div class="left_tab"> </div>
@@ -133,9 +150,11 @@
                      onclick="window.open('https://discord.gg/mEnXK8cP4R', '_blank')">
             </div>
         </div>
+
         <div id="div-main" class="modular_view">
             <div id="main-board" class="board-view"> </div>
         </div>
+
         <div id="div-games" class="modular_view">
             <button id="audio-butt2" class="audio-toggle" onclick="toggleAudio()">Sound On</button>
             <button id="help-butt2" onclick="showHelp()">Help</button>
@@ -156,6 +175,7 @@
             <br><br>
             <table id="table-players"></table>
         </div>
+
         <div id="div-moves" class="modular_view">
             <button onclick="exportPGN()">Export PGN</button> <br>
             <input id="range-history" type="range" min="0" onchange="rangeSelect()">

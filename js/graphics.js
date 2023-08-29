@@ -195,3 +195,36 @@ function animateDefection(duration,player) {
     });
 }
 
+function animateRampage(duration,player) {
+
+    main_div.style.display = "none";
+    div_ramp.style.display = "block";
+
+    document.getElementById("ramp-txt").innerHTML = player.user.name + " rampages!";
+
+    const mole = document.getElementById("mole-ramp-sprite");
+    mole.style.top = "50%";
+
+    let mole_blink = mole.animate([
+        { backgroundImage: 'url("img/sprites/ramp1.png") '},
+        { backgroundImage: 'url("img/sprites/ramp2.png") '}
+    ], {
+        duration: 250,
+        direction: 'alternate',
+        iterations: 'Infinity'
+    });
+
+    let x = "-" + div_ramp.clientWidth + "px";
+    let mole_ani = mole.animate([
+        { transform: "translateX(" + x + ")", offset: 1 },
+    ], {
+        duration: duration,
+    });
+
+    mole_ani.finished.then( () => {
+        mole_blink.cancel();
+        main_div.style.display = "block";
+        div_ramp.style.display = "none";
+    });
+}
+

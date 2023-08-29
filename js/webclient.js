@@ -85,11 +85,13 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "mole" && !obs) notifyMole(data.msg === "true");
     else if (type === "top") updateHighScores(data);
     else if (type === "users") showPlayers(data.users);
-    else if (type === "phase") { console.log("New phase: " + data.phase); updateGame(data); }
+    else if (type === "phase") { newPhase(data); }
     else if (type === "status") { handleStatus(data.msg, data.source); }
     else if (type === "votelist") { handleVote(data.list, data.move, data.source); }
     else if (type === "color") { flipAtStart(data.msg === "black"); }
-    else if (type === "defection") { animateDefection(5000,data); }
+    else if (type === "move") { handleMove(data); }
+    else if (type === "defection") { handleDefection(data); }
+    else if (type === "rampage") { handleRampage(data); }
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     //else if (type === "movelist") updateMoveList(data);
     else {

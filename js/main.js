@@ -41,7 +41,7 @@ function createList(list) {
 
 let AUDIO = false;
 let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
-const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP','IS_MOLE','NOT_MOLE']);
+const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP','IS_MOLE','NOT_MOLE','MOVE1','MOVE2','DEFECT','RAMPAGE']);
 let clips = [AUDIO_CLIPS.length];
 let current_clip, fader;
 const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
@@ -88,6 +88,7 @@ let color_light_square = document.getElementById("color-light-square");
 let mole_pawns = document.getElementById("chk-mole-pawns");
 let div_defect = document.getElementById("div-defect");
 let div_defect_overlay = document.getElementById("defect-overlay");
+let div_ramp = document.getElementById("div-ramp");
 
 let current_board_style;
 let splash_img = new Image();
@@ -394,11 +395,6 @@ function sendMove(move) {
     }
 }
 
-function notifyMole(mole) {
-if (mole) document.getElementById("div-mole").style.display = "block";
-else document.getElementById("div-not-mole").style.display = "block";
-}
-
 function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
     if (current_hover !== null) current_hover.style.visibility = "hidden";
     zug_board.updateBoard(moves.fen);
@@ -437,7 +433,7 @@ function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game)
                 zug_board.clearPromotion(cancelMove);
             }
             zug_board.updateBoard(game.currentFEN);
-            if (game.timeRemaining !== undefined) countdown(selected_game,game.turn,game.timeRemaining);
+            if (game.timeRemaining && game.phase === "VOTING") countdown(selected_game,game.turn,game.timeRemaining);
         }
         if (game.history !== undefined) updateMoveList(game.history);
         updatePlayTbl(game);
@@ -841,6 +837,36 @@ function submitOptions() {
         team_predict_move: document.getElementById("chk-team-move-prediction").checked
     });
     closeModalWindow(document.getElementById("div-opt"));
+}
+
+function newPhase(data) {
+    console.log("New phase: " + data.phase);
+    updateGame(data);
+}
+
+function handleDefection(data) {
+    playClip(AUDIO_CLIPS.enum.DEFECT);
+    animateDefection(5000,data); //updateGame?
+}
+
+function handleRampage(data) {
+    playClip(AUDIO_CLIPS.enum.RAMPAGE);
+    animateRampage(5000,data);
+}
+
+function handleMove(data) {
+    playClip(data.game.turn ? AUDIO_CLIPS.enum.MOVE1 : AUDIO_CLIPS.enum.MOVE2);
+}
+
+function notifyMole(mole) {
+    if (mole) {
+        document.getElementById("div-mole").style.display = "block";
+        playClip(AUDIO_CLIPS.enum.IS_MOLE);
+    }
+    else {
+        document.getElementById("div-not-mole").style.display = "block";
+        playClip(AUDIO_CLIPS.enum.NOT_MOLE);
+    }
 }
 
 let toggle = true;
