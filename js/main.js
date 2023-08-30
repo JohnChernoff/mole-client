@@ -10,15 +10,11 @@ support for the Maxthon Browser
 ~OwenKraweki: (clock) bottom right
 ~OwenKraweki: and top right when it's opponents move
 
-Clarify current position in movelist
+arrows after move?
+clock shift on flip?
 
-arrows after move
-clock shift on flip
-
-checkerfill bug?
-votelist move numbers
-
-~tooltips!
+weird sound loops with multiple games
+divide sounds into music/sfx
  */
 
 function createEnum(arr) {
@@ -56,6 +52,7 @@ let move_cells = [];
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
+let time_ctx = time_can.getContext("2d");
 let countdown_can = document.createElement("canvas");
 let countdown_ctx = countdown_can.getContext("2d");
 let main_div = document.getElementById("div-main");
@@ -89,6 +86,7 @@ let mole_pawns = document.getElementById("chk-mole-pawns");
 let div_defect = document.getElementById("div-defect");
 let div_defect_overlay = document.getElementById("defect-overlay");
 let div_ramp = document.getElementById("div-ramp");
+let div_veto = document.getElementById("div-veto");
 
 let current_board_style;
 let splash_img = new Image();
@@ -146,11 +144,11 @@ window.addEventListener("keyup", e => { //console.log("Key up: " + e.code);
 
 games_select.addEventListener("change", () =>  {
     selected_game = games_select.value; //console.log("Selected: " + selected_game);
-    send("update", selected_game);
+    if (selected_game !== "") send("update", selected_game);
 });
 
 games_select.addEventListener("dblclick", () =>  {
-    send("update", selected_game); //TODO: refresh time
+    send("update", selected_game);
     handleMessage("",selected_game); //updates message tab
 });
 
@@ -183,7 +181,7 @@ async function toggleAudio(audio) {
     if (AUDIO) await playClip(current_clip); else pauseClip(current_clip);
 }
 
-async function playClip(clip,switch_clips = true) {
+async function playClip(clip,switch_clips = false) {
     if (clip === undefined) return;
     let prev_clip = current_clip;
     current_clip = clip;
@@ -231,7 +229,12 @@ function pauseClip(clip) {
     if (clip !== undefined) clips[clip.index].pause();
 }
 
-function countdown(title,turn,max_seconds) { //console.log(JSON.stringify(data));
+function clearCountdown() {  //console.log("Clearing countdown :" + time_can.width + "," + time_can.height);
+    if (checker_timer != undefined) clearInterval(checker_timer.timer);
+    time_ctx.drawImage(splash_img,0,0,time_can.width,time_can.height);
+}
+
+function countdown(title,turn,max_seconds) { //console.log("Countdown: " + max_seconds);
     if (title !== selected_game) return;
     let millis = ((max_seconds) * 1000);
     countdown_ctx.fillStyle = (turn === BLACK ? "white" : "black");
@@ -425,7 +428,7 @@ function exportPGN() {
     alert(pgn_txt);
 }
 
-function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game));
+function updateGame(game) { //console.log("Update Game: " + game.title + "," + game.phase); //JSON.stringify(game));
     if (game.title === selected_game || obs) {
         if (game.currentFEN !== undefined) {
             if (game.currentFEN !== zug_board.currentFEN) {
@@ -433,8 +436,11 @@ function updateGame(game) { //console.log("Update Game: " + JSON.stringify(game)
                 zug_board.clearPromotion(cancelMove);
             }
             zug_board.updateBoard(game.currentFEN);
-            if (game.timeRemaining && game.phase === "VOTING") countdown(selected_game,game.turn,game.timeRemaining);
         }
+        if (game.timeRemaining && (game.phase === "VOTING" || game.phase === "VETO")) {
+            countdown(selected_game,game.turn,game.timeRemaining);
+        }
+        else clearCountdown();
         if (game.history !== undefined) updateMoveList(game.history);
         updatePlayTbl(game);
     }
@@ -652,7 +658,7 @@ function createGame() {
     let title = prompt("Enter a new game title",username);
     console.log("Starting: " + title);
     if (title !== null) {
-        send("newgame", {title: title, color: COLOR_UNKNOWN});
+        send("newgame", {title: title, color: COLOR_BLACK}); //TODO: non-bucket color choice
         playClip(AUDIO_CLIPS.enum.BUMP);
     }
 }
@@ -841,6 +847,7 @@ function submitOptions() {
 
 function newPhase(data) {
     console.log("New phase: " + data.phase);
+    if (data.phase !== "VETO") div_veto.style.display = "hidden";
     updateGame(data);
 }
 
@@ -867,6 +874,13 @@ function notifyMole(mole) {
         document.getElementById("div-not-mole").style.display = "block";
         playClip(AUDIO_CLIPS.enum.NOT_MOLE);
     }
+}
+
+function sendVeto(confirm) {
+    send("veto", {
+        game: selected_game,
+        confirm: confirm
+    });
 }
 
 let toggle = true;

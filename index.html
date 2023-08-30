@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
         <title>MoleChess 0.1</title>
         <link rel="stylesheet" href="css/main.css">
     </head>
@@ -72,6 +73,10 @@
                 <div id="ramp-overlay"> </div>
             </div>
             <div id="mole-ramp-sprite" class="mole-sprites"></div>
+        </div>
+
+        <div id="div-veto" class="modal">
+            <img src="./img/bkg/veto.png" id="img-veto" onclick="sendVeto(true)" oncontextmenu="sendVeto(false)">
         </div>
 
         <div id="div-opt" class="modal">

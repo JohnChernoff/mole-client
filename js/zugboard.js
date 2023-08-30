@@ -95,7 +95,7 @@ class ZugBoard {
         this.overlay_ctx.fillStyle = color + "80";
         let dist = ZugBoard.calcDistance(coords);
         this.overlay_ctx.save();
-        this.overlay_ctx.translate(coords.from.x+10,coords.from.y);
+        this.overlay_ctx.translate(coords.from.x,coords.from.y);
         let arrowhead_x = dist * .8;
         let arrowhead_y = this.square_height * .2;
         this.overlay_ctx.rotate(ZugBoard.calcAngle(coords));

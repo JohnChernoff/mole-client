@@ -70,7 +70,7 @@ function closeSocket() {
 }
 
 let username = "?";
-function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) + ", Data: " + JSON.stringify(data));
+function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)); // + ", Data: " + JSON.stringify(data));
     if (type === "chat") {
         if (data.source == "serv") handleMessage(data.user + ": " + data.msg,data.source,null);
         else handleMessage(data.player.user.name + ": " + data.msg,data.source,data.player);
@@ -92,6 +92,15 @@ function msgHandler(type,data) { //console.log("Type: " + JSON.stringify(type) +
     else if (type === "move") { handleMove(data); }
     else if (type === "defection") { handleDefection(data); }
     else if (type === "rampage") { handleRampage(data); }
+    else if (type == "veto") { div_veto.style.display = "block"; }
+    else if (type == "join") {
+        selected_game = data.title; updateGame(data);
+    }
+    else if (type == "part") {
+        if (selected_game == data.title) {
+            clearCountdown(); selected_game = "";
+        }
+    }
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     //else if (type === "movelist") updateMoveList(data);
     else {
