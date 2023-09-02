@@ -95,10 +95,11 @@ body {
 }
 
 #div-veto {
-    left: 0;
+    display: none;
+    left: 50%;
     top: 0;
-    width: 25%;
-    height: 25%;
+    width: 50%;
+    height: 100%;
     background: antiquewhite;
     overflow: hidden;
 }
@@ -258,7 +259,7 @@ body {
     font-size: larger;
 }
 
-#div-movelist > table > tr > td .tooltiptext {
+#div-movelist > table > tr > td .movetiptext {
     visibility: hidden;
     width: max-content;
     background-color: #000000;
@@ -273,6 +274,45 @@ body {
     margin-left: -60px;
     opacity: 1;
     transition: opacity 0.5s;
+}
+
+.opt-tip {
+    width: 80%;
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.opt-tip .tooltiptext {
+    visibility: hidden;
+    width: 100%;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: x-large;
+}
+
+.opt-tip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.opt-tip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }
 
 #div-buttons {

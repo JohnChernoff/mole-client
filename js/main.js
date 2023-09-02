@@ -35,20 +35,6 @@ function createList(list) {
     };
 }
 
-let AUDIO = false;
-let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
-const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP','IS_MOLE','NOT_MOLE','MOVE1','MOVE2','DEFECT','RAMPAGE']);
-let clips = [AUDIO_CLIPS.length];
-let current_clip, fader;
-const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
-let layout_style = LAYOUT_STYLES.UNDEFINED;
-const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
-const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
-let current_tab = "serv";
-let current_ply = 0;
-let current_hover = null;
-let move_cells = [];
-
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
@@ -79,6 +65,11 @@ let turntime_range = document.getElementById("range-time");
 let turntime_out = document.getElementById("turn-time-out");
 let maxplayers_range = document.getElementById("range-max-players");
 let maxplayers_out = document.getElementById("max-players-out");
+let chk_mole_move_predict = document.getElementById("chk-mole-move-prediction");
+let chk_mole_piece_predict = document.getElementById("chk-mole-piece-prediction");
+let chk_team_move_predict = document.getElementById("chk-team-move-prediction");
+let chk_mole_veto = document.getElementById("chk-mole-veto");
+let chk_hide_move = document.getElementById("chk-hide-move-vote");
 let select_piece_style = document.getElementById("select-piece-style");
 let color_dark_square = document.getElementById("color-dark-square");
 let color_light_square = document.getElementById("color-light-square");
@@ -88,6 +79,19 @@ let div_defect_overlay = document.getElementById("defect-overlay");
 let div_ramp = document.getElementById("div-ramp");
 let div_veto = document.getElementById("div-veto");
 
+let AUDIO = false;
+let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
+const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP','IS_MOLE','NOT_MOLE','MOVE1','MOVE2','DEFECT','RAMPAGE']);
+let clips = [AUDIO_CLIPS.length];
+let current_clip, fader;
+const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
+let layout_style = LAYOUT_STYLES.UNDEFINED;
+const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
+const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
+let current_tab = "serv";
+let current_ply = 0;
+let current_hover = null;
+let move_cells = [];
 let current_board_style;
 let splash_img = new Image();
 let BLACK = 0, WHITE = 1;
@@ -99,8 +103,8 @@ let selected_player;
 let zug_board;
 let lichess = new LichessLogger("https://lichess.org", "molechess.com");
 let starting = false;
-
 let oauth_token;
+
 const obs =  new URL(document.location).searchParams.get("obs");
 if (obs) initGame(false);
 
@@ -482,7 +486,7 @@ function updateMoveList(history) {
             move_entry.onclick = () => { selectMove(move_history[i]); };
 
             let move_span = document.createElement("span");
-            move_span.className = "tooltiptext";
+            move_span.className = "movetiptext";
             move_span.innerHTML = voteSummary(move_history[i]);
             move_entry.addEventListener("mouseover", () => {
                 move_span.style.visibility = "visible";
@@ -799,10 +803,17 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
     area.votes.appendChild(tbody);
 }
 
-function showOptions() { //TODO: initialize current game options
+function showOptions(curr_opts) {
     document.getElementById("div-opt").style.display = "block";
-    document.getElementById("turn-time-out").innerHTML = document.getElementById("range-time").value;
-    document.getElementById("max-players-out").innerHTML = document.getElementById("range-max-players").value;
+
+    console.log(JSON.stringify(curr_opts));
+    turntime_range.value = turntime_out.innerHTML = curr_opts.move_time;
+    maxplayers_range.value = maxplayers_out.innerHTML = curr_opts.max_play;
+    chk_mole_move_predict.checked = curr_opts.mole_move_predict;
+    chk_mole_piece_predict.checked = curr_opts.mole_piece_predict;
+    chk_team_move_predict.checked = curr_opts.team_move_predict;
+    chk_mole_veto.checked = curr_opts.mole_veto;
+    chk_hide_move.checked = curr_opts.hide_move;
 
     current_board_style = {
         dark_square :  zug_board.black_square_color,
@@ -832,22 +843,27 @@ function cancelOptions() {
 }
 
 function submitOptions() {
-    send("opt",{
-        game: selected_game,
-        time: document.getElementById("range-time").value,
-        max_players: document.getElementById("range-max-players").value,
-        mole_veto: document.getElementById("chk-mole-veto").checked,
-        hide_move_vote: document.getElementById("chk-hide-move-vote").checked,
-        mole_predict_move: document.getElementById("chk-mole-move-prediction").checked,
-        mole_predict_piece: document.getElementById("chk-mole-piece-prediction").checked,
-        team_predict_move: document.getElementById("chk-team-move-prediction").checked
-    });
+    let new_opts = {
+        game : selected_game,
+        time : turntime_range.value,
+        max_players : maxplayers_range.value,
+        mole_veto : chk_mole_veto.checked,
+        hide_move_vote : chk_hide_move.checked,
+        mole_predict_move : chk_mole_move_predict.checked,
+        mole_predict_piece : chk_mole_piece_predict.checked,
+        team_predict_move : chk_team_move_predict.checked
+
+    };
+    send("set_opt", new_opts);
     closeModalWindow(document.getElementById("div-opt"));
 }
 
 function newPhase(data) {
     console.log("New phase: " + data.phase);
-    if (data.phase !== "VETO") div_veto.style.display = "hidden";
+    if (data.phase !== "VETO") {
+        div_veto.style.display = "none";
+        time_can.style.display = "block";
+    }
     updateGame(data);
 }
 
