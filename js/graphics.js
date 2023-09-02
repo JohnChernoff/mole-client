@@ -76,6 +76,7 @@ function rndCheckerFill(img,millis,inc,canvas,color,callback1,callback2) { //con
     let iter = Math.pow(Math.floor(Math.sqrt(i)),2); //console.log("Iter: " + iter);
     canvas.width = iter; canvas.height = iter; //img.width = iter; img.height = iter;
     let dim = Math.floor(Math.sqrt(iter)); //iter = dim*dim;
+    //if (!dim || dim < 1) dim = 1; // console.log("DIM: " + dim);
     let matrix = new Array(dim);
     for (let x = 0; x < matrix.length; x++) {
         matrix[x] = new Array(dim);

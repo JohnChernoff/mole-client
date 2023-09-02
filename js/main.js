@@ -239,7 +239,7 @@ function clearCountdown() {  //console.log("Clearing countdown :" + time_can.wid
 }
 
 function countdown(title,turn,max_seconds) { //console.log("Countdown: " + max_seconds);
-    if (title !== selected_game) return;
+    if (title !== selected_game || max_seconds <= 0) return;
     let millis = ((max_seconds) * 1000);
     countdown_ctx.fillStyle = (turn === BLACK ? "white" : "black");
     countdown_ctx.fillRect(0,0,countdown_can.width,countdown_can.height);
@@ -406,20 +406,18 @@ function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.
     if (current_hover !== null) current_hover.style.visibility = "hidden";
     zug_board.updateBoard(moves.fen);
     move_cells[current_ply].style.color = "#FFFFFF";
-    move_cells[current_ply].style.border = "none";
-    let tools = move_cells[current_ply].getElementsByClassName("tooltiptext");
+    move_cells[current_ply].style.border = "none"; //console.log("Current cell: " + move_cells[current_ply]);
+    let tools = move_cells[current_ply].getElementsByClassName("movetiptext");
     tools[0].style.visibility = "hidden";
-    for (let i=0;i<moves.selected.length;i++) {
-        zug_board.drawArrow(moves.selected[0].move,
-            moves.selected[i].player === null ? "#555555" : moves.selected[i].player.play_col);
-    }
+    zug_board.drawArrow(moves.selected.move,
+        moves.selected.player === null ? "#555555" : moves.selected.player.play_col);
     for (let i=0;i<moves.alts.length;i++) {
         zug_board.drawArrow(moves.alts[i].move,moves.alts[i].player.play_col);
     }
     current_ply = moves_range.value = moves.ply;
     move_cells[current_ply].style.color = "#FFFF00";
     move_cells[current_ply].style.border = "solid";
-    tools = move_cells[current_ply].getElementsByClassName("tooltiptext");
+    tools = move_cells[current_ply].getElementsByClassName("movetiptext");
     tools[0].style.visibility = "visible";
 }
 
@@ -427,7 +425,7 @@ function exportPGN() {
     console.log(JSON.stringify(move_history));
     let pgn_txt = "";
     for (let i=0; i<move_history.length; i++) {
-        pgn_txt += (move_history[i].selected[0].move.san + " ");
+        pgn_txt += (move_history[i].selected.move.san + " ");
     }
     alert(pgn_txt);
 }
@@ -450,10 +448,10 @@ function updateGame(game) { //console.log("Update Game: " + game.title + "," + g
     }
 }
 
-function voteSummary(votes) {  //console.log(votes.selected[0]);
+function voteSummary(votes) {  //console.log(JSON.stringify(votes) + "," + votes.selected);
     let n = Math.ceil((votes.ply + 1) / 2) +  (votes.ply % 2 === 0 ? "." : "...");
-    let txt = n + votes.selected[0].move.san + " -> " +
-        (votes.selected[0].player !== null ? votes.selected[0].player.user.name : "?") + " <br> ";
+    let txt = n + votes.selected.move.san + " -> " +
+        (votes.selected.player !== null ? votes.selected.player.user.name : "?") + " <br> ";
     for (let i=0; i < votes.alts.length; i++) {
         txt += n + votes.alts[i].move.san + " -> " + votes.alts[i].player.user.name + " <br> ";
     }
@@ -479,8 +477,8 @@ function updateMoveList(history) {
                 alts: history[i].alts
             };
 
-            if (history[i].selected.length > 0) {
-                move_entry.textContent = m + history[i].selected[0].move.san;
+            if (history[i].selected) {
+                move_entry.textContent = m + history[i].selected.move.san;
             }
             else move_entry.textContent = "?";
             move_entry.onclick = () => { selectMove(move_history[i]); };
