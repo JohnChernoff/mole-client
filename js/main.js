@@ -17,24 +17,6 @@ weird sound loops with multiple games
 divide sounds into music/sfx
  */
 
-function createEnum(arr) {
-    let obj = Object.create(null);
-    for (let val of arr) {
-        obj[val] = Symbol(val);
-    }
-    return Object.freeze(obj);
-}
-function createList(list) {
-    let obj = Object.create(null);
-    for (let i = 0; i < list.length; i++) {
-        obj[list[i]] = { "name" : list[i], "index" : i }
-    }
-    return {
-        "enum" : Object.freeze(obj),
-        "length" : list.length
-    };
-}
-
 let time_div = document.getElementById("div-time");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
@@ -79,13 +61,6 @@ let div_defect_overlay = document.getElementById("defect-overlay");
 let div_ramp = document.getElementById("div-ramp");
 let div_veto = document.getElementById("div-veto");
 
-let AUDIO = false;
-let AUDIO_PRELOAD = -1; let AUDIO_LOAD = AUDIO_PRELOAD;
-const AUDIO_CLIPS = createList(['INTRO','EPIC','CREATE','VOTE','ACCUSE','FUGUE','BUMP','IS_MOLE','NOT_MOLE','MOVE1','MOVE2','DEFECT','RAMPAGE']);
-let clips = [AUDIO_CLIPS.length];
-let current_clip, fader;
-const LAYOUT_STYLES = createEnum(['UNDEFINED','HORIZONTAL','VERTICAL']);
-let layout_style = LAYOUT_STYLES.UNDEFINED;
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
 let current_tab = "serv";
@@ -123,12 +98,12 @@ color_light_square.onchange = () => {
 };
 
 document.addEventListener("visibilitychange", (event) => {
-    if (document.visibilityState == "visible") {
+    if (document.visibilityState === "visible") {
         console.log("tab is active");
         send("update", selected_game);
     } else {
         console.log("tab is inactive");
-        if (checker_timer != undefined) clearInterval(checker_timer);
+        if (checker_timer !== undefined) clearInterval(checker_timer);
     }
 });
 
@@ -156,106 +131,12 @@ games_select.addEventListener("dblclick", () =>  {
     handleMessage("",selected_game); //updates message tab
 });
 
-function closeModalWindow(element) {
-    element.style.display = "none";
-    fadeAndPlay();
-}
-
-function loadAudio(onload) {
-    AUDIO_LOAD = 0; let track = 0;
-    for (let clip in AUDIO_CLIPS.enum) {
-        clips[track] = new Audio("audio/" + clip.toLowerCase() + ".mp3");
-        clips[track++].addEventListener('loadeddata', () => {
-            AUDIO_LOAD++;
-            console.log("Loaded: " + clip + " (" + AUDIO_LOAD + "/" + AUDIO_CLIPS.length + ")");
-            if (AUDIO_LOAD === AUDIO_CLIPS.length) {
-                console.log("Loaded all audio files");
-                onload();
-            }
-        });
-    }
-}
-
-async function toggleAudio(audio) {
-    if (audio !== undefined) AUDIO = audio; else AUDIO = !AUDIO;
-    let buttons = document.getElementsByClassName("audio-toggle");
-    for (let i =0; i < buttons.length; i++) {
-        buttons[i].innerHTML = AUDIO ? "Sound Off" : "Sound On";
-    }
-    if (AUDIO) await playClip(current_clip); else pauseClip(current_clip);
-}
-
-async function playClip(clip,switch_clips = false) {
-    if (clip === undefined) return;
-    let prev_clip = current_clip;
-    current_clip = clip;
-    if (switch_clips) pauseClip(prev_clip);
-    if (current_clip !== prev_clip || clips[prev_clip.index].ended) clips[current_clip.index].currentTime = 0;
-
-    if (AUDIO) {
-        console.log("Playing: " + clip.name);
-        clips[current_clip.index].volume = .8;
-        try {
-            if (switch_clips && prev_clip !== undefined && prev_clip !== current_clip && !clips[prev_clip.index].ended)
-            clips[current_clip.index].addEventListener("ended",() => {
-                current_clip = prev_clip;
-                clips[current_clip.index].play();
-            });
-            else clips[current_clip.index].addEventListener("ended",() => {});
-            clips[current_clip.index].loop = false;
-            await clips[current_clip.index].play();
-
-        }
-        catch(err) { console.log("Error: " + err); }
-    }
-}
-
-function fadeAndPlay(clip) { //console.log("Fading...");
-    if (current_clip != undefined) {
-        let audio = clips[current_clip.index];
-        if (fader !== undefined) clearInterval(fader);
-        fader = setInterval(()=> {
-            let v = audio.volume - 0.1;
-            if (AUDIO && v >= 0) { //console.log("Volume: " + v);
-                audio.volume = v;
-            }
-            else {
-                clearInterval(fader);
-                current_clip = undefined;
-                playClip(clip);
-            }
-        },200);
-    }
-    else playClip(clip);
-}
-
-function pauseClip(clip) {
-    if (clip !== undefined) clips[clip.index].pause();
-}
-
-function clearCountdown() {  //console.log("Clearing countdown :" + time_can.width + "," + time_can.height);
-    if (checker_timer != undefined) clearInterval(checker_timer.timer);
-    time_ctx.drawImage(splash_img,0,0,time_can.width,time_can.height);
-}
-
-function countdown(title,turn,max_seconds) { //console.log("Countdown: " + max_seconds);
-    if (title !== selected_game || max_seconds <= 0) return;
-    let millis = ((max_seconds) * 1000);
-    countdown_ctx.fillStyle = (turn === BLACK ? "white" : "black");
-    countdown_ctx.fillRect(0,0,countdown_can.width,countdown_can.height);
-    createImageBitmap(countdown_can).then(img => { //console.log(img);
-        rndCheckerFill(img,millis,.1,time_can,rndColor(),() => {
-            time_txt.innerHTML = (turn === BLACK ? "Black" : "White") + ": " +
-                Math.floor(checker_timer.seconds) + " seconds";
-        })
-    });
-}
 function initGame(audio) {
     welcome_screen.style.display = "none"; splash_screen.style.display = "block";
-    toggleAudio(audio);
+    toggleSound(audio);
     splash_img.onload = () => {
         console.log("Loaded Image: " + splash_img);
-        loadAudio(() => {
+        loadSounds(() => {
             zug_board = new ZugBoard(main_board_div,sendMove,() => {
                 console.log("Pieces loaded");
                 initLichess().then(() => showLogin());
@@ -272,7 +153,7 @@ function initGame(audio) {
             }
             else {
                 colorCycle(splash_screen,250);
-                playClip(AUDIO_CLIPS.enum.INTRO);
+                playTrack(AUDIO_CLIPS.music.enum.INTRO);
                 animateMole(5000);
             }
         });
@@ -320,76 +201,12 @@ function enterGame() {
     splash_screen.style.display = "none";
     window.onresize = () => { resize(); }; resize();
     if (oauth_token || obs) startSocket();
-    fadeAndPlay(AUDIO_CLIPS.enum.BUMP);
+    fadeAndPlay(AUDIO_CLIPS.sound.enum.BUMP,true);
 }
 
 function resize() {
     setLayout();
     zug_board.resize(main_board,main_board_div);
-}
-
-function setLayout() {
-    let main_div_size;
-    if (window.innerWidth > window.innerHeight) {
-        layout_style = LAYOUT_STYLES.HORIZONTAL;
-        sidebar_left.style.left = "0px";
-        sidebar_left.style.top = "0px";
-        sidebar_left.style.width = "20vw";
-        sidebar_left.style.height = "100vh";
-
-        main_div_size = Math.floor(Math.min(window.innerWidth /2, window.innerHeight * .89));
-        main_div_size -= (main_div_size % 8); //to make squares equally divisible in the grid
-        let extra_width = ((window.innerWidth/2) - main_div_size)/2;
-        main_div.style.left = Math.floor((window.innerWidth * .25) + (extra_width > 0 ? extra_width : 0)) + "px";
-
-        time_div.style.left =  main_div.style.left;
-        time_div.style.top = "";
-        time_div.style.bottom = "1vh";
-        time_div.style.width = main_div_size + "px";
-        time_div.style.height = "7vh";
-
-        games_div.style.left = "80vw";
-        games_div.style.top = "0px";
-        games_div.style.width = "20vw";
-        games_div.style.height = "50vh";
-
-        moves_div.style.left = "80vw";
-        moves_div.style.top = "50vh";
-        moves_div.style.width = "20vw";
-        moves_div.style.height = "50vh";
-    }
-    else {
-        layout_style = LAYOUT_STYLES.VERTICAL;
-        comm_div.style.left = "0px";
-        comm_div.style.top = "0px";
-        comm_div.style.width = "30vw";
-        comm_div.style.height = "99vh";
-
-        main_div_size = Math.floor(window.innerWidth * .67);
-        main_div.style.left = "33vw"; //(window.innerWidth * .25) + "px";
-
-        let lower_div_height = Math.floor(window.innerWidth * .70);
-
-        let clock_height = 50;
-        time_div.style.left = main_div.style.left;
-        time_div.style.top = lower_div_height + "px";
-        time_div.style.bottom = "";
-        time_div.style.width = main_div_size + "px";
-        time_div.style.height = clock_height + "px";
-
-        games_div.style.left = "33vw";
-        games_div.style.top = (lower_div_height + clock_height + 20) + "px";
-        games_div.style.width =  (main_div_size / 2) + "px";
-        games_div.style.height = (window.innerHeight - lower_div_height) + "px";
-
-        moves_div.style.left = "66vw";
-        moves_div.style.top = (lower_div_height + clock_height + 20) + "px";
-        moves_div.style.width =  (main_div_size / 2) + "px";
-        moves_div.style.height = (window.innerHeight - lower_div_height) + "px";
-    }
-    main_div.style.top = "1vh";
-    main_div.style.width =  main_div_size + "px";
-    main_div.style.height = main_div_size + "px";
 }
 
 function sendMove(move) {
@@ -400,6 +217,29 @@ function sendMove(move) {
             promotion: move.promotion
         });
     }
+}
+
+function closeModalWindow(element) {
+    element.style.display = "none";
+    fadeAndPlay();
+}
+
+function clearCountdown() {  //console.log("Clearing countdown :" + time_can.width + "," + time_can.height);
+    if (checker_timer !== undefined) clearInterval(checker_timer.timer);
+    time_ctx.drawImage(splash_img,0,0,time_can.width,time_can.height);
+}
+
+function countdown(title,turn,max_seconds) { //console.log("Countdown: " + max_seconds);
+    if (title !== selected_game || max_seconds <= 0) return;
+    let millis = ((max_seconds) * 1000);
+    countdown_ctx.fillStyle = (turn === BLACK ? "white" : "black");
+    countdown_ctx.fillRect(0,0,countdown_can.width,countdown_can.height);
+    createImageBitmap(countdown_can).then(img => { //console.log(img);
+        rndCheckerFill(img,millis,.1,time_can,rndColor(),() => {
+            time_txt.innerHTML = (turn === BLACK ? "Black" : "White") + ": " +
+                Math.floor(checker_timer.seconds) + " seconds";
+        })
+    });
 }
 
 function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.stringify(moves));
@@ -430,7 +270,7 @@ function exportPGN() {
     alert(pgn_txt);
 }
 
-function updateGame(game) { //console.log("Update Game: " + game.title + "," + game.phase); //JSON.stringify(game));
+function updateGame(game) {//console.log("Update Game: " + game.title + "," + game.phase);//JSON.stringify(game));
     if (game.title === selected_game || obs) {
         if (game.currentFEN !== undefined) {
             if (game.currentFEN !== zug_board.currentFEN) {
@@ -644,12 +484,12 @@ function showPlayers(players) {
 function showHighScores() {
     score_div.style.display = "block";
     send("top",10);
-    fadeAndPlay(AUDIO_CLIPS.enum.EPIC);
+    fadeAndPlay(AUDIO_CLIPS.music.enum.EPIC);
 }
 
 function showHelp() {
     document.getElementById('div-help').style.display='block';
-    fadeAndPlay(AUDIO_CLIPS.enum.FUGUE)
+    fadeAndPlay(AUDIO_CLIPS.music.enum.FUGUE)
 }
 
 function clearElement(e) {
@@ -658,10 +498,10 @@ function clearElement(e) {
 
 function createGame() {
     let title = prompt("Enter a new game title",username);
-    console.log("Starting: " + title);
     if (title !== null) {
+        console.log("Starting: " + title);
         send("newgame", {title: title, color: COLOR_BLACK}); //TODO: non-bucket color choice
-        playClip(AUDIO_CLIPS.enum.BUMP);
+        playSFX(AUDIO_CLIPS.sound.enum.BUMP);
     }
 }
 
@@ -866,27 +706,27 @@ function newPhase(data) {
 }
 
 function handleDefection(data) {
-    playClip(AUDIO_CLIPS.enum.DEFECT);
+    playSFX(AUDIO_CLIPS.sound.enum.DEFECT);
     animateDefection(5000,data); //updateGame?
 }
 
 function handleRampage(data) {
-    playClip(AUDIO_CLIPS.enum.RAMPAGE);
+    playSFX(AUDIO_CLIPS.sound.enum.RAMPAGE);
     animateRampage(5000,data);
 }
 
 function handleMove(data) {
-    playClip(data.game.turn ? AUDIO_CLIPS.enum.MOVE1 : AUDIO_CLIPS.enum.MOVE2);
+    playSFX(data.game.turn ? AUDIO_CLIPS.sound.enum.MOVE1 : AUDIO_CLIPS.sound.enum.MOVE2);
 }
 
 function notifyMole(mole) {
     if (mole) {
         document.getElementById("div-mole").style.display = "block";
-        playClip(AUDIO_CLIPS.enum.IS_MOLE);
+        playSFX(AUDIO_CLIPS.sound.enum.IS_MOLE);
     }
     else {
         document.getElementById("div-not-mole").style.display = "block";
-        playClip(AUDIO_CLIPS.enum.NOT_MOLE);
+        playSFX(AUDIO_CLIPS.sound.enum.NOT_MOLE);
     }
 }
 
