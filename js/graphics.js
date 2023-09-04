@@ -69,7 +69,7 @@ function shuffle2D(array) {
 
 function rndCheckerFill(img,millis,inc,canvas,color,callback1,callback2) { //console.log("Check, millis: " +  millis + ", inc: " + inc);
     if (document.visibilityState !== "visible") return; //console.log("CheckerFilling...");
-    if (checker_timer != undefined) clearInterval(checker_timer.timer);
+    if (checker_timer !== undefined) clearInterval(checker_timer.timer);
 
     let interval = 1000 * inc;
     let i = millis / interval;
@@ -156,9 +156,7 @@ function animateMole(duration) {
 
 function animateDefection(duration,player) {
 
-    main_div.style.display = "none";
-    div_defect.style.display = "block";
-
+    openModalWindow(div_defect);
     let color_txt = player.game_col ? "white" : "black";
     document.getElementById("defect-txt").innerHTML = player.user.name + " defects to " + color_txt + "!";
 
@@ -191,16 +189,13 @@ function animateDefection(duration,player) {
 
     mole_ani.finished.then( () => {
         mole_legs.cancel(); bkg_ani.cancel();
-        main_div.style.display = "block";
-        div_defect.style.display = "none";
+        closeModalWindow(div_defect);
     });
 }
 
 function animateRampage(duration,player) {
 
-    main_div.style.display = "none";
-    div_ramp.style.display = "block";
-
+    openModalWindow(div_ramp);
     document.getElementById("ramp-txt").innerHTML = player.user.name + " rampages!";
 
     const mole = document.getElementById("mole-ramp-sprite");
@@ -224,8 +219,28 @@ function animateRampage(duration,player) {
 
     mole_ani.finished.then( () => {
         mole_blink.cancel();
-        main_div.style.display = "block";
-        div_ramp.style.display = "none";
+        closeModalWindow(div_ramp);
     });
+}
+
+function animateWanderingElement(wrapper,e) {
+    let duration = 5000;
+    let x = Math.round(Math.random() * (wrapper.clientWidth - e.clientWidth)) + "px";
+    let y = Math.round(Math.random() * (wrapper.clientHeight - e.clientHeight)) + "px";
+    let z = (5 + (Math.round(Math.random() * 25))) + "px";
+
+    let anim =  e.animate([
+        { left: x, offset: 1},
+        { top: y, offset: 1},
+        { fontSize: z, offset: 1}
+    ], { duration: duration, fill: 'forwards' }
+    );
+
+    anim.finished.then( () => {
+        //e.style.left = x; e.style.top = y;
+        if (wrapper.style.display === "block") animateWanderingElement(wrapper,e);
+    });
+
+    return anim;
 }
 

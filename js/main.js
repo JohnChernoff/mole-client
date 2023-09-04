@@ -12,9 +12,7 @@ support for the Maxthon Browser
 
 arrows after move?
 clock shift on flip?
-
 weird sound loops with multiple games
-divide sounds into music/sfx
  */
 
 let time_div = document.getElementById("div-time");
@@ -70,7 +68,6 @@ let move_cells = [];
 let current_board_style;
 let splash_img = new Image();
 let BLACK = 0, WHITE = 1;
-let main_board = [];
 let move_history = [];
 let games;
 let selected_game = "";
@@ -206,7 +203,7 @@ function enterGame() {
 
 function resize() {
     setLayout();
-    zug_board.resize(main_board,main_board_div);
+    zug_board.resize(main_board_div);
 }
 
 function sendMove(move) {
@@ -217,6 +214,17 @@ function sendMove(move) {
             promotion: move.promotion
         });
     }
+}
+
+function openModalWindow(e,overlay) {
+    if (e.style.display === "block") return false;
+    if (!overlay) overlay = main_div;
+    e.style.top = overlay.style.top;
+    e.style.left = overlay.style.left;
+    e.style.width = overlay.style.width;
+    e.style.height = overlay.style.height;
+    e.style.display = "block";
+    return true;
 }
 
 function closeModalWindow(element) {
@@ -462,16 +470,28 @@ function getActionButton(board,player,action_msg,active) {
 }
 
 function updateHighScores(data) {
-    clearElement(score_tbl);
+    clearElement(score_div);
     for (let i=0;i<data.length;i++) {
-        let row = document.createElement("tr");
+        /* let row = document.createElement("tr");
         let play_field = document.createElement("td");
         play_field.textContent = data[i].name;
         let rating_field = document.createElement("td");
         rating_field.textContent = data[i].rating;
         row.appendChild(play_field); row.appendChild(rating_field);
-        score_tbl.appendChild(row);
+        score_tbl.appendChild(row); */
+
+        if (score_div.style.display === "block") {
+            let e = document.createElement("span");
+            e.innerHTML = (i + 1) + ". " + data[i].name + ": " + data[i].rating;
+            e.style.color = rndColor();
+            e.style.backgroundColor = "black";
+            e.className = "high-score-entry";
+            score_div.appendChild(e);
+            animateWanderingElement(score_div,e);
+        }
     }
+
+
 }
 
 function showPlayers(players) {
@@ -482,13 +502,13 @@ function showPlayers(players) {
 }
 
 function showHighScores() {
-    score_div.style.display = "block";
+    if (!openModalWindow(score_div)) return;
     send("top",10);
     fadeAndPlay(AUDIO_CLIPS.music.enum.EPIC);
 }
 
 function showHelp() {
-    document.getElementById('div-help').style.display='block';
+    if (!openModalWindow(document.getElementById('div-help'))) return;
     fadeAndPlay(AUDIO_CLIPS.music.enum.FUGUE)
 }
 
@@ -642,7 +662,8 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
 }
 
 function showOptions(curr_opts) {
-    document.getElementById("div-opt").style.display = "block";
+
+    if (!openModalWindow(document.getElementById("div-opt"),moves_div)) return;
 
     console.log(JSON.stringify(curr_opts));
     turntime_range.value = turntime_out.innerHTML = curr_opts.move_time;
@@ -721,11 +742,11 @@ function handleMove(data) {
 
 function notifyMole(mole) {
     if (mole) {
-        document.getElementById("div-mole").style.display = "block";
+        openModalWindow(document.getElementById("div-mole"));
         playSFX(AUDIO_CLIPS.sound.enum.IS_MOLE);
     }
     else {
-        document.getElementById("div-not-mole").style.display = "block";
+        openModalWindow(document.getElementById("div-not-mole"));
         playSFX(AUDIO_CLIPS.sound.enum.NOT_MOLE);
     }
 }

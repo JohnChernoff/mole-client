@@ -26,8 +26,7 @@
             <div id="mole-sprite" class="mole-sprites"></div>
         </div>
 
-        <div id="div-highscores" class="modal">
-            <button onclick="closeModalWindow(document.getElementById('div-highscores'))">Return</button>
+        <div id="div-highscores" onclick="closeModalWindow(document.getElementById('div-highscores'))" class="modal">
             <table id="table-highscores"></table>
         </div>
 
@@ -125,7 +124,7 @@
 
             <br><br>
 
-            <label for="range-time">Max Players per Side: <span id="max-players-out"></span> </label><br>
+            <label for="range-max-players">Max Players per Side: <span id="max-players-out"></span> </label><br>
             <input type="range" id="range-max-players" min="3" max="16" value="6" step="1">
 
             <br><br>

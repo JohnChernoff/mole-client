@@ -73,7 +73,7 @@ function toggleSound(bool) {
     for (let i =0; i < buttons.length; i++) {
         buttons[i].innerHTML = AUDIO.sound ? "Sound Off" : "Sound On";
     }
-    if (!AUDIO.sound) {
+    if (!AUDIO.sound && current_sfx) {
         clips.sound[current_sfx.index].pause();
         clips.sound[current_sfx.index].currentTime = 0;
     }

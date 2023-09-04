@@ -147,7 +147,7 @@ class ZugBoard {
         }
     }
 
-    resize(board,wrapper) {
+    resize(wrapper) {
         this.square_width = Math.floor(wrapper.clientWidth/8)-1;
         this.square_height = Math.floor(wrapper.clientHeight/8)-1;
         //console.log("Resizing: " + width + ", " + height);
