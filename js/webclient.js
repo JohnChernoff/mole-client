@@ -93,10 +93,9 @@ function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)
     else if (type === "defection") { handleDefection(data); }
     else if (type === "rampage") { handleRampage(data); }
     else if (type === "options") { showOptions(data); }
-    else if (type === "veto") { div_veto.style.display = "block"; time_can.style.display = "none"; }
     else if (type === "join") { selected_game = data.title; updateGame(data); }
     else if (type === "part") { if (selected_game == data.title) { clearCountdown(); selected_game = ""; } }
-
+    else if (type === "veto") {}
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     //else if (type === "movelist") updateMoveList(data);
     else {

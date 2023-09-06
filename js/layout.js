@@ -23,11 +23,11 @@ function setLayout() {
         let extra_width = ((window.innerWidth/2) - main_div_size)/2;
         main_div.style.left = Math.floor((window.innerWidth * .25) + (extra_width > 0 ? extra_width : 0)) + "px";
 
-        time_div.style.left =  main_div.style.left;
-        time_div.style.top = "";
-        time_div.style.bottom = "1vh";
-        time_div.style.width = main_div_size + "px";
-        time_div.style.height = "7vh";
+        status_div.style.left =  main_div.style.left;
+        status_div.style.top = "";
+        status_div.style.bottom = "1vh";
+        status_div.style.width = (main_div_size-8) + "px";
+        status_div.style.height = "7vh";
 
         games_div.style.left = "80vw";
         games_div.style.top = "0px";
@@ -53,11 +53,11 @@ function setLayout() {
         let lower_div_height = Math.floor(window.innerWidth * .70);
 
         let clock_height = 50;
-        time_div.style.left = main_div.style.left;
-        time_div.style.top = lower_div_height + "px";
-        time_div.style.bottom = "";
-        time_div.style.width = main_div_size + "px";
-        time_div.style.height = clock_height + "px";
+        status_div.style.left = main_div.style.left;
+        status_div.style.top = lower_div_height + "px";
+        status_div.style.bottom = "";
+        status_div.style.width = main_div_size + "px";
+        status_div.style.height = clock_height + "px";
 
         games_div.style.left = "33vw";
         games_div.style.top = (lower_div_height + clock_height + 20) + "px";

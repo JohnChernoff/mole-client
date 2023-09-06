@@ -52,6 +52,10 @@ body {
     color: white;
 }
 
+#div-highscores {
+    background: black;
+}
+
 .high-score-entry {
     position: absolute;
     left: 50%;
@@ -99,21 +103,6 @@ body {
 
 #div-opt {
     background: black;
-}
-
-#div-veto {
-    display: none;
-    left: 50%;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    background: antiquewhite;
-    overflow: hidden;
-}
-
-#img-veto {
-    width: 100%;
-    height: 100%;
 }
 
 #div-welcome {
@@ -419,24 +408,38 @@ body {
     border-style: solid;
 }
 
-#div-time {
+#div-status {
     position: absolute;
+    display: flex;
+    justify-content: space-evenly;
     background-color: black;
-    border: solid thick #2f4f4f;
+    border: solid 4px #2f4f4f;
+}
+
+#div-time {
+    position: relative;
+    text-align: center;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
 }
 
 #txt-time {
     position: relative;
-    text-align: center;
-    font-size: larger;
-    width: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    float: left;
+    top: 33%;
+    font-size: x-large;
+    background: black;
     color: white;
 }
 
+#img-status {
+    height: 100%;
+    width: 50%;
+}
+
 #can-time {
+    display: none;
     position: relative;
     width: 50%;
     height: 100%;

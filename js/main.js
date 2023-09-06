@@ -15,7 +15,7 @@ clock shift on flip?
 weird sound loops with multiple games
  */
 
-let time_div = document.getElementById("div-time");
+let status_div = document.getElementById("div-status");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
 let time_ctx = time_can.getContext("2d");
@@ -57,7 +57,7 @@ let mole_pawns = document.getElementById("chk-mole-pawns");
 let div_defect = document.getElementById("div-defect");
 let div_defect_overlay = document.getElementById("defect-overlay");
 let div_ramp = document.getElementById("div-ramp");
-let div_veto = document.getElementById("div-veto");
+let img_status = document.getElementById("img-status");
 
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
@@ -67,6 +67,15 @@ let current_hover = null;
 let move_cells = [];
 let current_board_style;
 let splash_img = new Image();
+let phase_imgs = [
+    { img: new Image(), src: "img/phases/pregame.png" },
+    { img: new Image(), src: "img/phases/move_white.png" },
+    { img: new Image(), src: "img/phases/move_black.png" },
+    { img: new Image(), src: "img/phases/veto_white.png" },
+    { img: new Image(), src: "img/phases/veto_black.png" },
+    { img: new Image(), src: "img/phases/game_over.png" },
+];
+let PREGAME = 0, MOVE_WHITE = 1, MOVE_BLACK = 2, VETO_WHITE = 3, VETO_BLACK = 4, POSTGAME= 5;
 let BLACK = 0, WHITE = 1;
 let move_history = [];
 let games;
@@ -128,21 +137,40 @@ games_select.addEventListener("dblclick", () =>  {
     handleMessage("",selected_game); //updates message tab
 });
 
+function loadPhaseImgs(i,callback) {
+    if (i >= phase_imgs.length) callback();
+    else {
+        phase_imgs[i].img.onload = () => {
+            console.log("Loaded Image: " + phase_imgs[i].img.src);
+            loadPhaseImgs(i+1,callback);
+        }
+        phase_imgs[i].img.src = phase_imgs[i].src;
+    }
+}
+
+function loadImages(callback) {
+    splash_img.onload = () => {
+        console.log("Loaded Image: " + splash_img.src);
+        loadPhaseImgs(0,callback);
+    }
+    splash_img.src = "img/bkg/mole-splash2a.png";
+}
+
 function initGame(audio) {
     welcome_screen.style.display = "none"; splash_screen.style.display = "block";
     toggleSound(audio);
-    splash_img.onload = () => {
-        console.log("Loaded Image: " + splash_img);
+    loadImages(() => {
+        console.log("Loaded all images");
         loadSounds(() => {
             zug_board = new ZugBoard(main_board_div,sendMove,() => {
-                console.log("Pieces loaded");
+                console.log("ZugBoard loaded");
                 initLichess().then(() => showLogin());
             },{
                 board_tex: "plain",
                 pieces: select_piece_style.value,
                 pawns: mole_pawns.checked ? "mole-pawns" : undefined
             },{
-                square: { black: "#2F4F4F", white: "#AAAA88" },
+                square: { black: "#676A58", white: "#AAAA88" },
                 piece: { black: "#000000", white: "#FFFFFF"}
             });
             if (obs) {
@@ -154,8 +182,7 @@ function initGame(audio) {
                 animateMole(5000);
             }
         });
-    };
-    splash_img.src = "img/bkg/mole-splash2a.png";
+    });
 }
 
 function showLogin() {
@@ -382,12 +409,15 @@ function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
             selected_game = games[0].title;
             updatePlayTbl(games[0]);
         }
-        else selected_game = "";
+        else {
+            selected_game = "";
+            updatePlayTbl();
+        }
     }
 }
 
 function updatePlayTbl(game) { //console.log(JSON.stringify(game));
-    clearElement(play_tbl);
+    clearElement(play_tbl); if (!game) return;
     play_tbl.appendChild(getHeaders(["Player","Color","Rating","Vote","Accuse","Kick"]));
     if (game.bucket !== undefined) {
         for (let p = 0; p < game.bucket.length; p++) {
@@ -471,7 +501,7 @@ function getActionButton(board,player,action_msg,active) {
 
 function updateHighScores(data) {
     clearElement(score_div);
-    for (let i=0;i<data.length;i++) {
+    for (let i= data.length-1;i >= 0;i--) {
         /* let row = document.createElement("tr");
         let play_field = document.createElement("td");
         play_field.textContent = data[i].name;
@@ -482,12 +512,18 @@ function updateHighScores(data) {
 
         if (score_div.style.display === "block") {
             let e = document.createElement("span");
-            e.innerHTML = (i + 1) + ". " + data[i].name + ": " + data[i].rating;
-            e.style.color = rndColor();
-            e.style.backgroundColor = "black";
             e.className = "high-score-entry";
+            e.innerHTML = (i + 1) + ". " + data[i].name + ": " + data[i].rating;
+            let colors = hsvToRgb(Math.random(),1,1);
+            e.style.color = "rgb(" + colors[0] + "," + colors[1] + "," + colors[2] + ")";
+            let r = Math.round((Math.random() * 100));
+            let g = Math.round((Math.random() * 100));
+            let b = Math.round((Math.random() * 100));
+            let a = .5; //Math.random();
+            e.style.backgroundColor = "rgba(" + r + "," + g + "," + b + "," + a + ")";
             score_div.appendChild(e);
-            animateWanderingElement(score_div,e);
+            let font_size = (15 + ((data.length - i)*4)) + "px";
+            animateWanderingElement(score_div,e,font_size);
         }
     }
 
@@ -526,11 +562,14 @@ function createGame() {
 }
 
 function joinGame() {
-    send("joingame",{ title: selected_game, color: COLOR_UNKNOWN });
+    send("joingame",{ title: selected_game, color: COLOR_BLACK });
 }
 
 function gameCmd(cmd) {
-    if (selected_game !== undefined) send(cmd, selected_game);
+    if (selected_game) {
+        console.log("Sending: " + cmd);
+        send(cmd, selected_game);
+    }
 }
 
 function startGame() {
@@ -717,18 +756,30 @@ function submitOptions() {
     closeModalWindow(document.getElementById("div-opt"));
 }
 
-function newPhase(data) {
-    console.log("New phase: " + data.phase);
-    if (data.phase !== "VETO") {
-        div_veto.style.display = "none";
-        time_can.style.display = "block";
+function newPhase(game) { //console.log(JSON.stringify(game));
+    time_can.style.display = "none";
+    console.log("New phase: " + game.phase);
+    if (game.phase === "PREGAME") {
+        img_status.src = phase_imgs[PREGAME].src;
     }
-    updateGame(data);
+    else if (game.phase === "VOTING") {
+        if (game.turn === BLACK) img_status.src = phase_imgs[MOVE_BLACK].src;
+        else img_status.src = phase_imgs[MOVE_WHITE].src;
+    }
+    if (game.phase === "VETO") {
+        if (game.turn === BLACK) img_status.src = phase_imgs[VETO_BLACK].src;
+        else img_status.src = phase_imgs[VETO_WHITE].src;
+    }
+    else if (game.phase === "POSTGAME") {
+        img_status.src = phase_imgs[POSTGAME].src;
+    }
+
+    updateGame(game);
 }
 
 function handleDefection(data) {
     playSFX(AUDIO_CLIPS.sound.enum.DEFECT);
-    animateDefection(5000,data); //updateGame?
+    animateDefection(8000,data); //updateGame?
 }
 
 function handleRampage(data) {
@@ -756,6 +807,7 @@ function sendVeto(confirm) {
         game: selected_game,
         confirm: confirm
     });
+    return false;
 }
 
 let toggle = true;

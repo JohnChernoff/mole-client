@@ -137,7 +137,7 @@ function playTrack(clip) {
 }
 
 function playSFX(clip) {
-    if (!clip) return;
+    if (!AUDIO.sound || !clip) return;
     //if (current_sfx) clips.sound[current_sfx.index].pause();
     current_sfx = clip;
     clips.sound[current_sfx.index].play();

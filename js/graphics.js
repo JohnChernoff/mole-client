@@ -223,11 +223,11 @@ function animateRampage(duration,player) {
     });
 }
 
-function animateWanderingElement(wrapper,e) {
+function animateWanderingElement(wrapper,e,font_size) {
     let duration = 5000;
     let x = Math.round(Math.random() * (wrapper.clientWidth - e.clientWidth)) + "px";
     let y = Math.round(Math.random() * (wrapper.clientHeight - e.clientHeight)) + "px";
-    let z = (5 + (Math.round(Math.random() * 25))) + "px";
+    let z = (Math.random() < .5) ? (5 + (Math.round(Math.random() * 25))) + "px" : font_size;
 
     let anim =  e.animate([
         { left: x, offset: 1},
@@ -237,8 +237,7 @@ function animateWanderingElement(wrapper,e) {
     );
 
     anim.finished.then( () => {
-        //e.style.left = x; e.style.top = y;
-        if (wrapper.style.display === "block") animateWanderingElement(wrapper,e);
+        if (wrapper.style.display === "block") animateWanderingElement(wrapper,e,font_size);
     });
 
     return anim;
