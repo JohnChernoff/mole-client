@@ -237,7 +237,7 @@ function sendMove(move) {
     if (selected_game !== undefined) {
         send("move", {
             move: ZugBoard.getAlgebraicMove(move),
-            board: selected_game,
+            game: selected_game,
             promotion: move.promotion
         });
     }
@@ -486,12 +486,12 @@ function playRow(pdata,title) { //console.log(JSON.stringify(pdata));
     return play_row;
 }
 
-function getActionButton(board,player,action_msg,active) {
+function getActionButton(title,player,action_msg,active) {
     let play_col = document.createElement("td");
     let play_butt = document.createElement("button");
     if (active) {
         play_butt.textContent = "X"; play_butt.addEventListener("click",() => {
-            send(action_msg,{ player: player, board: board });
+            send(action_msg,{ player: player, game: title });
         });
     }
     else play_butt.textContent = "-";
@@ -556,13 +556,13 @@ function createGame() {
     let title = prompt("Enter a new game title",username);
     if (title !== null) {
         console.log("Starting: " + title);
-        send("newgame", {title: title, color: COLOR_BLACK}); //TODO: non-bucket color choice
+        send("newgame", {game: title, color: COLOR_BLACK}); //TODO: non-bucket color choice
         playSFX(AUDIO_CLIPS.sound.enum.BUMP);
     }
 }
 
 function joinGame() {
-    send("joingame",{ title: selected_game, color: COLOR_BLACK });
+    send("joingame",{ game: selected_game, color: COLOR_BLACK });
 }
 
 function gameCmd(cmd) {
@@ -575,13 +575,6 @@ function gameCmd(cmd) {
 function startGame() {
     starting = true;
     send("status",selected_game);
-}
-
-function setTime() {
-    if (selected_game !== undefined) {
-        let t = prompt("Enter move time in seconds: ");
-        if (t > 0) send("time",{ game: selected_game, time : t });
-    }
 }
 
 function rangeSelect() { //TODO: game change bug
@@ -605,6 +598,9 @@ function sendChat(input, source) {
         let cmd = tokens.shift();
         send("cmd",{ cmd: cmd, args: tokens });
     }
+    if (msg === "?") {
+        send("role",selected_game);
+    }
     else {
         send("chat",{ msg: input.value, source: source });
     }
@@ -624,15 +620,16 @@ function handleStatus(msg,src) {
     }
 }
 
-function selectTab(title) { //TODO: don't switch tabs?
+function selectTab(title,swap) {
     if (!title || title === "") title = "serv";
     let selected = null;
     let tab_areas = document.getElementsByClassName(TAB_PFX);
     for (const area of tab_areas) {
         if (area.id === TAB_PFX + title) {
-            area.style.display = "block"; selected = area;
+           if (swap) area.style.display = "block";
+            selected = area;
         }
-        else area.style.display = "none";
+        else if (swap) area.style.display = "none";
     }
     if (selected == null) selected = addTabArea(title);
     current_tab = title;
@@ -648,7 +645,7 @@ function addTabArea(title) {
     tab.id = TAB_BUTT + title;
     tab.className = TAB_BUTT;
     tab.textContent = title;
-    tab.onclick = () => selectTab(title);
+    tab.onclick = () => selectTab(title,true);
     tab.oncontextmenu = () => {
         if (title !== "serv") removeTabArea(title);
         return false;
@@ -700,18 +697,22 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
     area.votes.appendChild(tbody);
 }
 
-function showOptions(curr_opts) {
+function getOptions() {
+    if (selected_game) gameCmd('get_opt');
+    else showOptions();
+}
+
+function showOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
 
     if (!openModalWindow(document.getElementById("div-opt"),moves_div)) return;
 
-    console.log(JSON.stringify(curr_opts));
-    turntime_range.value = turntime_out.innerHTML = curr_opts.move_time;
-    maxplayers_range.value = maxplayers_out.innerHTML = curr_opts.max_play;
-    chk_mole_move_predict.checked = curr_opts.mole_move_predict;
-    chk_mole_piece_predict.checked = curr_opts.mole_piece_predict;
-    chk_team_move_predict.checked = curr_opts.team_move_predict;
-    chk_mole_veto.checked = curr_opts.mole_veto;
-    chk_hide_move.checked = curr_opts.hide_move;
+    turntime_range.value = turntime_out.innerHTML = curr_opts ? curr_opts.move_time : 0;
+    maxplayers_range.value = maxplayers_out.innerHTML = curr_opts ? curr_opts.max_play : 0;
+    chk_mole_move_predict.checked = curr_opts ? curr_opts.mole_move_predict : false;
+    chk_mole_piece_predict.checked = curr_opts ? curr_opts.mole_piece_predict : false;
+    chk_team_move_predict.checked = curr_opts ? curr_opts.team_move_predict : false;
+    chk_mole_veto.checked = curr_opts ? curr_opts.mole_veto : false;
+    chk_hide_move.checked = curr_opts ? curr_opts.hide_move : false;
 
     current_board_style = {
         dark_square :  zug_board.black_square_color,
