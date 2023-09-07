@@ -82,7 +82,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)
     else if (type === "info") handleMessage(JSON.stringify(data),SERV);
     else if (type === "games_update") updateGames(data);
     else if (type === "game_update") updateGame(data);
-    else if (type === "mole" && !obs) notifyMole(data.msg === "true");
+    else if (type === "mole" && !obs) notifyMole(data.msg === "true",data.source);
     else if (type === "top") updateHighScores(data);
     else if (type === "users") showPlayers(data.users);
     else if (type === "phase") { newPhase(data); }
@@ -92,7 +92,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)
     else if (type === "move") { handleMove(data); }
     else if (type === "defection") { handleDefection(data); }
     else if (type === "rampage") { handleRampage(data); }
-    else if (type === "options") { showOptions(data); }
+    else if (type === "options") { showGameOptions(data); }
     else if (type === "join") { selected_game = data.title; updateGame(data); }
     else if (type === "part") { if (selected_game == data.title) { clearCountdown(); selected_game = ""; } }
     else if (type === "veto") {}

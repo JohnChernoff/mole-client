@@ -74,7 +74,7 @@
             <div id="mole-ramp-sprite" class="mole-sprites"></div>
         </div>
 
-        <div id="div-opt" class="modal">
+        <div id="div-game-opt" class="modal">
             <input type="checkbox" id="chk-hide-move-vote">
             <label for="chk-hide-move-vote" class="opt-tip">Hide Current Move Vote
                 <span class = "tooltiptext">
@@ -119,9 +119,6 @@
                 </span>
             </label><br>
 
-            <input type="checkbox" id="chk-mole-pawns">
-            <label for="chk-mole-pawns">Mole Pawns </label><br>
-
             <br><br>
 
             <label for="range-max-players">Max Players per Side: <span id="max-players-out"></span> </label><br>
@@ -134,11 +131,21 @@
 
             <br><br>
 
+            <button onclick="submitGameOptions()">Update</button>
+            <button onclick="cancelGameOptions()">Cancel</button>
+        </div>
+
+        <div id="div-general-opt" class="modal">
             <input type="color" id="color-dark-square">
             <label for="color-dark-square"> Dark Squares </label><br>
 
             <input type="color" id="color-light-square">
             <label for="color-light-square"> Light Squares </label><br>
+
+            <br><br>
+
+            <input type="checkbox" id="chk-mole-pawns">
+            <label for="chk-mole-pawns">Mole Pawns </label><br>
 
             <br><br>
 
@@ -153,8 +160,17 @@
 
             <br><br>
 
-            <button onclick="submitOptions()">Update</button>
-            <button onclick="cancelOptions()">Cancel</button>
+            <input type="checkbox" id="chk-streaming">
+            <label for="chk-streaming" class="opt-tip">Streaming
+                <span class = "tooltiptext">
+                    Hides mole notifications for streamers.
+                </span>
+            </label><br>
+
+            <br><br>
+
+            <button onclick="submitGeneralOptions()">Update</button>
+            <button onclick="cancelGeneralOptions()">Cancel</button>
         </div>
 
         <div id="div-status">
@@ -188,9 +204,9 @@
         </div>
 
         <div id="div-games" class="modular_view">
-            <button id="audio-butt2" class="audio-toggle" onclick="toggleSound()">Sound On</button>
             <button id="help-butt2" onclick="showHelp()">Help</button>
             <button id="best-butt" onclick="showHighScores()">Best</button>
+            <button id="opt-butt2" onclick="showGeneralOptions()">General Options</button>
             <br><br>
             <button id="new-butt" onclick="createGame()">New Game</button>
             <button id="join-butt" onclick="joinGame()">Join</button>
@@ -200,7 +216,7 @@
             <button id="veto-butt" onclick="sendVeto(true)" oncontextmenu="return sendVeto(false)">Veto</button>
             <button id="resign-butt" onclick="gameCmd('resign')">Resign</button>
             <button id="flip-butt" onclick="flipBoard()">Flip</button>
-            <button id="opt-butt" onclick="getOptions()">Options</button>
+            <button id="opt-butt1" onclick="getGameOptions()">Game Options</button>
             <br><br>
             <label for="select-games">Game Title: </label>
             <select id="select-games"></select>

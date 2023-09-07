@@ -58,6 +58,9 @@ let div_defect = document.getElementById("div-defect");
 let div_defect_overlay = document.getElementById("defect-overlay");
 let div_ramp = document.getElementById("div-ramp");
 let img_status = document.getElementById("img-status");
+let div_gen_opt = document.getElementById("div-general-opt");
+let div_game_opt = document.getElementById("div-game-opt");
+let chk_streaming = document.getElementById("chk-streaming");
 
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
@@ -85,6 +88,7 @@ let zug_board;
 let lichess = new LichessLogger("https://lichess.org", "molechess.com");
 let starting = false;
 let oauth_token;
+let streaming = false;
 
 const obs =  new URL(document.location).searchParams.get("obs");
 if (obs) initGame(false);
@@ -607,9 +611,9 @@ function sendChat(input, source) {
     input.value = "";
 }
 
-function handleMessage(msg,src,player) {
-    if (player === undefined || player === null) writeMessage(msg,selectTab(src).messages,"white");
-    else writeMessage(msg,selectTab(src).messages, player.play_col);
+function handleMessage(msg,src,player,spoiler_txt) {
+    if (player === undefined || player === null) writeMessage(msg,selectTab(src).messages,"white",spoiler_txt);
+    else writeMessage(msg,selectTab(src).messages, player.play_col,spoiler_txt);
 }
 
 function handleStatus(msg,src) {
@@ -670,10 +674,21 @@ function removeTabArea(title) {
     for (const area of areas) if (area.id === (TAB_PFX + title)) div_info_tab.removeChild(area);
 }
 
-function writeMessage(text, chat_div, c) { //console.log("Response: " + text);
-    let span = document.createElement("span"); span.style.color = c;
-    span.appendChild(document.createTextNode(text));
-    chat_div.appendChild(span);
+function writeMessage(text, chat_div, c, spoiler_txt) { //console.log("Response: " + text);
+    let e,txt;
+    if (spoiler_txt) {
+        e = document.createElement("details");
+        e.style.color = "white";
+        e.innerHTML = text;
+        txt = document.createElement("summary");
+        txt.innerHTML = spoiler_txt;
+        e.appendChild(txt);
+    }
+    else {
+        e = document.createElement("span"); e.style.color = c;
+        e.appendChild(document.createTextNode(text));
+    }
+    chat_div.appendChild(e);
     chat_div.appendChild(document.createElement("br"));
     chat_div.scrollTop = chat_div.scrollHeight;
     if (chat_div.childElementCount > 128) chat_div.removeChild(chat_div.childNodes[0]);
@@ -697,14 +712,12 @@ function handleVote(votelist,turn,source) { //console.log("Vote List: " + JSON.s
     area.votes.appendChild(tbody);
 }
 
-function getOptions() {
+function getGameOptions() {
     if (selected_game) gameCmd('get_opt');
-    else showOptions();
 }
 
-function showOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
-
-    if (!openModalWindow(document.getElementById("div-opt"),moves_div)) return;
+function showGameOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
+    if (!openModalWindow(div_game_opt,moves_div)) return;
 
     turntime_range.value = turntime_out.innerHTML = curr_opts ? curr_opts.move_time : 0;
     maxplayers_range.value = maxplayers_out.innerHTML = curr_opts ? curr_opts.max_play : 0;
@@ -713,7 +726,29 @@ function showOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
     chk_team_move_predict.checked = curr_opts ? curr_opts.team_move_predict : false;
     chk_mole_veto.checked = curr_opts ? curr_opts.mole_veto : false;
     chk_hide_move.checked = curr_opts ? curr_opts.hide_move : false;
+}
 
+function submitGameOptions() {
+    let new_opts = {
+        game : selected_game,
+        time : turntime_range.value,
+        max_players : maxplayers_range.value,
+        mole_veto : chk_mole_veto.checked,
+        hide_move_vote : chk_hide_move.checked,
+        mole_predict_move : chk_mole_move_predict.checked,
+        mole_predict_piece : chk_mole_piece_predict.checked,
+        team_predict_move : chk_team_move_predict.checked
+    };
+    send("set_opt", new_opts);
+    closeModalWindow(div_game_opt);
+}
+
+function cancelGameOptions() {
+    closeModalWindow(div_game_opt);
+}
+
+function showGeneralOptions() {
+    if (!openModalWindow(div_gen_opt,moves_div)) return;
     current_board_style = {
         dark_square :  zug_board.black_square_color,
         light_square : zug_board.white_square_color,
@@ -725,10 +760,16 @@ function showOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
     color_light_square.value = current_board_style.light_square;
     select_piece_style.value = current_board_style.piece_style;
     mole_pawns.checked = current_board_style.mole_pawns;
+    chk_streaming.checked = streaming;
 }
 
-function cancelOptions() {
-    closeModalWindow(document.getElementById("div-opt"));
+function submitGeneralOptions() {
+    streaming = chk_streaming.checked;
+    closeModalWindow(div_gen_opt);
+}
+
+function cancelGeneralOptions() {
+    closeModalWindow(div_gen_opt);
     zug_board.setBoardStyle(
         {
             board_tex: "plain",
@@ -739,22 +780,6 @@ function cancelOptions() {
     zug_board.black_square_color = current_board_style.dark_square;
     zug_board.white_square_color = current_board_style.light_square;
     zug_board.updateBoard();
-}
-
-function submitOptions() {
-    let new_opts = {
-        game : selected_game,
-        time : turntime_range.value,
-        max_players : maxplayers_range.value,
-        mole_veto : chk_mole_veto.checked,
-        hide_move_vote : chk_hide_move.checked,
-        mole_predict_move : chk_mole_move_predict.checked,
-        mole_predict_piece : chk_mole_piece_predict.checked,
-        team_predict_move : chk_team_move_predict.checked
-
-    };
-    send("set_opt", new_opts);
-    closeModalWindow(document.getElementById("div-opt"));
 }
 
 function newPhase(game) { //console.log(JSON.stringify(game));
@@ -792,8 +817,11 @@ function handleMove(data) {
     playSFX(data.game.turn ? AUDIO_CLIPS.sound.enum.MOVE1 : AUDIO_CLIPS.sound.enum.MOVE2);
 }
 
-function notifyMole(mole) {
-    if (mole) {
+function notifyMole(mole,game) {
+    if (streaming) {
+        handleMessage(mole ? "You're the mole!" : "You're not the mole",game,null,"Mole Status");
+    }
+    else if (mole) {
         openModalWindow(document.getElementById("div-mole"));
         playSFX(AUDIO_CLIPS.sound.enum.IS_MOLE);
     }
