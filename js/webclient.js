@@ -90,6 +90,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)
     else if (type === "votelist") { handleVote(data.list, data.move, data.source); }
     else if (type === "color") { flipAtStart(data.msg === "black"); }
     else if (type === "move") { handleMove(data); }
+    else if (type == "move_conf") { moveConfirm(data.player,data.move,data.san,data.game.title); }
     else if (type === "defection") { handleDefection(data); }
     else if (type === "rampage") { handleRampage(data); }
     else if (type === "options") { showGameOptions(data); }

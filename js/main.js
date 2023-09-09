@@ -612,11 +612,11 @@ function sendChat(input, source) {
 }
 
 function handleMessage(msg,src,player,spoiler_txt) {
-    if (player === undefined || player === null) writeMessage(msg,selectTab(src).messages,"white",spoiler_txt);
-    else writeMessage(msg,selectTab(src).messages, player.play_col,spoiler_txt);
+    if (player) writeMessage(msg,selectTab(src).messages, player.play_col,spoiler_txt);
+    else writeMessage(msg,selectTab(src).messages,"white",spoiler_txt);
 }
 
-function handleStatus(msg,src) {
+function handleStatus(msg) {
     if (starting) {
         if (msg === "voting" || msg === "postgame" || msg === "wtf") alert("Bad Phase: " + msg);
         else if (msg === "ready" || confirm("Game not ready - add AI?")) gameCmd('startgame');
@@ -626,22 +626,33 @@ function handleStatus(msg,src) {
 
 function selectTab(title,swap) {
     if (!title || title === "") title = "serv";
-    let selected = null;
-    let tab_areas = document.getElementsByClassName(TAB_PFX);
-    for (const area of tab_areas) {
-        if (area.id === TAB_PFX + title) {
-           if (swap) area.style.display = "block";
-            selected = area;
-        }
-        else if (swap) area.style.display = "none";
+    let selected = findTab(TAB_PFX + title);
+    if (selected == null) {
+        selected = addTabArea(title);
+        hideTabs(selected);
     }
-    if (selected == null) selected = addTabArea(title);
+    else if (swap) {
+        hideTabs(selected);
+    }
+
     current_tab = title;
 
      return {
         "messages" : selected.getElementsByClassName("msg-class")[0],
         "votes" : selected.getElementsByClassName("vote-class")[0]
     };
+}
+
+function hideTabs(tab) {
+    for (const area of  document.getElementsByClassName(TAB_PFX)) {
+        if (area === tab) area.style.display = "block";
+        else area.style.display = "none";
+    }
+}
+
+function findTab(tab_id) {
+    for (const area of  document.getElementsByClassName(TAB_PFX)) if (area.id === tab_id) return area;
+    return null;
 }
 
 function addTabArea(title) {
@@ -828,6 +839,15 @@ function notifyMole(mole,game) {
     else {
         openModalWindow(document.getElementById("div-not-mole"));
         playSFX(AUDIO_CLIPS.sound.enum.NOT_MOLE);
+    }
+}
+
+function moveConfirm(player,move,san,game) {
+    if (streaming) {
+        handleMessage(san,game,player,"Your vote:");
+    }
+    else {
+        handleMessage("Your vote: " + san,game,player);
     }
 }
 
