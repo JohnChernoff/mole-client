@@ -60,6 +60,8 @@ let div_ramp = document.getElementById("div-ramp");
 let img_status = document.getElementById("img-status");
 let div_gen_opt = document.getElementById("div-general-opt");
 let div_game_opt = document.getElementById("div-game-opt");
+let div_history = document.getElementById("div-history");
+let history_tbl = document.getElementById("table-history");
 let chk_streaming = document.getElementById("chk-streaming");
 
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
@@ -110,7 +112,7 @@ color_light_square.onchange = () => {
 document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState === "visible") {
         console.log("tab is active");
-        send("update", selected_game);
+        if (selected_game) send("update", selected_game);
     } else {
         console.log("tab is inactive");
         if (checker_timer !== undefined) clearInterval(checker_timer);
@@ -857,6 +859,49 @@ function sendVeto(confirm) {
         confirm: confirm
     });
     return false;
+}
+
+function showHistory(pgnlist) { //console.log(JSON.stringify(pgnlist));
+    openModalWindow(div_history);
+    clearElement(history_tbl);
+    for (let i=0;i<pgnlist.length;i++) {
+        let row = document.createElement("tr");
+        let teams = parsePGN(pgnlist[i].pgn);
+        for (let w=0;w<teams.white_players.length;w++) {
+            let white_field = document.createElement("td");
+            white_field.textContent = teams.white_players[w];
+            white_field.className = "team-white";
+            row.appendChild(white_field);
+        }
+        for (let b=0;b<teams.black_players.length;b++) {
+            let black_field = document.createElement("td");
+            black_field.textContent = teams.black_players[b];
+            black_field.className = "team-black";
+            row.appendChild(black_field);
+        }
+        let pgn_field = document.createElement("td");
+        pgn_field.textContent = "PGN";
+        pgn_field.style.backgroundColor = "green";
+        pgn_field.onclick = () => {
+            navigator.clipboard.writeText(pgnlist[i].pgn).then(function() {
+                alert('PGN copied to clipboard');
+            }, function(err) {
+                alert('Error: Could not copy PGN to clipboard: ' + err);
+            });
+            return false;
+        }
+        row.appendChild(pgn_field);
+        history_tbl.appendChild(row);
+    }
+}
+
+function parsePGN(pgn) {
+    let tags = [];
+    pgn.replace(/\[(.*?)\]/g, function(g0,g1){tags.push(g1);});
+    return {
+        white_players :  (tags[2].replaceAll("\"","").split(" ").slice(1)), //TODO: IE breaks
+        black_players :  (tags[3].replaceAll("\"","").split(" ").slice(1))
+    };
 }
 
 let toggle = true;

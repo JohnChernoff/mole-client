@@ -97,6 +97,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)
     else if (type === "join") { selected_game = data.title; updateGame(data); }
     else if (type === "part") { if (selected_game == data.title) { clearCountdown(); selected_game = ""; } }
     else if (type === "veto") {}
+    else if (type === "history") { showHistory(data); }
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     //else if (type === "movelist") updateMoveList(data);
     else {
