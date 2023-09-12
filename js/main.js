@@ -46,7 +46,7 @@ let turntime_out = document.getElementById("turn-time-out");
 let maxplayers_range = document.getElementById("range-max-players");
 let maxplayers_out = document.getElementById("max-players-out");
 let chk_mole_move_predict = document.getElementById("chk-mole-move-prediction");
-let chk_mole_piece_predict = document.getElementById("chk-mole-piece-prediction");
+//let chk_mole_piece_predict = document.getElementById("chk-mole-piece-prediction");
 let chk_team_move_predict = document.getElementById("chk-team-move-prediction");
 let chk_mole_veto = document.getElementById("chk-mole-veto");
 let chk_hide_move = document.getElementById("chk-hide-move-vote");
@@ -302,18 +302,20 @@ function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.
     tools[0].style.visibility = "visible";
 }
 
-function exportPGN() {
-    console.log(JSON.stringify(move_history));
-    let pgn_txt = "";
-    for (let i=0; i<move_history.length; i++) {
-        pgn_txt += (move_history[i].selected.move.san + " ");
+function exportPGN() { //TODO request PGN from server
+    if (move_history.length > 1) {
+        console.log(JSON.stringify(move_history));
+        let pgn_txt = "";
+        for (let i=0; i<move_history.length; i++) {
+            pgn_txt += (move_history[i].selected.move.san + " ");
+        }
+        alert(pgn_txt);
     }
-    alert(pgn_txt);
 }
 
 function updateGame(game) {//console.log("Update Game: " + game.title + "," + game.phase);//JSON.stringify(game));
     if (game.title === selected_game || obs) {
-        if (game.currentFEN !== undefined) {
+        if (game.currentFEN) {
             if (game.currentFEN !== zug_board.currentFEN) {
                 let cancelMove = zug_board.promoting;
                 zug_board.clearPromotion(cancelMove);
@@ -324,7 +326,7 @@ function updateGame(game) {//console.log("Update Game: " + game.title + "," + ga
             countdown(selected_game,game.turn,game.timeRemaining);
         }
         else clearCountdown();
-        if (game.history !== undefined) updateMoveList(game.history);
+        if (game.history) updateMoveList(game.history);
         updatePlayTbl(game);
     }
 }
@@ -628,27 +630,38 @@ function handleStatus(msg) {
 
 function selectTab(title,swap) {
     if (!title || title === "") title = "serv";
-    let selected = findTab(TAB_PFX + title);
-    if (selected == null) {
-        selected = addTabArea(title);
-        hideTabs(selected);
-    }
-    else if (swap) {
-        hideTabs(selected);
+    let selected = document.getElementById(TAB_PFX + title);
+    if (swap || selected == null) {
+        if (selected == null) selected = addTabArea(title);
+        switchTabs(selected);
+        current_tab = title;
     }
 
-    current_tab = title;
+    let butt = document.getElementById(TAB_BUTT + title);
+    if (butt) highlightButt(butt);
 
-     return {
+    return {
         "messages" : selected.getElementsByClassName("msg-class")[0],
         "votes" : selected.getElementsByClassName("vote-class")[0]
     };
 }
 
-function hideTabs(tab) {
+function switchTabs(tab) {
     for (const area of  document.getElementsByClassName(TAB_PFX)) {
         if (area === tab) area.style.display = "block";
         else area.style.display = "none";
+    }
+}
+
+function highlightButt(tab) { //TODO: maintain highlight of unread tabs?
+    let curr_butt = document.getElementById(TAB_BUTT + current_tab);
+    for (const butt of  document.getElementsByClassName(TAB_BUTT)) {
+        if (butt === tab) {
+            if (butt === curr_butt) butt.style.color = "white"; else butt.style.color = "bisque";
+        }
+        else {
+            if (butt === curr_butt) butt.style.color = "cyan"; else butt.style.color = "darkslategrey";
+        }
     }
 }
 
@@ -731,11 +744,10 @@ function getGameOptions() {
 
 function showGameOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
     if (!openModalWindow(div_game_opt,moves_div)) return;
-
+    //chk_mole_piece_predict.checked = curr_opts ? curr_opts.mole_piece_predict : false;
     turntime_range.value = turntime_out.innerHTML = curr_opts ? curr_opts.move_time : 0;
     maxplayers_range.value = maxplayers_out.innerHTML = curr_opts ? curr_opts.max_play : 0;
     chk_mole_move_predict.checked = curr_opts ? curr_opts.mole_move_predict : false;
-    chk_mole_piece_predict.checked = curr_opts ? curr_opts.mole_piece_predict : false;
     chk_team_move_predict.checked = curr_opts ? curr_opts.team_move_predict : false;
     chk_mole_veto.checked = curr_opts ? curr_opts.mole_veto : false;
     chk_hide_move.checked = curr_opts ? curr_opts.hide_move : false;
@@ -748,8 +760,7 @@ function submitGameOptions() {
         max_players : maxplayers_range.value,
         mole_veto : chk_mole_veto.checked,
         hide_move_vote : chk_hide_move.checked,
-        mole_predict_move : chk_mole_move_predict.checked,
-        mole_predict_piece : chk_mole_piece_predict.checked,
+        mole_predict_move : chk_mole_move_predict.checked, //mole_predict_piece : chk_mole_piece_predict.checked,
         team_predict_move : chk_team_move_predict.checked
     };
     send("set_opt", new_opts);
@@ -864,9 +875,11 @@ function sendVeto(confirm) {
 function showHistory(pgnlist) { //console.log(JSON.stringify(pgnlist));
     openModalWindow(div_history);
     clearElement(history_tbl);
+    history_tbl.style.height = (pgnlist.length < 10 ? (pgnlist.length * 10) : 95) + "%";
     for (let i=0;i<pgnlist.length;i++) {
         let row = document.createElement("tr");
         let teams = parsePGN(pgnlist[i].pgn);
+
         for (let w=0;w<teams.white_players.length;w++) {
             let white_field = document.createElement("td");
             white_field.textContent = teams.white_players[w];
@@ -882,16 +895,59 @@ function showHistory(pgnlist) { //console.log(JSON.stringify(pgnlist));
         let pgn_field = document.createElement("td");
         pgn_field.textContent = "PGN";
         pgn_field.style.backgroundColor = "green";
-        pgn_field.onclick = () => {
+        pgn_field.onclick = (ev) => {
             navigator.clipboard.writeText(pgnlist[i].pgn).then(function() {
                 alert('PGN copied to clipboard');
             }, function(err) {
                 alert('Error: Could not copy PGN to clipboard: ' + err);
             });
-            return false;
+            ev.stopPropagation();
         }
         row.appendChild(pgn_field);
         history_tbl.appendChild(row);
+    }
+}
+
+function showHistory2(pgnlist) {
+    openModalWindow(div_history);
+    clearElement(div_history);
+    for (let g=0;g<pgnlist.length;g++) {
+        let teams = parsePGN(pgnlist[g].pgn);
+
+        let div = document.createElement("div");
+        div.style.width = "90%";
+        div.style.height = "10%";
+        div.style.backgroundColor = "brown";
+        div.style.borderStyle = "ridge";
+        div.style.borderColor = "cornsilk";
+
+        for (let i=0;i<teams.white_players.length;i++) {
+            let white_butt = document.createElement("button");
+            white_butt.textContent = teams.white_players[i];
+            white_butt.className = "team-white";
+            div.appendChild(white_butt);
+        }
+        div.appendChild(document.createElement("br"));
+        for (let i=0;i<teams.black_players.length;i++) {
+            let black_butt = document.createElement("button");
+            black_butt.textContent = teams.black_players[i];
+            black_butt.className = "team-black";
+            div.appendChild(black_butt);
+        }
+        div.appendChild(document.createElement("br"));
+        let pgn_butt = document.createElement("button");
+        pgn_butt.textContent = "PGN";
+        pgn_butt.style.backgroundColor = "green";
+        pgn_butt.onclick = (ev) => {
+            navigator.clipboard.writeText(pgnlist[g].pgn).then(function() {
+                alert('PGN copied to clipboard');
+            }, function(err) {
+                alert('Error: Could not copy PGN to clipboard: ' + err);
+            });
+            ev.stopPropagation();
+        }
+        div.appendChild(pgn_butt);
+        div_history.appendChild(div);
     }
 }
 
@@ -902,6 +958,10 @@ function parsePGN(pgn) {
         white_players :  (tags[2].replaceAll("\"","").split(" ").slice(1)), //TODO: IE breaks
         black_players :  (tags[3].replaceAll("\"","").split(" ").slice(1))
     };
+}
+
+function partGame(game) { //console.log("Parting: " + JSON.stringify(game));
+    if (selected_game === game.title) { clearCountdown(); selected_game = ""; } //updateGame(game);
 }
 
 let toggle = true;

@@ -30,7 +30,7 @@
             <table id="table-highscores"></table>
         </div>
 
-        <div id="div-history" class="modal">
+        <div id="div-history" class="modal" onclick="closeModalWindow(document.getElementById('div-history'))">
             <button id="hist-return-butt" onclick="closeModalWindow(document.getElementById('div-history'))">Return</button>
             <table id="table-history"></table>
         </div>
@@ -94,15 +94,6 @@
                     any mole that can no longer be democratically removed (i.e., by voting).  If successful, the move
                     is vetoed, but the mole which cast the veto must then reveal a (randomly selected) move they
                     previously voted for.
-                </span>
-            </label><br>
-
-            <input type="checkbox" id="chk-mole-piece-prediction">
-            <label for="chk-mole-piece-prediction" class="opt-tip">Mole Piece Prediction
-                <span class = "tooltiptext">
-                    A mole may attempt to predict the type of piece moved by an opposing team's "rampaging" mole.
-                    A "rampaging" mole is any mole that can no longer be democratically removed (i.e., by voting).
-                    If successful, the move is vetoed.
                 </span>
             </label><br>
 

@@ -418,6 +418,10 @@ body {
     height: 95%;
 }
 
+#div-history {
+    overflow: auto;
+}
+
 #hist-return-butt {
     height: 5%;
 }

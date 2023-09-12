@@ -72,7 +72,7 @@ function closeSocket() {
 let username = "?";
 function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)); // + ", Data: " + JSON.stringify(data));
     if (type === "chat") {
-        if (data.source == "serv") handleMessage(data.user + ": " + data.msg,data.source,null);
+        if (data.source === "serv") handleMessage(data.user + ": " + data.msg,data.source,null);
         else handleMessage(data.player.user.name + ": " + data.msg,data.source,data.player);
     }
     else if (type === "serv_msg") handleMessage(data.msg,data.source,data.player);
@@ -90,14 +90,17 @@ function msgHandler(type,data) { console.log("Msg Type: " + JSON.stringify(type)
     else if (type === "votelist") { handleVote(data.list, data.move, data.source); }
     else if (type === "color") { flipAtStart(data.msg === "black"); }
     else if (type === "move") { handleMove(data); }
-    else if (type == "move_conf") { moveConfirm(data.player,data.move,data.san,data.game.title); }
+    else if (type === "move_conf") { moveConfirm(data.player,data.move,data.san,data.game.title); }
     else if (type === "defection") { handleDefection(data); }
     else if (type === "rampage") { handleRampage(data); }
     else if (type === "options") { showGameOptions(data); }
     else if (type === "join") { selected_game = data.title; updateGame(data); }
-    else if (type === "part") { if (selected_game == data.title) { clearCountdown(); selected_game = ""; } }
+    else if (type === "part") { partGame(data); }
     else if (type === "veto") {}
-    else if (type === "history") { showHistory(data); }
+    else if (type === "history") { showHistory2(data); }
+    else if (type === "ping") { send("pong","pong"); }
+    else if (type === "conn_stat") { console.log("Connection Status: " + data.msg); }
+    else if (type === "spam") { alert(data.msg); }
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     //else if (type === "movelist") updateMoveList(data);
     else {
