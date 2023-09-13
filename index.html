@@ -3,8 +3,9 @@
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-        <title>MoleChess 0.1</title>
+        <title>MoleChess</title>
         <link rel="stylesheet" href="css/main.css">
+        <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     </head>
 
     <body id="body">
@@ -16,8 +17,6 @@
         </div>
 
         <div id="div-splash" class="modal">
-            <button id="audio-butt1" class="audio-toggle big-butt" onclick="toggleSound()">Sound On</button>
-            <button id="help-butt1" class = "big-butt" onclick="window.location.assign('help.html')">How to Play</button>
             <button id="login-butt" class="splash-butt big-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt big-butt" onclick="logout()">Logout</button>
             <button id="enter-butt" class="splash-butt big-butt" onclick="enterGame()"></button>
@@ -142,6 +141,12 @@
 
             <input type="checkbox" id="chk-mole-pawns">
             <label for="chk-mole-pawns">Mole Pawns </label><br>
+
+            <input type="checkbox" id="chk-sound">
+            <label for="chk-sound">Sound </label><br>
+
+            <input type="checkbox" id="chk-music">
+            <label for="chk-music">Music </label><br>
 
             <br><br>
 

@@ -67,24 +67,20 @@ function loadMusic(onload) {
     }
 }
 
-function toggleSound(bool) {
+function toggleSound(bool) { console.log("Sound: " + bool);
     if (bool !== undefined) AUDIO.sound = bool; else AUDIO.sound = !AUDIO.sound;
     let buttons = document.getElementsByClassName("audio-toggle");
-    for (let i =0; i < buttons.length; i++) {
-        buttons[i].innerHTML = AUDIO.sound ? "Sound Off" : "Sound On";
-    }
+    for (let i =0; i < buttons.length; i++) buttons[i].innerHTML = AUDIO.sound ? "Sound Off" : "Sound On";
     if (!AUDIO.sound && current_sfx) {
         clips.sound[current_sfx.index].pause();
         clips.sound[current_sfx.index].currentTime = 0;
     }
 }
 
-function toggleMusic(bool) {
+function toggleMusic(bool) { console.log("Music: " + bool);
     if (bool !== undefined) AUDIO.music = bool; else AUDIO.music = !AUDIO.music;
     let buttons = document.getElementsByClassName("music-toggle");
-    for (let i= 0; i < buttons.length; i++) {
-        buttons[i].innerHTML = AUDIO.sound ? "Music Off" : "Music On";
-    }
+    for (let i= 0; i < buttons.length; i++) buttons[i].innerHTML = AUDIO.sound ? "Music Off" : "Music On";
     if (!AUDIO.music) clips.music[current_track.index].pause();
 }
 

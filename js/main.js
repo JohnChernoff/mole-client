@@ -63,6 +63,8 @@ let div_game_opt = document.getElementById("div-game-opt");
 let div_history = document.getElementById("div-history");
 let history_tbl = document.getElementById("table-history");
 let chk_streaming = document.getElementById("chk-streaming");
+let chk_sound = document.getElementById("chk-sound");
+let chk_music = document.getElementById("chk-music");
 
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
@@ -785,10 +787,15 @@ function showGeneralOptions() {
     select_piece_style.value = current_board_style.piece_style;
     mole_pawns.checked = current_board_style.mole_pawns;
     chk_streaming.checked = streaming;
+    chk_sound.checked = AUDIO.sound;
+    chk_music.checked = AUDIO.music;
+
 }
 
 function submitGeneralOptions() {
     streaming = chk_streaming.checked;
+    toggleSound(chk_sound.checked);
+    toggleMusic(chk_music.checked);
     closeModalWindow(div_gen_opt);
 }
 
