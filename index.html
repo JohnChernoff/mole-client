@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
         <title>MoleChess</title>
+        <link rel="stylesheet" href="css/lichess-pgn-viewer.css">
         <link rel="stylesheet" href="css/main.css">
         <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     </head>
@@ -193,10 +194,7 @@
             <br>
             <div id="div-info"> </div>
             <div id="div-links">
-                <img class="img-link"
-                     src="img/bkg/discord-logo.png"
-                     alt="Discord"
-                     onclick="window.open('https://discord.gg/mEnXK8cP4R', '_blank')">
+                <div class="img-link" onclick="window.open('https://discord.gg/mEnXK8cP4R', '_blank')"> </div>
             </div>
         </div>
 
@@ -234,7 +232,14 @@
             </div>
         </div>
 
+         <div id="div-pgn-view" class="modal">
+             <div id="div-pgn-viewer" class="pgn-viewer"><div>
+         </div>
+
         <script>let exports = {};</script>
+        <script type="module" src="./js/chess/lichess-pgn-viewer.min.js"></script>
+        <script type="module" src="./js/pgn.js"></script>
+        <script type="text/javascript" src="js/pgn-parser/lib/index.umd.js"></script>
         <script type="text/javascript" src="js/oauth2-auth-code-pkce-master/pkce.js"></script>
         <script type="text/javascript" src="js/env.js"></script>
         <script type="text/javascript" src="js/lichess.js"></script>

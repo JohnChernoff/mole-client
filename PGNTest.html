@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PGNTest</title>
+    <link href="css/pgn-viewer.css" rel="stylesheet" />
+    <link href="css/lichess-pgn-viewer.css" rel="stylesheet" />
+</head>
+<body>
+
+<script type="text/javascript" src="./js/pgn-parser/lib/index.umd.js"></script>
+<script type="module" src="./js/pgntest.js"></script>
+
+<script type="module" src="./js/chess/lichess-pgn-viewer.min.js"></script>
+
+<div id="div-pgn-view" class="viewers"></div>
+
+<textarea id="txt-pgn"></textarea>
+<button onclick="testPGN(document.getElementById('div-pgn-view'))">Parse PGN</button>
+
+</body>
+</html>

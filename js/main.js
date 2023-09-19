@@ -18,7 +18,7 @@ weird sound loops with multiple games
 let status_div = document.getElementById("div-status");
 let time_txt = document.getElementById("txt-time");
 let time_can = document.getElementById("can-time");
-let time_ctx = time_can.getContext("2d");
+let time_ctx = (time_can) ? time_can.getContext("2d") : null;
 let countdown_can = document.createElement("canvas");
 let countdown_ctx = countdown_can.getContext("2d");
 let main_div = document.getElementById("div-main");
@@ -65,6 +65,8 @@ let history_tbl = document.getElementById("table-history");
 let chk_streaming = document.getElementById("chk-streaming");
 let chk_sound = document.getElementById("chk-sound");
 let chk_music = document.getElementById("chk-music");
+let div_pgn_view = document.getElementById("div-pgn-view");
+let div_pgn_viewer = document.getElementById("div-pgn-viewer");
 
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
@@ -315,7 +317,7 @@ function exportPGN() { //TODO request PGN from server
     }
 }
 
-function updateGame(game) {//console.log("Update Game: " + game.title + "," + game.phase);//JSON.stringify(game));
+function updateGame(game) { console.log("Update Game: " + game.title + "," + game.phase + "," + JSON.stringify(game));
     if (game.title === selected_game || obs) {
         if (game.currentFEN) {
             if (game.currentFEN !== zug_board.currentFEN) {
@@ -885,7 +887,7 @@ function showHistory(pgnlist) { //console.log(JSON.stringify(pgnlist));
     history_tbl.style.height = (pgnlist.length < 10 ? (pgnlist.length * 10) : 95) + "%";
     for (let i=0;i<pgnlist.length;i++) {
         let row = document.createElement("tr");
-        let teams = parsePGN(pgnlist[i].pgn);
+        let teams = parsePlayersFromPGN(pgnlist[i].pgn);
 
         for (let w=0;w<teams.white_players.length;w++) {
             let white_field = document.createElement("td");
@@ -919,7 +921,7 @@ function showHistory2(pgnlist) {
     openModalWindow(div_history);
     clearElement(div_history);
     for (let g=0;g<pgnlist.length;g++) {
-        let teams = parsePGN(pgnlist[g].pgn);
+        let teams = parsePlayersFromPGN(pgnlist[g].pgn);
 
         let div = document.createElement("div");
         div.style.width = "90%";
@@ -944,7 +946,7 @@ function showHistory2(pgnlist) {
         div.appendChild(document.createElement("br"));
         let pgn_butt = document.createElement("button");
         pgn_butt.textContent = "PGN";
-        pgn_butt.style.backgroundColor = "green";
+        pgn_butt.style.backgroundColor = "orange";
         pgn_butt.onclick = (ev) => {
             navigator.clipboard.writeText(pgnlist[g].pgn).then(function() {
                 alert('PGN copied to clipboard');
@@ -954,11 +956,29 @@ function showHistory2(pgnlist) {
             ev.stopPropagation();
         }
         div.appendChild(pgn_butt);
+        let view_butt = document.createElement("button");
+        view_butt.textContent = "View";
+        view_butt.style.backgroundColor = "green";
+        view_butt.onclick = (ev) => {
+              openModalWindow(div_pgn_view);
+              clearElement(div_pgn_view);
+              let exit_div = document.createElement("div");
+              exit_div.onclick = () => { closeModalWindow(div_pgn_view); };
+              exit_div.style.backgroundColor = "darkslategrey";
+              exit_div.style.height = "10%";
+              div_pgn_view.appendChild(exit_div);
+              div_pgn_viewer = document.createElement("div");
+              div_pgn_viewer.className = "pgn-viewer";
+              div_pgn_view.appendChild(div_pgn_viewer);
+              loadPGN(div_pgn_viewer,pgnlist[g].pgn);
+              ev.stopPropagation();
+        }
+        div.appendChild(view_butt);
         div_history.appendChild(div);
     }
 }
 
-function parsePGN(pgn) {
+function parsePlayersFromPGN(pgn) {
     let tags = [];
     pgn.replace(/\[(.*?)\]/g, function(g0,g1){tags.push(g1);});
     return {
@@ -973,3 +993,9 @@ function partGame(game) { //console.log("Parting: " + JSON.stringify(game));
 
 let toggle = true;
 function test() { toggle = !toggle; }
+
+function testPGNParsing() {
+    testPGN();
+}
+
+
