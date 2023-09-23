@@ -18,6 +18,7 @@
         </div>
 
         <div id="div-splash" class="modal">
+            <button id="about-butt" class="big-butt" onclick="showHelp()">About</button>
             <button id="login-butt" class="splash-butt big-butt" onclick="login()">Login with Lichess</button>
             <button id="logout-butt" class="splash-butt big-butt" onclick="logout()">Logout</button>
             <button id="enter-butt" class="splash-butt big-butt" onclick="enterGame()"></button>
@@ -84,6 +85,14 @@
             <label for="chk-hide-move-vote" class="opt-tip">Hide Current Move Vote
                 <span class = "tooltiptext">
                     All moves for a turn are anonymous until one is (randomly) selected.
+                </span>
+            </label><br>
+
+            <input type="checkbox" id="chk-inspector">
+            <label for="chk-inspector" class="opt-tip">Inspector Role
+                <span class = "tooltiptext">
+                    The Inspector can reveal to themself a random vote made by the Mole at the cost of a random move
+                    on their part.
                 </span>
             </label><br>
 
@@ -206,17 +215,20 @@
             <button id="help-butt2" onclick="showHelp()">Help</button>
             <button id="best-butt" onclick="showHighScores()">Best</button>
             <button id="hist-butt" onclick="send('history','10')">History</button>
-            <button id="opt-butt2" onclick="showGeneralOptions()">General Options</button>
             <br><br>
             <button id="new-butt" onclick="createGame()">New Game</button>
             <button id="join-butt" onclick="joinGame()">Join</button>
             <button id="part-butt" onclick="gameCmd('partgame')">Leave</button>
             <button id="start-butt" onclick="startGame()">Start</button>
+            <button id="flip-butt" onclick="flipBoard()">Flip</button>
             <br><br>
             <button id="veto-butt" onclick="sendVeto(true)" oncontextmenu="return sendVeto(false)">Veto</button>
+            <button id="inspect-butt" onclick="gameCmd('inspect')">Inspect</button>
+            <button id="bomb-butt" onclick="gameCmd('bomb')">Mole Bomb</button>
             <button id="resign-butt" onclick="gameCmd('resign')">Resign/Abort</button>
-            <button id="flip-butt" onclick="flipBoard()">Flip</button>
+            <br><br>
             <button id="opt-butt1" onclick="getGameOptions()">Game Options</button>
+            <button id="opt-butt2" onclick="showGeneralOptions()">General Options</button>
             <br><br>
             <label for="select-games">Game Title: </label>
             <select id="select-games"></select>
@@ -233,23 +245,23 @@
         </div>
 
          <div id="div-pgn-view" class="modal">
-             <div id="div-pgn-viewer" class="pgn-viewer"><div>
+             <div id="div-pgn-viewer" class="pgn-viewer"></div>
          </div>
 
         <script>let exports = {};</script>
         <script type="module" src="./js/chess/lichess-pgn-viewer.min.js"></script>
+        <script type="text/javascript" src="./js/chess/pgn-parser/index.umd.js"></script>
         <script type="module" src="./js/pgn.js"></script>
-        <script type="text/javascript" src="js/pgn-parser/lib/index.umd.js"></script>
-        <script type="text/javascript" src="js/oauth2-auth-code-pkce-master/pkce.js"></script>
-        <script type="text/javascript" src="js/env.js"></script>
-        <script type="text/javascript" src="js/lichess.js"></script>
-        <script type="text/javascript" src="js/colors.js"></script>
-        <script type="text/javascript" src="js/graphics.js"></script>
-        <script type="text/javascript" src="js/webclient.js"></script>
-        <script type="text/javascript" src="js/audio.js"></script>
-        <script type="text/javascript" src="js/layout.js"></script>
-        <script type="text/javascript" src="js/zugboard.js"></script>
-        <script type="text/javascript" src="js/main.js"></script>
+        <script type="text/javascript" src="./js/oauth2-auth-code-pkce-master/pkce.js"></script>
+        <script type="text/javascript" src="./js/env.js"></script>
+        <script type="text/javascript" src="./js/lichess.js"></script>
+        <script type="text/javascript" src="./js/colors.js"></script>
+        <script type="text/javascript" src="./js/graphics.js"></script>
+        <script type="text/javascript" src="./js/webclient.js"></script>
+        <script type="text/javascript" src="./js/audio.js"></script>
+        <script type="text/javascript" src="./js/layout.js"></script>
+        <script type="text/javascript" src="./js/zugboard.js"></script>
+        <script type="text/javascript" src="./js/main.js"></script>
 
     </body>
 

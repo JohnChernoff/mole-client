@@ -13,6 +13,8 @@ support for the Maxthon Browser
 arrows after move?
 clock shift on flip?
 weird sound loops with multiple games
+more sounds (game over, mole vote, etc.),
+create checkbox options programmatically
  */
 
 let status_div = document.getElementById("div-status");
@@ -45,6 +47,7 @@ let turntime_range = document.getElementById("range-time");
 let turntime_out = document.getElementById("turn-time-out");
 let maxplayers_range = document.getElementById("range-max-players");
 let maxplayers_out = document.getElementById("max-players-out");
+let chk_inspector_role = document.getElementById("chk-inspector");
 let chk_mole_move_predict = document.getElementById("chk-mole-move-prediction");
 //let chk_mole_piece_predict = document.getElementById("chk-mole-piece-prediction");
 let chk_team_move_predict = document.getElementById("chk-team-move-prediction");
@@ -317,7 +320,7 @@ function exportPGN() { //TODO request PGN from server
     }
 }
 
-function updateGame(game) { console.log("Update Game: " + game.title + "," + game.phase + "," + JSON.stringify(game));
+function updateGame(game) { //console.log("Update Game: " + game.title + "," + game.phase + "," + JSON.stringify(game));
     if (game.title === selected_game || obs) {
         if (game.currentFEN) {
             if (game.currentFEN !== zug_board.currentFEN) {
@@ -755,6 +758,7 @@ function showGameOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
     chk_team_move_predict.checked = curr_opts ? curr_opts.team_move_predict : false;
     chk_mole_veto.checked = curr_opts ? curr_opts.mole_veto : false;
     chk_hide_move.checked = curr_opts ? curr_opts.hide_move : false;
+    chk_inspector_role.checked = curr_opts ? curr_opts.inspector_role : false;
 }
 
 function submitGameOptions() {
@@ -762,6 +766,7 @@ function submitGameOptions() {
         game : selected_game,
         time : turntime_range.value,
         max_players : maxplayers_range.value,
+        inspector_role : chk_inspector_role.checked,
         mole_veto : chk_mole_veto.checked,
         hide_move_vote : chk_hide_move.checked,
         mole_predict_move : chk_mole_move_predict.checked, //mole_predict_piece : chk_mole_piece_predict.checked,
@@ -850,17 +855,20 @@ function handleMove(data) {
     playSFX(data.game.turn ? AUDIO_CLIPS.sound.enum.MOVE1 : AUDIO_CLIPS.sound.enum.MOVE2);
 }
 
-function notifyMole(mole,game) {
-    if (streaming) {
-        handleMessage(mole ? "You're the mole!" : "You're not the mole",game,null,"Mole Status");
-    }
-    else if (mole) {
+function notifyRole(role,game) {
+    handleMessage("Role: " + role,game,null,"Role Status");
+
+    if (streaming) return;
+    else if (role === "MOLE") {
         openModalWindow(document.getElementById("div-mole"));
         playSFX(AUDIO_CLIPS.sound.enum.IS_MOLE);
     }
-    else {
+    else if (role === "PLAYER") {
         openModalWindow(document.getElementById("div-not-mole"));
-        playSFX(AUDIO_CLIPS.sound.enum.NOT_MOLE);
+        playSFX(AUDIO_CLIPS.sound.enum.IS_PLAYER);
+    }
+    else if (role === "INSPECTOR") {
+
     }
 }
 
@@ -881,43 +889,7 @@ function sendVeto(confirm) {
     return false;
 }
 
-function showHistory(pgnlist) { //console.log(JSON.stringify(pgnlist));
-    openModalWindow(div_history);
-    clearElement(history_tbl);
-    history_tbl.style.height = (pgnlist.length < 10 ? (pgnlist.length * 10) : 95) + "%";
-    for (let i=0;i<pgnlist.length;i++) {
-        let row = document.createElement("tr");
-        let teams = parsePlayersFromPGN(pgnlist[i].pgn);
-
-        for (let w=0;w<teams.white_players.length;w++) {
-            let white_field = document.createElement("td");
-            white_field.textContent = teams.white_players[w];
-            white_field.className = "team-white";
-            row.appendChild(white_field);
-        }
-        for (let b=0;b<teams.black_players.length;b++) {
-            let black_field = document.createElement("td");
-            black_field.textContent = teams.black_players[b];
-            black_field.className = "team-black";
-            row.appendChild(black_field);
-        }
-        let pgn_field = document.createElement("td");
-        pgn_field.textContent = "PGN";
-        pgn_field.style.backgroundColor = "green";
-        pgn_field.onclick = (ev) => {
-            navigator.clipboard.writeText(pgnlist[i].pgn).then(function() {
-                alert('PGN copied to clipboard');
-            }, function(err) {
-                alert('Error: Could not copy PGN to clipboard: ' + err);
-            });
-            ev.stopPropagation();
-        }
-        row.appendChild(pgn_field);
-        history_tbl.appendChild(row);
-    }
-}
-
-function showHistory2(pgnlist) {
+function showHistory(pgnlist) {
     openModalWindow(div_history);
     clearElement(div_history);
     for (let g=0;g<pgnlist.length;g++) {
@@ -946,7 +918,7 @@ function showHistory2(pgnlist) {
         div.appendChild(document.createElement("br"));
         let pgn_butt = document.createElement("button");
         pgn_butt.textContent = "PGN";
-        pgn_butt.style.backgroundColor = "orange";
+        pgn_butt.style.backgroundColor = "green";
         pgn_butt.onclick = (ev) => {
             navigator.clipboard.writeText(pgnlist[g].pgn).then(function() {
                 alert('PGN copied to clipboard');
@@ -958,7 +930,7 @@ function showHistory2(pgnlist) {
         div.appendChild(pgn_butt);
         let view_butt = document.createElement("button");
         view_butt.textContent = "View";
-        view_butt.style.backgroundColor = "green";
+        view_butt.style.backgroundColor = "orange";
         view_butt.onclick = (ev) => {
               openModalWindow(div_pgn_view);
               clearElement(div_pgn_view);
@@ -978,14 +950,7 @@ function showHistory2(pgnlist) {
     }
 }
 
-function parsePlayersFromPGN(pgn) {
-    let tags = [];
-    pgn.replace(/\[(.*?)\]/g, function(g0,g1){tags.push(g1);});
-    return {
-        white_players :  (tags[2].replaceAll("\"","").split(" ").slice(1)), //TODO: IE breaks
-        black_players :  (tags[3].replaceAll("\"","").split(" ").slice(1))
-    };
-}
+
 
 function partGame(game) { //console.log("Parting: " + JSON.stringify(game));
     if (selected_game === game.title) { clearCountdown(); selected_game = ""; } //updateGame(game);
@@ -993,9 +958,3 @@ function partGame(game) { //console.log("Parting: " + JSON.stringify(game));
 
 let toggle = true;
 function test() { toggle = !toggle; }
-
-function testPGNParsing() {
-    testPGN();
-}
-
-

@@ -334,12 +334,13 @@ body {
     width: 50%;
     border: 8px solid;
     border-bottom-left-radius: 50%;
-    background: lightskyblue url("../img/bkg/discord-logo.png");
-    opacity: .5;
+    background-image: url("../img/bkg/discord-logo.png");
+    background-size: cover;
+    background-repeat: round;
 }
 
 .img-link:hover {
-    background-color: brown;
+    background-image: url("../img/bkg/discord-logo2.png");
 }
 
 .msg-class {
