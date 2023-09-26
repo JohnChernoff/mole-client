@@ -15,6 +15,9 @@ clock shift on flip?
 weird sound loops with multiple games
 more sounds (game over, mole vote, etc.),
 create checkbox options programmatically
+time warnings?
+player history lookup
+casual game option
  */
 
 let status_div = document.getElementById("div-status");
@@ -868,7 +871,8 @@ function notifyRole(role,game) {
         playSFX(AUDIO_CLIPS.sound.enum.IS_PLAYER);
     }
     else if (role === "INSPECTOR") {
-
+        openModalWindow(document.getElementById("div-inspector"));
+        playSFX(AUDIO_CLIPS.sound.enum.INSPECTOR);
     }
 }
 

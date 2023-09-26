@@ -101,6 +101,10 @@ function msgHandler(type,data) { console.log("Msg Type: " + type); // + ", Data:
     else if (type === "ping") { send("pong","pong"); }
     else if (type === "conn_stat") { console.log("Connection Status: " + data.msg); }
     else if (type === "spam") { alert(data.msg); }
+    else if (type === "molebomb") {
+        openModalWindow(document.getElementById("div-bomb"));
+        playSFX(AUDIO_CLIPS.sound.enum.BOMB);
+    }
     //else if (type === "countdown") countdown(data.title, data.turn, data.seconds);
     //else if (type === "movelist") updateMoveList(data);
     else {

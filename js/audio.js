@@ -11,7 +11,7 @@ let AUDIO_LOAD = {
 };
 
 const AUDIO_CLIPS = {
-    sound : createList(['CREATE','VOTE','ACCUSE','BUMP','IS_MOLE','IS_PLAYER','MOVE1','MOVE2','DEFECT','RAMPAGE']),
+    sound : createList(['CREATE','VOTE','ACCUSE','BUMP','IS_MOLE','IS_PLAYER','INSPECTOR','MOVE1','MOVE2','DEFECT','RAMPAGE','BOMB']),
     music: createList(['INTRO','EPIC','FUGUE'])
 }
 

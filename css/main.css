@@ -398,6 +398,16 @@ body {
     background-size: cover;
 }
 
+#div-inspector {
+    background-image: url("../img/bkg/mole-inspect.png");
+    background-size: cover;
+}
+
+#div-bomb {
+    background-image: url("../img/bkg/mole-bomb.png");
+    background-size: cover;
+}
+
 .modal {
     display: none; /* Hidden by default */
     left: 25vw;
