@@ -51,6 +51,8 @@ let turntime_out = document.getElementById("turn-time-out");
 let maxplayers_range = document.getElementById("range-max-players");
 let maxplayers_out = document.getElementById("max-players-out");
 let chk_inspector_role = document.getElementById("chk-inspector");
+let chk_casual = document.getElementById("chk-casual");
+let chk_mole_bomb = document.getElementById("chk-mole-bomb");
 let chk_mole_move_predict = document.getElementById("chk-mole-move-prediction");
 //let chk_mole_piece_predict = document.getElementById("chk-mole-piece-prediction");
 let chk_team_move_predict = document.getElementById("chk-team-move-prediction");
@@ -174,7 +176,7 @@ function loadImages(callback) {
 
 function initGame(audio) {
     welcome_screen.style.display = "none"; splash_screen.style.display = "block";
-    toggleSound(audio);
+    toggleSound(audio); toggleMusic(audio);
     loadImages(() => {
         console.log("Loaded all images");
         loadSounds(() => {
@@ -754,7 +756,6 @@ function getGameOptions() {
 
 function showGameOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
     if (!openModalWindow(div_game_opt,moves_div)) return;
-    //chk_mole_piece_predict.checked = curr_opts ? curr_opts.mole_piece_predict : false;
     turntime_range.value = turntime_out.innerHTML = curr_opts ? curr_opts.move_time : 0;
     maxplayers_range.value = maxplayers_out.innerHTML = curr_opts ? curr_opts.max_play : 0;
     chk_mole_move_predict.checked = curr_opts ? curr_opts.mole_move_predict : false;
@@ -762,6 +763,8 @@ function showGameOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
     chk_mole_veto.checked = curr_opts ? curr_opts.mole_veto : false;
     chk_hide_move.checked = curr_opts ? curr_opts.hide_move : false;
     chk_inspector_role.checked = curr_opts ? curr_opts.inspector_role : false;
+    chk_casual.checked =  curr_opts ? curr_opts.casual : false;
+    chk_mole_bomb.checked =  curr_opts ? curr_opts.mole_bomb : false;
 }
 
 function submitGameOptions() {
@@ -770,10 +773,12 @@ function submitGameOptions() {
         time : turntime_range.value,
         max_players : maxplayers_range.value,
         inspector_role : chk_inspector_role.checked,
+        casual : chk_casual.checked,
         mole_veto : chk_mole_veto.checked,
         hide_move_vote : chk_hide_move.checked,
-        mole_predict_move : chk_mole_move_predict.checked, //mole_predict_piece : chk_mole_piece_predict.checked,
-        team_predict_move : chk_team_move_predict.checked
+        mole_predict_move : chk_mole_move_predict.checked,
+        team_predict_move : chk_team_move_predict.checked,
+        mole_bomb : chk_mole_bomb.checked
     };
     send("set_opt", new_opts);
     closeModalWindow(div_game_opt);
@@ -893,9 +898,16 @@ function sendVeto(confirm) {
     return false;
 }
 
-function showHistory(pgnlist) {
+function showHistory(pgnlist,player) { //TODO: CSS
     openModalWindow(div_history);
     clearElement(div_history);
+
+    let div_head = document.createElement("div");
+    div_head.style.fontSize = "large"; div_head.style.height = "fit-content"; div_head.style.backgroundColor = "grey";
+    let head_txt = document.createElement("p"); head_txt.textContent = "Player: " + player;
+    div_head.appendChild(head_txt);
+    div_history.appendChild(div_head);
+
     for (let g=0;g<pgnlist.length;g++) {
         let teams = parsePlayersFromPGN(pgnlist[g].pgn);
 
@@ -907,17 +919,11 @@ function showHistory(pgnlist) {
         div.style.borderColor = "cornsilk";
 
         for (let i=0;i<teams.white_players.length;i++) {
-            let white_butt = document.createElement("button");
-            white_butt.textContent = teams.white_players[i];
-            white_butt.className = "team-white";
-            div.appendChild(white_butt);
+            div.appendChild(addPlayerButt(teams.white_players[i],"team-white"));
         }
         div.appendChild(document.createElement("br"));
         for (let i=0;i<teams.black_players.length;i++) {
-            let black_butt = document.createElement("button");
-            black_butt.textContent = teams.black_players[i];
-            black_butt.className = "team-black";
-            div.appendChild(black_butt);
+            div.appendChild(addPlayerButt(teams.black_players[i],"team-black"));
         }
         div.appendChild(document.createElement("br"));
         let pgn_butt = document.createElement("button");
@@ -954,7 +960,16 @@ function showHistory(pgnlist) {
     }
 }
 
-
+function addPlayerButt(name,class_name) {
+    let butt = document.createElement("button");
+    butt.textContent = name;
+    butt.className = class_name;
+    butt.onclick = () => { send("history",{
+        name : name.endsWith("(*)") ? name.substring(0,name.length-3) : name,
+        num : 10
+    }); };
+    return butt;
+}
 
 function partGame(game) { //console.log("Parting: " + JSON.stringify(game));
     if (selected_game === game.title) { clearCountdown(); selected_game = ""; } //updateGame(game);

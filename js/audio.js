@@ -81,7 +81,7 @@ function toggleMusic(bool) { console.log("Music: " + bool);
     if (bool !== undefined) AUDIO.music = bool; else AUDIO.music = !AUDIO.music;
     let buttons = document.getElementsByClassName("music-toggle");
     for (let i= 0; i < buttons.length; i++) buttons[i].innerHTML = AUDIO.sound ? "Music Off" : "Music On";
-    if (!AUDIO.music) clips.music[current_track.index].pause();
+    if (!AUDIO.music && current_track) clips.music[current_track.index].pause();
 }
 
 function fadeAndPlay(clip,sfx) { //console.log("Fading...");

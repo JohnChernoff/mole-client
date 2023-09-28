@@ -137,6 +137,21 @@
                 </span>
             </label><br>
 
+            <input type="checkbox" id="chk-casual">
+            <label for="chk-casual" class="opt-tip">Casual
+                <span class = "tooltiptext">
+                    Casual games are not saved to the database.
+                </span>
+            </label><br>
+
+            <input type="checkbox" id="chk-mole-bomb">
+            <label for="chk-team-move-prediction" class="opt-tip">Mole Bomb
+                <span class = "tooltiptext">
+                    The Mole may occasionally perform a "Mole Bomb" where their move anonymously goes through (unless
+                    vetoed by the opposing Mole).
+                </span>
+            </label><br>
+
             <br><br>
 
             <label for="range-max-players">Max Players per Side: <span id="max-players-out"></span> </label><br>
@@ -227,7 +242,7 @@
         <div id="div-games" class="modular_view">
             <button id="help-butt2" onclick="showHelp()">Help</button>
             <button id="best-butt" onclick="showHighScores()">Best</button>
-            <button id="hist-butt" onclick="send('history','10')">History</button>
+            <button id="hist-butt" onclick="send('history')">History</button>
             <br><br>
             <button id="new-butt" onclick="createGame()">New Game</button>
             <button id="join-butt" onclick="joinGame()">Join</button>

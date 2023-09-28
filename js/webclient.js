@@ -61,7 +61,7 @@ function gameSockHandler(event_type,event) {
 
 function send(type,data) {
     if (web_socket === undefined || web_socket.readyState === WebSocket.CLOSED) { handleMessage("Not connected",SERV); }
-    else { web_socket.send(JSON.stringify({type: type, data: data})); }
+    else { web_socket.send(JSON.stringify({type: type, data: data ? data : ""})); }
 }
 
 function closeSocket() {
@@ -97,7 +97,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + type); // + ", Data:
     else if (type === "join") { selected_game = data.title; updateGame(data); }
     else if (type === "part") { partGame(data); }
     else if (type === "veto") {}
-    else if (type === "history") { showHistory(data); }
+    else if (type === "history") { showHistory(data.pgn_list,JSON.stringify(data.player_data)); }
     else if (type === "ping") { send("pong","pong"); }
     else if (type === "conn_stat") { console.log("Connection Status: " + data.msg); }
     else if (type === "spam") { alert(data.msg); }
