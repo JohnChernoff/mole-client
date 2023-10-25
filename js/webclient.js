@@ -94,7 +94,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + type); // + ", Data:
     else if (type === "defection") { handleDefection(data); }
     else if (type === "rampage") { handleRampage(data); }
     else if (type === "options") { showGameOptions(data); }
-    else if (type === "join") { selected_game = data.title; updateGame(data); }
+    else if (type === "join") { selected_game = data.title; current_fen = START_FEN; updateGame(data); }
     else if (type === "part") { partGame(data); }
     else if (type === "veto") {}
     else if (type === "history") { showHistory(data.pgn_list,JSON.stringify(data.player_data)); }

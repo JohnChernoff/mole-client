@@ -76,6 +76,8 @@ let chk_music = document.getElementById("chk-music");
 let div_pgn_view = document.getElementById("div-pgn-view");
 let div_pgn_viewer = document.getElementById("div-pgn-viewer");
 
+const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+let current_fen = START_FEN;
 const COLOR_UNKNOWN = -1, COLOR_BLACK = 0, COLOR_WHITE = 1;
 const TAB_PFX = "tab-pfx", TAB_BUTT = "tab-butt";
 let current_tab = "serv";
@@ -107,8 +109,8 @@ let streaming = false;
 const obs =  new URL(document.location).searchParams.get("obs");
 if (obs) initGame(false);
 
-turntime_range.oninput = () => { turntime_out.innerHTML = turntime_range.value; };
-maxplayers_range.oninput = () => { maxplayers_out.innerHTML = maxplayers_range.value; };
+turntime_range.oninput = () => { turntime_out.innerHTML = turntime_range.value.toString(); };
+maxplayers_range.oninput = () => { maxplayers_out.innerHTML = maxplayers_range.value.toString(); };
 mole_pawns.onchange = select_piece_style.onchange = () => {
     zug_board.setBoardStyle(
         { board_tex: "plain", pieces: select_piece_style.value, pawns: mole_pawns.checked ? "mole-pawns" : undefined }
@@ -308,10 +310,16 @@ function selectMove(moves) { //console.log("Displaying Arrows for Move:" + JSON.
         zug_board.drawArrow(moves.alts[i].move,moves.alts[i].player.play_col);
     }
     current_ply = moves_range.value = moves.ply;
+    //console.log("Current ply: " + current_ply);
+    if (current_ply >= move_cells.length) {
+        console.log("Wtf: " + current_ply);
+        current_ply =  moves_range.value = move_cells.length-1;
+    }
     move_cells[current_ply].style.color = "#FFFF00";
     move_cells[current_ply].style.border = "solid";
     tools = move_cells[current_ply].getElementsByClassName("movetiptext");
     tools[0].style.visibility = "visible";
+
 }
 
 function exportPGN() { //TODO request PGN from server
@@ -327,13 +335,7 @@ function exportPGN() { //TODO request PGN from server
 
 function updateGame(game) { //console.log("Update Game: " + game.title + "," + game.phase + "," + JSON.stringify(game));
     if (game.title === selected_game || obs) {
-        if (game.currentFEN) {
-            if (game.currentFEN !== zug_board.currentFEN) {
-                let cancelMove = zug_board.promoting;
-                zug_board.clearPromotion(cancelMove);
-            }
-            zug_board.updateBoard(game.currentFEN);
-        }
+        if (game.currentFEN) updateFEN(game.currentFEN);
         if (game.timeRemaining && (game.phase === "VOTING" || game.phase === "VETO")) {
             countdown(selected_game,game.turn,game.timeRemaining);
         }
@@ -341,6 +343,14 @@ function updateGame(game) { //console.log("Update Game: " + game.title + "," + g
         if (game.history) updateMoveList(game.history);
         updatePlayTbl(game);
     }
+}
+
+function updateFEN(fen) {
+    if (fen !== zug_board.currentFEN) {
+        let cancelMove = zug_board.promoting;
+        zug_board.clearPromotion(cancelMove);
+    }
+    zug_board.updateBoard(fen);
 }
 
 function voteSummary(votes) {  //console.log(JSON.stringify(votes) + "," + votes.selected);
@@ -353,27 +363,41 @@ function voteSummary(votes) {  //console.log(JSON.stringify(votes) + "," + votes
     return txt;
 }
 
-function updateMoveList(history) {
+function parseMoveHistory(history,oldfen,ply) {
+    return {
+        ply: ply, //? ply : history.ply,
+        turn: history.turn,
+        fen: oldfen,
+        selected: history.selected,
+        alts: history.alts
+    };
+}
+
+function updateMoveList(move_data,new_move) {
     move_cells = [];
     clearElement(moves_list);
-    move_history = [history.length];
+    if (new_move) {
+        let l = move_history.length;
+        move_history.push(parseMoveHistory(move_data,l > 0 ? current_fen : START_FEN,l));
+        current_fen = move_data.fen;
+    }
+    else {
+        move_history = [];
+        for (let i= 0; i<move_data.length; i++) {
+            move_history.push(parseMoveHistory(move_data[i],i > 0 ?  move_data[i-1].fen : START_FEN,i));
+        }
+        if (move_data.length > 0) current_fen = move_data[move_data.length-1].fen;
+    }
     let move_tab = document.createElement("table");
     let move_row = document.createElement("tr");
     let n = 0;
-    for (let i= 0; i<=history.length; i++) {
+    let moves = move_history.length;
+    for (let i= 0; i <= moves; i++) {
         let move_entry = document.createElement("td");
         let m = ""; if (i % 2 === 0) m = (++n) + ".";
-        if (i < history.length) {
-            move_history[i] = {
-                ply: i,
-                turn: history[i].turn,
-                fen: i < 1 ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" : history[i-1].fen,
-                selected: history[i].selected,
-                alts: history[i].alts
-            };
-
-            if (history[i].selected) {
-                move_entry.textContent = m + history[i].selected.move.san;
+        if (i < moves) {
+            if (move_history[i].selected) {
+                move_entry.textContent = m + move_history[i].selected.move.san;
             }
             else move_entry.textContent = "?";
             move_entry.onclick = () => { selectMove(move_history[i]); };
@@ -393,8 +417,11 @@ function updateMoveList(history) {
             move_cells.push(move_entry);
         }
         else {
-            move_entry.textContent = "Current position (click to update)";
-            move_entry.onclick = () => { send("update", selected_game); };
+            move_entry.textContent = "(current position/click to refresh)";
+            move_entry.onclick = () => {
+                updateFEN(current_fen);
+                //send("update", selected_game);
+            };
         }
 
         move_row.appendChild(move_entry);
@@ -403,12 +430,12 @@ function updateMoveList(history) {
             move_tab.appendChild(move_row);
             move_row = document.createElement("tr");
         }
-        else if (i === history.length) {
+        else if (i === moves) {
             move_tab.appendChild(move_row);
         }
     }
     moves_list.appendChild(move_tab);
-    moves_range.max = history.length-1; //TODO: buggy?
+    moves_range.max = moves; //TODO: buggy?
 }
 
 function updateGames(data) { //console.log("Data: " + JSON.stringify(data));
@@ -770,15 +797,15 @@ function showGameOptions(curr_opts) {  //console.log(JSON.stringify(curr_opts));
 function submitGameOptions() {
     let new_opts = {
         game : selected_game,
-        time : turntime_range.value,
-        max_players : maxplayers_range.value,
+        move_time : turntime_range.value,
+        max_play : maxplayers_range.value,
+        mole_veto : chk_mole_veto.checked,
+        mole_move_predict : chk_mole_move_predict.checked,
+        team_move_predict : chk_team_move_predict.checked,
+        hide_move : chk_hide_move.checked,
+        mole_bomb : chk_mole_bomb.checked,
         inspector_role : chk_inspector_role.checked,
         casual : chk_casual.checked,
-        mole_veto : chk_mole_veto.checked,
-        hide_move_vote : chk_hide_move.checked,
-        mole_predict_move : chk_mole_move_predict.checked,
-        team_predict_move : chk_team_move_predict.checked,
-        mole_bomb : chk_mole_bomb.checked
     };
     send("set_opt", new_opts);
     closeModalWindow(div_game_opt);
@@ -845,7 +872,6 @@ function newPhase(game) { //console.log(JSON.stringify(game));
     else if (game.phase === "POSTGAME") {
         img_status.src = phase_imgs[POSTGAME].src;
     }
-
     updateGame(game);
 }
 
@@ -859,15 +885,24 @@ function handleRampage(data) {
     animateRampage(5000,data);
 }
 
-function handleMove(data) {
-    playSFX(data.game.turn ? AUDIO_CLIPS.sound.enum.MOVE1 : AUDIO_CLIPS.sound.enum.MOVE2);
+function handleMove(game) {  //console.log("New Move: " + JSON.stringify(game));
+    if (selected_game === game.title ) {
+        if (move_history.length + 1 === game.ply) {
+            updateMoveList(game.move_votes,true);
+        }
+        else {
+            console.log("Invalid game state!");
+            return;
+        }
+        playSFX(game.turn ? AUDIO_CLIPS.sound.enum.MOVE1 : AUDIO_CLIPS.sound.enum.MOVE2);
+    }
 }
 
 function notifyRole(role,game) {
     handleMessage("Role: " + role,game,null,"Role Status");
-
     if (streaming) return;
-    else if (role === "MOLE") {
+
+    if (role === "MOLE") {
         openModalWindow(document.getElementById("div-mole"));
         playSFX(AUDIO_CLIPS.sound.enum.IS_MOLE);
     }
