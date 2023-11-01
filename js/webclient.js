@@ -88,7 +88,7 @@ function msgHandler(type,data) { console.log("Msg Type: " + type); // + ", Data:
     else if (type === "phase") { newPhase(data); }
     else if (type === "status") { handleStatus(data.msg, data.source); }
     else if (type === "votelist") { handleVote(data.list, data.move, data.source); }
-    else if (type === "color") { flipAtStart(data.msg === "black"); }
+    else if (type === "side") { flipAtStart(data.color === "black"); }
     else if (type === "move") { handleMove(data); }
     else if (type === "move_conf") { moveConfirm(data.player,data.move,data.san,data.game.title); }
     else if (type === "defection") { handleDefection(data); }
